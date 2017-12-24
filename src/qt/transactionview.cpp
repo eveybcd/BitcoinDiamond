@@ -108,7 +108,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     } else {
         amountWidget->setFixedWidth(100);
     }
-    amountWidget->setValidator(new QDoubleValidator(0, 1e20, 8, this));
+    amountWidget->setValidator(new QDoubleValidator(0, 1e20, 7, this));
     hlayout->addWidget(amountWidget);
 
     QVBoxLayout *vlayout = new QVBoxLayout(this);
