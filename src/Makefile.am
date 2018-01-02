@@ -468,37 +468,6 @@ CTAES_DIST += crypto/ctaes/ctaes.h
 CTAES_DIST += crypto/ctaes/README.md
 CTAES_DIST += crypto/ctaes/test.c
 
-X13_DIST = crypto/x13hash/sm3.h
-X13_DIST += crypto/x13hash/sm3.c
-X13_DIST += crypto/x13hash/skein.h
-X13_DIST += crypto/x13hash/skein.c
-X13_DIST += crypto/x13hash/simd.h
-X13_DIST += crypto/x13hash/simd.c
-X13_DIST += crypto/x13hash/shavite.h
-X13_DIST += crypto/x13hash/shavite.c
-X13_DIST += crypto/x13hash/luffa.h
-X13_DIST += crypto/x13hash/luffa.c
-X13_DIST += crypto/x13hash/keccak.h
-X13_DIST += crypto/x13hash/keccak.c
-X13_DIST += crypto/x13hash/jh.h
-X13_DIST += crypto/x13hash/jh.c
-X13_DIST += crypto/x13hash/hamsi.h
-X13_DIST += crypto/x13hash/hamsi.c
-X13_DIST += crypto/x13hash/groestl.h
-X13_DIST += crypto/x13hash/groestl.c
-X13_DIST += crypto/x13hash/fugue.h
-X13_DIST += crypto/x13hash/fugue.c
-X13_DIST += crypto/x13hash/echo.h
-X13_DIST += crypto/x13hash/echo.c
-X13_DIST += crypto/x13hash/cubehash.h
-X13_DIST += crypto/x13hash/cubehash.c
-X13_DIST += crypto/x13hash/bmw.h
-X13_DIST += crypto/x13hash/bmw.c
-X13_DIST += crypto/x13hash/blake.h
-X13_DIST += crypto/x13hash/blake.c
-X13_DIST += crypto/x13hash/aes_helper.h
-X13_DIST += crypto/x13hash/aes_helper.c
-
 CLEANFILES = $(EXTRA_LIBRARIES)
 
 CLEANFILES += *.gcda *.gcno
@@ -516,7 +485,7 @@ CLEANFILES += zmq/*.gcda zmq/*.gcno
 
 DISTCLEANFILES = obj/build.h
 
-EXTRA_DIST = $(CTAES_DIST) $(X13_DIST)
+EXTRA_DIST = $(CTAES_DIST)
 
 
 config/bitcoin-config.h: config/stamp-h1
