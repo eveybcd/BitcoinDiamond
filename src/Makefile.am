@@ -255,36 +255,36 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/sha256.h \
   crypto/sha512.cpp \
   crypto/sha512.h \
-    crypto/x13hash/sm3.h  \
-    crypto/x13hash/sm3.c  \
-    crypto/x13hash/skein.h  \
-    crypto/x13hash/skein.c  \
-    crypto/x13hash/simd.h  \
-    crypto/x13hash/simd.c  \
-    crypto/x13hash/shavite.h  \
-    crypto/x13hash/shavite.c  \
-    crypto/x13hash/luffa.h  \
-    crypto/x13hash/luffa.c  \
-    crypto/x13hash/keccak.h  \
-    crypto/x13hash/keccak.c  \
-    crypto/x13hash/jh.h  \
-    crypto/x13hash/jh.c  \
-    crypto/x13hash/hamsi.h  \
-    crypto/x13hash/hamsi.c  \
-    crypto/x13hash/groestl.h  \
-    crypto/x13hash/groestl.c  \
-    crypto/x13hash/fugue.h  \
-    crypto/x13hash/fugue.c  \
-    crypto/x13hash/echo.h  \
-    crypto/x13hash/echo.c  \
-    crypto/x13hash/cubehash.h  \
-    crypto/x13hash/cubehash.c  \
-    crypto/x13hash/bmw.h  \
-    crypto/x13hash/bmw.c  \
-    crypto/x13hash/blake.h  \
-    crypto/x13hash/blake.c  \
-    crypto/x13hash/aes_helper.h  \
-    crypto/x13hash/aes_helper.c
+  crypto/x13hash/sm3.h  \
+  crypto/x13hash/sm3.c  \
+  crypto/x13hash/skein.h  \
+  crypto/x13hash/skein.c  \
+  crypto/x13hash/simd.h  \
+  crypto/x13hash/simd.c  \
+  crypto/x13hash/shavite.h  \
+  crypto/x13hash/shavite.c  \
+  crypto/x13hash/luffa.h  \
+  crypto/x13hash/luffa.c  \
+  crypto/x13hash/keccak.h  \
+  crypto/x13hash/keccak.c  \
+  crypto/x13hash/jh.h  \
+  crypto/x13hash/jh.c  \
+  crypto/x13hash/hamsi.h  \
+  crypto/x13hash/hamsi.c  \
+  crypto/x13hash/groestl.h  \
+  crypto/x13hash/groestl.c  \
+  crypto/x13hash/fugue.h  \
+  crypto/x13hash/fugue.c  \
+  crypto/x13hash/echo.h  \
+  crypto/x13hash/echo.c  \
+  crypto/x13hash/cubehash.h  \
+  crypto/x13hash/cubehash.c  \
+  crypto/x13hash/bmw.h  \
+  crypto/x13hash/bmw.c  \
+  crypto/x13hash/blake.h  \
+  crypto/x13hash/blake.c  \
+  crypto/x13hash/aes_helper.h  \
+  crypto/x13hash/aes_helper.c
 
 # consensus: shared between all executables that validate any consensus rules.
 libbitcoin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
