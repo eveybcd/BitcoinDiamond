@@ -16,9 +16,9 @@ uint256 CBlockHeader::GetHash() const
     return SerializeHash(*this);
 }
 
-uint256 CBlockHeader::GetPoWHash() const
+uint256 CBlockHeader::GetPoWHash(bool isBCDBlock) const
 {
-	if (nVersion & VERSIONBITS_FORK_BCD)
+	if ((nVersion & VERSIONBITS_FORK_BCD) && isBCDBlock)
 		return HashX13sm3(BEGIN(nVersion), END(nNonce));
 	else
 		return GetHash();

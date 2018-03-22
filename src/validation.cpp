@@ -2844,10 +2844,10 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
     return true;
 }
 
-bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW)
+bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool isBCDBlock)
 {
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
+    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(isBCDBlock), block.nBits, consensusParams))
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
     return true;
@@ -2857,12 +2857,24 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 {
     // These are checks that are independent of context.
 
+    bool isBCDBlock = false;
+    CBlockIndex* pindexPrev = NULL;
+
     if (block.fChecked)
         return true;
 
+    BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+    if (mi == mapBlockIndex.end())
+        return state.DoS(10, error("%s: prev block not found", __func__), 0, "bad-prevblk");
+
+    pindexPrev = (*mi).second;
+    if ((block.nVersion & VERSIONBITS_FORK_BCD) && pindexPrev->nHeight + 1 >= consensusParams.BCDHeight)
+        isBCDBlock = true;
+
+
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
+    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW, isBCDBlock))
         return false;
 
     // Check the merkle root.
@@ -3104,6 +3116,7 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
 {
     AssertLockHeld(cs_main);
     // Check for duplicate
+    bool isBCDBlock = false;
     uint256 hash = block.GetHash();
     BlockMap::iterator miSelf = mapBlockIndex.find(hash);
     CBlockIndex *pindex = NULL;
@@ -3131,7 +3144,10 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
             return true;
         }
 
-        if (!CheckBlockHeader(block, state, chainparams.GetConsensus()))
+        if ((block.nVersion & VERSIONBITS_FORK_BCD) && pindexPrev->nHeight + 1 >= chainparams.GetConsensus().BCDHeight)
+            isBCDBlock = true;
+
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), true, isBCDBlock))
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
 
         if (pindexPrev->nStatus & BLOCK_FAILED_MASK)
