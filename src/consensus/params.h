@@ -48,6 +48,8 @@ struct Params {
     int BIP66Height;
 
     int BCDHeight;
+    int64_t BCDGenesisBlockReward;
+    int BCDLastRewardHeight;
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargeting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.

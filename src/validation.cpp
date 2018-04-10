@@ -1141,6 +1141,8 @@ bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHea
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams)
 {
     block.SetNull();
+    bool isBCDBlock = false;
+    CBlockIndex* pindexPrev = NULL;
 
     // Open history file to read
     CAutoFile filein(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION);
@@ -1155,8 +1157,18 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
+    if (!block.hashPrevBlock.IsNull()){
+        BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+        if (mi == mapBlockIndex.end())
+            return error("%s: block %s  prev block not found", __func__, pos.ToString());
+
+        pindexPrev = (*mi).second;
+        if ((block.nVersion & VERSIONBITS_FORK_BCD) && pindexPrev->nHeight + 1 >= consensusParams.BCDHeight)
+            isBCDBlock = true;
+    }
+
     // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
+    if (!CheckProofOfWork(block.GetPoWHash(isBCDBlock), block.nBits, consensusParams))
         return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
 
     return true;
@@ -1174,11 +1186,11 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-	if (nHeight > 826002)	//
+	if (nHeight > consensusParams.BCDLastRewardHeight) 	//
 		return 0;
 
 	if (nHeight == consensusParams.BCDHeight)
-		return 1400 * 10000 * COIN;
+		return consensusParams.BCDGenesisBlockReward;
 
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
     // Force block reward to zero when right shift is undefined.
@@ -2863,14 +2875,15 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     if (block.fChecked)
         return true;
 
-    BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
-    if (mi == mapBlockIndex.end())
-        return state.DoS(10, error("%s: prev block not found", __func__), 0, "bad-prevblk");
+    if (!block.hashPrevBlock.IsNull()){
+        BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+        if (mi == mapBlockIndex.end())
+            return state.DoS(10, error("%s: prev block not found", __func__), 0, "bad-prevblk");
 
-    pindexPrev = (*mi).second;
-    if ((block.nVersion & VERSIONBITS_FORK_BCD) && pindexPrev->nHeight + 1 >= consensusParams.BCDHeight)
-        isBCDBlock = true;
-
+        pindexPrev = (*mi).second;
+        if ((block.nVersion & VERSIONBITS_FORK_BCD) && pindexPrev->nHeight + 1 >= consensusParams.BCDHeight)
+            isBCDBlock = true;
+    }
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
@@ -2910,7 +2923,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check transactions
     for (const auto& tx : block.vtx)
-        if (!CheckTransaction(*tx, state, block.nVersion & VERSIONBITS_FORK_BCD, false))
+        if (!CheckTransaction(*tx, state, block.nVersion & VERSIONBITS_FORK_BCD && isBCDBlock, false))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s", tx->GetHash().ToString(), state.GetDebugMessage()));
 
