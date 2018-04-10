@@ -24,7 +24,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     	return nProofOfWorkLimit;
 
     if (pindexLast->nHeight+1 == params.BCDHeight+1)
-    	return UintToArith256(uint256S("0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff")).GetCompact();;
+    	return UintToArith256(uint256S("0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff")).GetCompact();
 
     int height, interval;
     if (pindexLast->nHeight+1 > params.BCDHeight) {
