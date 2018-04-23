@@ -38,7 +38,7 @@ RUN curl -SLO https://github.com/eveybcd/BitcoinDiamond/releases/download/v${BIT
 
 VOLUME ["/home/bitcoin/.bitcoindiamond"]
 
-ENV UPNP=0
+ENV UPNP=-1
 
 EXPOSE 7116 7117 18332 18333 18443 18444
 

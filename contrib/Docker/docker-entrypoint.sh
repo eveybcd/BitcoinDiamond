@@ -13,8 +13,13 @@ if [ $(echo "$1" | cut -c1) = "-" ] || [ "$1" = "bitcoindiamond" ]; then
   chown -R bitcoin "$BITCOINDIAMOND_DATA"
 
   echo "$0: setting data directory to $BITCOINDIAMOND_DATA"
+  if [ $UPNP == -1 ]
+  then
+    set -- "$@" -datadir="$BITCOINDIAMOND_DATA"
+  else
+    set -- "$@" -datadir="$BITCOINDIAMOND_DATA" -upnp="$UPNP"
+  fi
 
-  set -- "$@" -datadir="$BITCOINDIAMOND_DATA" -upnp="$UPNP"
 fi
 
 if [ "$1" = "bitcoindiamondd" ] || [ "$1" = "bitcoindiamond-cli" ] || [ "$1" = "bitcoindiamond-tx" ]; then
