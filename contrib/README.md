@@ -55,7 +55,7 @@ This script attempts to download and verify the signature file SHA256SUMS.asc fr
 ### build
 
 ```
-cd BitcoinDiamond/doc/Docker
+cd /path/to/BitcoinDiamond/contrib/Docker
 docker build -t bcd .
 ```
 
