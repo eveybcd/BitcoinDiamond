@@ -37,7 +37,9 @@
 #include <string>
 #include "port/atomic_pointer.h"
 #include "port/thread_annotations.h"
-
+#ifndef(LEVELDB_IS_BIG_ENDIAN)
+#define LEVELDB_IS_BIG_ENDIAN=1
+#endif
 namespace leveldb {
 	namespace port {
 
