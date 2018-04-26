@@ -35,6 +35,7 @@ leveldb_libleveldb_a_SOURCES += leveldb/port/port_example.h
 leveldb_libleveldb_a_SOURCES += leveldb/port/port_posix.h
 leveldb_libleveldb_a_SOURCES += leveldb/port/win/stdint.h
 leveldb_libleveldb_a_SOURCES += leveldb/port/port.h
+leveldb_libleveldb_a_SOURCES += leveldb/port/port_stdcxx.h
 leveldb_libleveldb_a_SOURCES += leveldb/port/port_win.h
 leveldb_libleveldb_a_SOURCES += leveldb/port/thread_annotations.h
 leveldb_libleveldb_a_SOURCES += leveldb/include/leveldb/db.h
