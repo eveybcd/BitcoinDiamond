@@ -89,7 +89,6 @@ struct CompareModifiedEntry {
 // to appear in a block.
 struct CompareTxIterByAncestorCount {
     bool operator()(const CTxMemPool::txiter &a, const CTxMemPool::txiter &b)const
-
     {
         if (a->GetCountWithAncestors() != b->GetCountWithAncestors())
             return a->GetCountWithAncestors() < b->GetCountWithAncestors();
