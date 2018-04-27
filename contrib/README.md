@@ -48,3 +48,25 @@ Utilities to generate test vectors for the data-driven Bitcoin tests.
 
 ### [Verify Binaries](/contrib/verifybinaries) ###
 This script attempts to download and verify the signature file SHA256SUMS.asc from bitcoin.org.
+
+
+## BitcoinDiamond-Docker
+
+### build
+
+```
+cd /path/to/BitcoinDiamond/contrib/Docker
+docker build -t bcd .
+```
+
+### Run
+
+```
+docker run -ti -v /path/to/youdir:/home/bitcoin/.bitcoindiamond bcd
+```
+
+### UPnP
+
+```
+docker run -ti -v /path/to/youdir:/home/bitcoin/.bitcoindiamond -p 7116:7116 -e UPNP=0 bcd
+```
