@@ -16,7 +16,7 @@ Authors: Sanjay Ghemawat (sanjay@google.com) and Jeff Dean (jeff@google.com)
   * External activity (file system operations etc.) is relayed through a virtual interface so users can customize the operating system interactions.
 
 # Documentation
-  [LevelDB library documentation](https://rawgit.com/google/leveldb/master/doc/index.html) is online and bundled with the source code.
+  [LevelDB library documentation](https://github.com/google/leveldb/blob/master/doc/index.md) is online and bundled with the source code.
 
 
 # Limitations
@@ -135,7 +135,8 @@ uncompressed blocks in memory, the read performance improves again:
 
 ## Repository contents
 
-See doc/index.html for more explanation. See doc/impl.html for a brief overview of the implementation.
+See [doc/index.md](doc/index.md) for more explanation. See
+[doc/impl.md](doc/impl.md) for a brief overview of the implementation.
 
 The public interface is in include/*.h.  Callers should not include or
 rely on the details of any other header files in this package.  Those
