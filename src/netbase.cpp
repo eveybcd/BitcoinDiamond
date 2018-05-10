@@ -197,7 +197,14 @@ struct timeval MillisToTimeval(int64_t nTimeout)
     timeout.tv_usec = (nTimeout % 1000) * 1000;
     return timeout;
 }
-
+enum class IntrRecvError
+{
+    OK,
+    Timeout,
+    Disconnected,
+    NetworkError,
+    Interrupted
+};
 /**
  * Read bytes from socket. This will either read the full number of bytes requested
  * or return False on error or timeout.
@@ -209,7 +216,7 @@ struct timeval MillisToTimeval(int64_t nTimeout)
  *
  * @note This function requires that hSocket is in non-blocking mode.
  */
-bool static InterruptibleRecv(char* data, size_t len, int timeout, SOCKET& hSocket)
+static IntrRecvError InterruptibleRecv(char* data, size_t len, int timeout, const SOCKET& hSocket)
 {
     int64_t curTime = GetTimeMillis();
     int64_t endTime = curTime + timeout;
@@ -222,30 +229,30 @@ bool static InterruptibleRecv(char* data, size_t len, int timeout, SOCKET& hSock
             len -= ret;
             data += ret;
         } else if (ret == 0) { // Unexpected disconnection
-            return false;
+            return IntrRecvError::Disconnected;
         } else { // Other error or blocking
             int nErr = WSAGetLastError();
             if (nErr == WSAEINPROGRESS || nErr == WSAEWOULDBLOCK || nErr == WSAEINVAL) {
                 if (!IsSelectableSocket(hSocket)) {
-                    return false;
+                    return IntrRecvError::NetworkError;
                 }
                 struct timeval tval = MillisToTimeval(std::min(endTime - curTime, maxWait));
                 fd_set fdset;
                 FD_ZERO(&fdset);
                 FD_SET(hSocket, &fdset);
-                int nRet = select(hSocket + 1, &fdset, NULL, NULL, &tval);
+                int nRet = select(hSocket + 1, &fdset, nullptr, nullptr, &tval);
                 if (nRet == SOCKET_ERROR) {
-                    return false;
+                    return IntrRecvError::NetworkError;
                 }
             } else {
-                return false;
+                return IntrRecvError::NetworkError;
             }
         }
         if (interruptSocks5Recv)
-            return false;
+            return IntrRecvError::Interrupted;
         curTime = GetTimeMillis();
     }
-    return len == 0;
+    return len == 0 ? IntrRecvError::OK : IntrRecvError::Timeout;
 }
 
 struct ProxyCredentials
@@ -272,6 +279,7 @@ std::string Socks5ErrorString(int err)
 /** Connect using SOCKS5 (as described in RFC1928) */
 static bool Socks5(const std::string& strDest, int port, const ProxyCredentials *auth, SOCKET& hSocket)
 {
+    IntrRecvError recvr;
     LogPrint("net", "SOCKS5 connecting %s\n", strDest);
     if (strDest.size() > 255) {
         CloseSocket(hSocket);
@@ -294,7 +302,7 @@ static bool Socks5(const std::string& strDest, int port, const ProxyCredentials 
         return error("Error sending to proxy");
     }
     char pchRet1[2];
-    if (!InterruptibleRecv(pchRet1, 2, SOCKS5_RECV_TIMEOUT, hSocket)) {
+    if ((recvr = InterruptibleRecv(pchRet1, 2, SOCKS5_RECV_TIMEOUT, hSocket)) != IntrRecvError::OK) {
         CloseSocket(hSocket);
         LogPrintf("Socks5() connect to %s:%d failed: InterruptibleRecv() timeout or other failure\n", strDest, port);
         return false;
@@ -320,7 +328,7 @@ static bool Socks5(const std::string& strDest, int port, const ProxyCredentials 
         }
         LogPrint("proxy", "SOCKS5 sending proxy authentication %s:%s\n", auth->username, auth->password);
         char pchRetA[2];
-        if (!InterruptibleRecv(pchRetA, 2, SOCKS5_RECV_TIMEOUT, hSocket)) {
+        if ((recvr = InterruptibleRecv(pchRetA, 2, SOCKS5_RECV_TIMEOUT, hSocket)) != IntrRecvError::OK) {
             CloseSocket(hSocket);
             return error("Error reading proxy authentication response");
         }
@@ -349,9 +357,16 @@ static bool Socks5(const std::string& strDest, int port, const ProxyCredentials 
         return error("Error sending to proxy");
     }
     char pchRet2[4];
-    if (!InterruptibleRecv(pchRet2, 4, SOCKS5_RECV_TIMEOUT, hSocket)) {
+    if ((recvr = InterruptibleRecv(pchRet2, 4, SOCKS5_RECV_TIMEOUT, hSocket)) != IntrRecvError::OK) {
         CloseSocket(hSocket);
-        return error("Error reading proxy response");
+        if (recvr == IntrRecvError::Timeout) {
+            /* If a timeout happens here, this effectively means we timed out while connecting
+             * to the remote node. This is very common for Tor, so do not print an
+             * error message. */
+            return false;
+        } else {
+            return error("Error while reading proxy response");
+        }
     }
     if (pchRet2[0] != 0x05) {
         CloseSocket(hSocket);
@@ -370,26 +385,26 @@ static bool Socks5(const std::string& strDest, int port, const ProxyCredentials 
     char pchRet3[256];
     switch (pchRet2[3])
     {
-        case 0x01: ret = InterruptibleRecv(pchRet3, 4, SOCKS5_RECV_TIMEOUT, hSocket); break;
-        case 0x04: ret = InterruptibleRecv(pchRet3, 16, SOCKS5_RECV_TIMEOUT, hSocket); break;
+        case 0x01: recvr = InterruptibleRecv(pchRet3, 4, SOCKS5_RECV_TIMEOUT, hSocket); break;
+        case 0x04: recvr = InterruptibleRecv(pchRet3, 16, SOCKS5_RECV_TIMEOUT, hSocket); break;
         case 0x03:
         {
-            ret = InterruptibleRecv(pchRet3, 1, SOCKS5_RECV_TIMEOUT, hSocket);
-            if (!ret) {
+            recvr = InterruptibleRecv(pchRet3, 1, SOCKS5_RECV_TIMEOUT, hSocket);
+            if (recvr != IntrRecvError::OK) {
                 CloseSocket(hSocket);
                 return error("Error reading from proxy");
             }
             int nRecv = pchRet3[0];
-            ret = InterruptibleRecv(pchRet3, nRecv, SOCKS5_RECV_TIMEOUT, hSocket);
+            recvr = InterruptibleRecv(pchRet3, nRecv, SOCKS5_RECV_TIMEOUT, hSocket);
             break;
         }
         default: CloseSocket(hSocket); return error("Error: malformed proxy response");
     }
-    if (!ret) {
+    if (recvr != IntrRecvError::OK) {
         CloseSocket(hSocket);
         return error("Error reading from proxy");
     }
-    if (!InterruptibleRecv(pchRet3, 2, SOCKS5_RECV_TIMEOUT, hSocket)) {
+    if ((recvr = InterruptibleRecv(pchRet3, 2, SOCKS5_RECV_TIMEOUT, hSocket)) != IntrRecvError::OK) {
         CloseSocket(hSocket);
         return error("Error reading from proxy");
     }
@@ -412,8 +427,9 @@ bool static ConnectSocketDirectly(const CService &addrConnect, SOCKET& hSocketRe
     if (hSocket == INVALID_SOCKET)
         return false;
 
-    int set = 1;
+
 #ifdef SO_NOSIGPIPE
+    int set = 1;
     // Different way of disabling SIGPIPE on BSD
     setsockopt(hSocket, SOL_SOCKET, SO_NOSIGPIPE, (void*)&set, sizeof(int));
 #endif
@@ -439,7 +455,7 @@ bool static ConnectSocketDirectly(const CService &addrConnect, SOCKET& hSocketRe
             fd_set fdset;
             FD_ZERO(&fdset);
             FD_SET(hSocket, &fdset);
-            int nRet = select(hSocket + 1, NULL, &fdset, NULL, &timeout);
+            int nRet = select(hSocket + 1, nullptr, &fdset, nullptr, &timeout);
             if (nRet == 0)
             {
                 LogPrint("net", "connection to %s timeout\n", addrConnect.ToString());
@@ -642,8 +658,8 @@ std::string NetworkErrorString(int err)
     char buf[256];
     buf[0] = 0;
     if(FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-            NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            buf, sizeof(buf), NULL))
+            nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            buf, sizeof(buf), nullptr))
     {
         return strprintf("%s (%d)", buf, err);
     }
