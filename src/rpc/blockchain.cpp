@@ -745,12 +745,12 @@ UniValue getblock(const JSONRPCRequest& request)
     std::string strHash = request.params[0].get_str();
     uint256 hash(uint256S(strHash));
 
-    int verbose = 1;
+    int fVerbose = 1;
     if (!request.params[1].isNull()) {
         if(request.params[1].isNum())
-            verbose = request.params[1].get_int();
+            fVerbose = request.params[1].get_int();
         else
-            verbose = request.params[1].get_bool() ? 1 : 0;
+            fVerbose = request.params[1].get_bool() ? 1 : 0;
     }
 
     if (mapBlockIndex.count(hash) == 0)
