@@ -13,6 +13,7 @@
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
+#include "fs.h"
 #include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "script/script_error.h"
 #include "sync.h"
@@ -30,7 +31,6 @@
 #include <atomic>
 
 #include <boost/unordered_map.hpp>
-#include <boost/filesystem/path.hpp>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -334,6 +334,9 @@ std::string FormatStateMessage(const CValidationState &state);
 
 /** Get the BIP9 state for a given deployment at the current tip. */
 ThresholdState VersionBitsTipState(const Consensus::Params& params, Consensus::DeploymentPos pos);
+
+/** Get the numerical statistics for the BIP9 state for a given deployment at the current tip. */
+BIP9Stats VersionBitsTipStatistics(const Consensus::Params& params, Consensus::DeploymentPos pos);
 
 /** Get the block height at which the BIP9 deployment switched into the state for the block building on the current tip. */
 int VersionBitsTipStateSinceHeight(const Consensus::Params& params, Consensus::DeploymentPos pos);
