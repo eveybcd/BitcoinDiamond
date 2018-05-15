@@ -6,7 +6,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
-include "validation.h" // For CheckTransaction
+#include "validation.h" 
 #include "consensus/validation.h"
 #include "fs.h"
 #include "protocol.h"
