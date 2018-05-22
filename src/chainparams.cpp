@@ -231,7 +231,7 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        vSeeds.push_back(CDNSSeedData("test1.dns.btcd.io", "test1.dns.btcd.io", true));
+        vSeeds.push_back(CDNSSeedData("test1.dns.btcd.io", "seed.test1.dns.btcd.io", true));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
