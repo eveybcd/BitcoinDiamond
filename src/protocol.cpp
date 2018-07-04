@@ -141,7 +141,7 @@ bool CMessageHeader::IsOversized() const {
     }
 
     // Scale the maximum accepted size with the block size.
-    if (nMessageSize > 2 * MAX_BLOCK_SERIALIZED_SIZE) {
+    if (nMessageSize > MAX_BLOCK_SERIALIZED_SIZE) {
         return true;
     }
 
