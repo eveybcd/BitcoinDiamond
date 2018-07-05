@@ -18,6 +18,12 @@
 #include <stdint.h>
 #include <string>
 
+/**
+ * Maximum length of incoming protocol messages (Currently 1MB).
+ * NB: Messages propagating block content are not subject to this limit.
+ */
+static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 1 * 1024 * 1024;
+
 /** Message header.
  * (4) message start.
  * (12) command.
@@ -44,6 +50,7 @@ public:
 
     std::string GetCommand() const;
     bool IsValid(const MessageStartChars& messageStart) const;
+    bool IsOversized() const;
 
     ADD_SERIALIZE_METHODS;
 
@@ -240,6 +247,13 @@ extern const char *GETBLOCKTXN;
  * @since protocol version 70014 as described by BIP 152
  */
 extern const char *BLOCKTXN;
+
+/**
+ * Indicate if the message is used to transmit the content of a block.
+ * These messages can be significantly larger than usual messages and therefore
+ * may need to be processed differently.
+ */
+bool IsBlockLike(const std::string &strCommand);
 };
 
 /* Get a vector of all valid message types (see above) */
