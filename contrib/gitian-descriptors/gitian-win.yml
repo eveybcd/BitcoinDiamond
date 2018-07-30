@@ -1,5 +1,5 @@
 ---
-name: "bitcoindiamond-win-1.0"
+name: "bitcoindiamond-win-1.1.0"
 enable_cache: true
 suites:
 - "trusty"

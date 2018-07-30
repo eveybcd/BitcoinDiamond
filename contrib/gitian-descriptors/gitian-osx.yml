@@ -1,5 +1,5 @@
 ---
-name: "bitcoindiamond-osx-1.0"
+name: "bitcoindiamond-osx-1.1.0"
 enable_cache: true
 suites:
 - "trusty"
