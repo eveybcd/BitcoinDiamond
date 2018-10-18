@@ -1,13 +1,13 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2014 The Bitcoin Core developers
+// Copyright (c) 2009-2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "compressor.h"
+#include <compressor.h>
 
-#include "hash.h"
-#include "pubkey.h"
-#include "script/standard.h"
+#include <hash.h>
+#include <pubkey.h>
+#include <script/standard.h>
 
 bool CScriptCompressor::IsToKeyID(CKeyID &hash) const
 {
@@ -93,7 +93,7 @@ bool CScriptCompressor::Decompress(unsigned int nSize, const std::vector<unsigne
         script[0] = OP_DUP;
         script[1] = OP_HASH160;
         script[2] = 20;
-        memcpy(&script[3], &in[0], 20);
+        memcpy(&script[3], in.data(), 20);
         script[23] = OP_EQUALVERIFY;
         script[24] = OP_CHECKSIG;
         return true;
@@ -101,7 +101,7 @@ bool CScriptCompressor::Decompress(unsigned int nSize, const std::vector<unsigne
         script.resize(23);
         script[0] = OP_HASH160;
         script[1] = 20;
-        memcpy(&script[2], &in[0], 20);
+        memcpy(&script[2], in.data(), 20);
         script[22] = OP_EQUAL;
         return true;
     case 0x02:
@@ -109,14 +109,14 @@ bool CScriptCompressor::Decompress(unsigned int nSize, const std::vector<unsigne
         script.resize(35);
         script[0] = 33;
         script[1] = nSize;
-        memcpy(&script[2], &in[0], 32);
+        memcpy(&script[2], in.data(), 32);
         script[34] = OP_CHECKSIG;
         return true;
     case 0x04:
     case 0x05:
         unsigned char vch[33] = {};
         vch[0] = nSize - 2;
-        memcpy(&vch[1], &in[0], 32);
+        memcpy(&vch[1], in.data(), 32);
         CPubKey pubkey(&vch[0], &vch[33]);
         if (!pubkey.Decompress())
             return false;

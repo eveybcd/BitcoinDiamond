@@ -1,10 +1,11 @@
-// Copyright (c) 2011-2016 The Bitcoin Core developers
+// Copyright (c) 2011-2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef BITCOIN_QT_SPLASHSCREEN_H
 #define BITCOIN_QT_SPLASHSCREEN_H
 
+#include <functional>
 #include <QSplashScreen>
 
 class CWallet;
@@ -34,6 +35,9 @@ public Q_SLOTS:
 
     /** Show message and progress */
     void showMessage(const QString &message, int alignment, const QColor &color);
+
+protected:
+    bool eventFilter(QObject * obj, QEvent * ev);
 
 private:
     /** Connect core signals to splash screen */

@@ -311,10 +311,8 @@ rm -f %{buildroot}%{_bindir}/test_*
 
 %check
 make check
-pushd src
-srcdir=. test/bitcoin-util-test.py
-popd
-qa/pull-tester/rpc-tests.py -extended
+srcdir=src test/bitcoin-util-test.py
+test/functional/test_runner.py --extended
 
 %post libs -p /sbin/ldconfig
 
@@ -335,9 +333,11 @@ for selinuxvariant in %{selinux_variants}; do
 	%{_sbindir}/semodule -s ${selinuxvariant} -i %{_datadir}/selinux/${selinuxvariant}/bitcoin.pp &> /dev/null || :
 done
 %{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 7116
-%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 8333
-%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 18332
-%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 18333
+%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 7117
+%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 17116
+%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 17117
+%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 17227
+%{_sbindir}/semanage port -a -t bitcoin_port_t -p tcp 17228
 %{_sbindir}/fixfiles -R bitcoin-server restore &> /dev/null || :
 %{_sbindir}/restorecon -R %{_localstatedir}/lib/bitcoin || :
 fi
@@ -354,9 +354,11 @@ fi
 if [ $1 -eq 0 ]; then
 	if [ `%{_sbindir}/sestatus |grep -c "disabled"` -eq 0 ]; then
 	%{_sbindir}/semanage port -d -p tcp 7116
-	%{_sbindir}/semanage port -d -p tcp 8333
-	%{_sbindir}/semanage port -d -p tcp 18332
-	%{_sbindir}/semanage port -d -p tcp 18333
+	%{_sbindir}/semanage port -d -p tcp 7117
+	%{_sbindir}/semanage port -d -p tcp 17116
+	%{_sbindir}/semanage port -d -p tcp 17117
+	%{_sbindir}/semanage port -d -p tcp 17227
+	%{_sbindir}/semanage port -d -p tcp 17228
 	for selinuxvariant in %{selinux_variants}; do
 		%{_sbindir}/semodule -s ${selinuxvariant} -r bitcoin &> /dev/null || :
 	done

@@ -1,13 +1,13 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "protocol.h"
+#include <protocol.h>
 
-#include "util.h"
-#include "utilstrencodings.h"
-#include "consensus/consensus.h"
+#include <util.h>
+#include <utilstrencodings.h>
+#include <consensus/consensus.h>
 
 #ifndef WIN32
 # include <arpa/inet.h>
@@ -45,8 +45,8 @@ bool IsBlockLike(const std::string &strCommand) {
            strCommand == NetMsgType::CMPCTBLOCK ||
            strCommand == NetMsgType::BLOCKTXN;
 }
-}; // namespace NetMsgType
-
+} // namespace NetMsgType
+const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 1 * 1024 * 1024;
 /** All known message types. Keep this in the same order as the list of
  * messages above and in protocol.h.
  */
@@ -132,6 +132,8 @@ bool CMessageHeader::IsValid(const MessageStartChars& pchMessageStartIn) const
     return true;
 }
 
+
+
 bool CMessageHeader::IsOversized() const {
     // If the message doesn't not contain a block content, check against
     // MAX_PROTOCOL_MESSAGE_LENGTH.
@@ -147,6 +149,8 @@ bool CMessageHeader::IsOversized() const {
 
     return false;
 }
+
+
 
 
 CAddress::CAddress() : CService()
@@ -172,11 +176,7 @@ CInv::CInv()
     hash.SetNull();
 }
 
-CInv::CInv(int typeIn, const uint256& hashIn)
-{
-    type = typeIn;
-    hash = hashIn;
-}
+CInv::CInv(int typeIn, const uint256& hashIn) : type(typeIn), hash(hashIn) {}
 
 bool operator<(const CInv& a, const CInv& b)
 {

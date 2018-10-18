@@ -1,24 +1,24 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2017 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "pow.h"
+#include <pow.h>
 
-#include "arith_uint256.h"
-#include "chain.h"
-#include "primitives/block.h"
-#include "uint256.h"
-#include "util.h"
+#include <arith_uint256.h>
+#include <chain.h>
+#include <primitives/block.h>
+#include <uint256.h>
+#include <util.h>
 
-#include "consensus/consensus.h"
-
+#include <consensus/consensus.h>
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
+    assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
     // Genesis block
-    if (pindexLast == NULL)
+    if (pindexLast == nullptr)
         return nProofOfWorkLimit;
     if (pindexLast->nHeight+1 == params.BCDHeight)
     	return nProofOfWorkLimit;
