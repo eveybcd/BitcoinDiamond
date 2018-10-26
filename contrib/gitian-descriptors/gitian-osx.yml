@@ -28,7 +28,7 @@ packages:
 - "python-setuptools"
 - "fonts-tuffy"
 remotes:
-- "url": "https://github.com/king-etc/bitcoin_debug.git"
+- "url": "https://github.com/eveybcd/BitcoinDiamond.git"
   "dir": "bitcoin"
 files:
 - "MacOSX10.11.sdk.tar.gz"

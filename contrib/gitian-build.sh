@@ -16,7 +16,7 @@ osx=true
 SIGNER=
 VERSION=
 commit=false
-url=https://github.com/king-etc/bitcoin_debug
+url=https://github.com/eveybcd/BitcoinDiamond
 proc=2
 mem=2000
 lxc=true
@@ -38,7 +38,7 @@ version		Version number, commit, or branch to build. If building a commit or bra
 
 Options:
 -c|--commit	Indicate that the version argument is for a commit or branch
--u|--url	Specify the URL of the repository. Default is https://github.com/king-etc/bitcoin_debug
+-u|--url	Specify the URL of the repository. Default is https://github.com/eveybcd/BitcoinDiamond
 -v|--verify 	Verify the Gitian build
 -b|--build	Do a Gitian build
 -s|--sign	Make signed binaries for Windows and Mac OSX
