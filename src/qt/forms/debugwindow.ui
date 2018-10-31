@@ -645,7 +645,7 @@
            <item>
             <widget class="QPushButton" name="btnClearTrafficGraph">
              <property name="text">
-              <string>&amp;Clear</string>
+              <string>&amp;Reset</string>
              </property>
              <property name="autoDefault">
               <bool>false</bool>
@@ -1424,7 +1424,7 @@
   <customwidget>
    <class>TrafficGraphWidget</class>
    <extends>QWidget</extends>
-   <header>trafficgraphwidget.h</header>
+   <header>qt/trafficgraphwidget.h</header>
    <container>1</container>
    <slots>
     <slot>clear()</slot>

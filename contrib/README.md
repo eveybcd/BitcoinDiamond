@@ -26,7 +26,7 @@ Contains files used to package bitcoind/bitcoin-qt
 for Debian-based Linux systems. If you compile bitcoind/bitcoin-qt yourself, there are some useful files here.
 
 ### [Gitian-descriptors](/contrib/gitian-descriptors) ###
-Notes on getting Gitian builds up and running using KVM.
+Files used during the gitian build process. For more information about gitian, see the [the Bitcoin Core documentation repository](https://github.com/bitcoin-core/docs).
 
 ### [Gitian-keys](/contrib/gitian-keys)
 PGP keys used for signing Bitcoin Core [Gitian release](/doc/release-process.md) results.
@@ -35,7 +35,7 @@ PGP keys used for signing Bitcoin Core [Gitian release](/doc/release-process.md)
 Scripts and notes for Mac builds. 
 
 ### [RPM](/contrib/rpm) ###
-RPM spec file for building bitcoin-core on RPM based distributions
+RPM spec file for building bitcoin-core on RPM based distributions.
 
 ### [Gitian-build](/contrib/gitian-build.sh) ###
 Script for running full Gitian builds.
@@ -48,25 +48,3 @@ Utilities to generate test vectors for the data-driven Bitcoin tests.
 
 ### [Verify Binaries](/contrib/verifybinaries) ###
 This script attempts to download and verify the signature file SHA256SUMS.asc from bitcoin.org.
-
-
-## BitcoinDiamond-Docker
-
-### build
-
-```
-cd /path/to/BitcoinDiamond/contrib/Docker
-docker build -t bcd .
-```
-
-### Run
-
-```
-docker run -ti -v /path/to/youdir:/home/bitcoin/.bitcoindiamond bcd
-```
-
-### UPnP
-
-```
-docker run -ti -v /path/to/youdir:/home/bitcoin/.bitcoindiamond -p 7116:7116 -e UPNP=0 bcd
-```

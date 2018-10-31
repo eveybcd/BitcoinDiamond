@@ -1,22 +1,25 @@
+# It is not recommended to modify this file in-place, because it will
+# be overwritten during package upgrades. If you want to add further
+# options or overwrite existing ones then use
+# $ systemctl edit bitcoind.service
+# See "man systemd.service" for details.
+
+# Note that almost all daemon options could be specified in
+# /home/bcd-root/.bitcoindiamond/bitcoin.conf
+
 [Unit]
-Description=Bitcoin's distributed currency daemon
+Description=Bitcoindiamond daemon
 After=network.target
 
 [Service]
-User=bitcoin
-Group=bitcoin
-
+ExecStart=/usr/local/bin/bitcoindiamondd -daemon -conf=/home/bcd-root/.bitcoindiamond/bitcoin.conf -pid=/run/bitcoindiamondd/bitcoindiamondd.pid
+# Creates /run/bitcoindiamondd owned by bitcoindiamondd
+RuntimeDirectory=bitcoindiamondd
+User=bcd-root
 Type=forking
-PIDFile=/var/lib/bitcoind/bitcoind.pid
-ExecStart=/usr/bin/bitcoind -daemon -pid=/var/lib/bitcoind/bitcoind.pid \
--conf=/etc/bitcoin/bitcoin.conf -datadir=/var/lib/bitcoind -disablewallet
-
-Restart=always
+PIDFile=/run/bitcoindiamondd/bitcoindiamondd.pid
+Restart=always #on-failure
 PrivateTmp=true
-TimeoutStopSec=60s
-TimeoutStartSec=2s
-StartLimitInterval=120s
-StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
