@@ -231,10 +231,10 @@ public:
 
 private:
     mutable CCriticalSection m_cs_fee_estimator;
-    unsigned int nBestSeenHeight;
-    unsigned int firstRecordedHeight;
-    unsigned int historicalFirst;
-    unsigned int historicalBest;
+    unsigned int nBestSeenHeight GUARDED_BY(m_cs_fee_estimator);
+    unsigned int firstRecordedHeight GUARDED_BY(m_cs_fee_estimator);
+    unsigned int historicalFirst GUARDED_BY(m_cs_fee_estimator);
+    unsigned int historicalBest GUARDED_BY(m_cs_fee_estimator);
 
     struct TxStatsInfo
     {
@@ -244,7 +244,7 @@ private:
     };
 
     // map of txids to information about that transaction
-    std::map<uint256, TxStatsInfo> mapMemPoolTxs;
+     std::map<uint256, TxStatsInfo> mapMemPoolTxs GUARDED_BY(m_cs_fee_estimator);
 
     /** Classes to track historical data on transaction confirmations */
     std::unique_ptr<TxConfirmStats> feeStats PT_GUARDED_BY(m_cs_fee_estimator);
