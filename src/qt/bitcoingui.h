@@ -66,7 +66,11 @@ public:
     bool setCurrentWallet(const QString& name);
     void removeAllWallets();
 #endif // ENABLE_WALLET
-    bool enableWallet;
+    bool enableWallet = false;
+        /** Get the tray icon status.
+        Some systems have not "system tray" or "notification area" available.
+    */
+    bool hasTrayIcon() const { return trayIcon; }
 
 protected:
     void changeEvent(QEvent *e);
