@@ -442,10 +442,6 @@ void InterruptHTTPServer()
 {
     LogPrint(BCLog::HTTP, "Interrupting HTTP server\n");
     if (eventHTTP) {
-        // Unlisten sockets
-        for (evhttp_bound_socket *socket : boundSockets) {
-            evhttp_del_accept_socket(eventHTTP, socket);
-        }
         // Reject requests on current connections
         evhttp_set_gencb(eventHTTP, http_reject_request_cb, nullptr);
     }
@@ -465,6 +461,12 @@ void StopHTTPServer()
         delete workQueue;
         workQueue = nullptr;
     }
+    // Unlisten sockets, these are what make the event loop running, which means
+    // that after this and all connections are closed the event loop will quit.
+    for (evhttp_bound_socket *socket : boundSockets) {
+        evhttp_del_accept_socket(eventHTTP, socket);
+    }
+    boundSockets.clear();
     if (eventBase) {
         LogPrint(BCLog::HTTP, "Waiting for HTTP event thread to exit\n");
         // Give event loop a few seconds to exit (to send back last RPC responses), then break it
