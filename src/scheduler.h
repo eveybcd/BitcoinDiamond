@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 The Bitcoin Core developers
+// Copyright (c) 2015-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -45,13 +45,13 @@ public:
     // Call func at/after time t
     void schedule(Function f, boost::chrono::system_clock::time_point t=boost::chrono::system_clock::now());
 
-    // Convenience method: call f once deltaMilliSeconds from now
+    // Convenience method: call f once deltaSeconds from now
     void scheduleFromNow(Function f, int64_t deltaMilliSeconds);
 
     // Another convenience method: call f approximately
-    // every deltaMilliSeconds forever, starting deltaMilliSeconds from now.
+    // every deltaSeconds forever, starting deltaSeconds from now.
     // To be more precise: every time f is finished, it
-    // is rescheduled to run deltaMilliSeconds later. If you
+    // is rescheduled to run deltaSeconds later. If you
     // need more accurate scheduling, don't use this method.
     void scheduleEvery(Function f, int64_t deltaMilliSeconds);
 
@@ -99,8 +99,8 @@ private:
     CScheduler *m_pscheduler;
 
     CCriticalSection m_cs_callbacks_pending;
-    std::list<std::function<void (void)>> m_callbacks_pending;
-    bool m_are_callbacks_running = false;
+    std::list<std::function<void (void)>> m_callbacks_pending GUARDED_BY(m_cs_callbacks_pending);
+    bool m_are_callbacks_running GUARDED_BY(m_cs_callbacks_pending) = false;
 
     void MaybeScheduleProcessQueue();
     void ProcessQueue();

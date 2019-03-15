@@ -38,7 +38,7 @@
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>io.btcd.BitcoinDiamond-Qt</string>
+  <string>org.bitcoindiamond.BitcoinDiamond-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>
@@ -98,6 +98,9 @@
     <string>True</string>
 
   <key>LSAppNapIsDisabled</key>
+    <string>True</string>
+
+  <key>NSRequiresAquaSystemAppearance</key>
     <string>True</string>
   
   <key>LSApplicationCategoryType</key>

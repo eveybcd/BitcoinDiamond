@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -205,7 +205,6 @@ public:
 
     static const int32_t CURRENT_VERSION_OLD=2;
     static const int32_t CURRENT_VERSION_FORK=12;
-
     // Default transaction version.
     static const int32_t CURRENT_VERSION=CURRENT_VERSION_FORK;
 
@@ -223,14 +222,16 @@ public:
     const std::vector<CTxIn> vin;
     const std::vector<CTxOut> vout;
     const int32_t nVersion;
-    const uint256 preBlockHash;
+	const uint256 preBlockHash;
     const uint32_t nLockTime;
 
 private:
     /** Memory only. */
     const uint256 hash;
+    const uint256 m_witness_hash;
 
     uint256 ComputeHash() const;
+    uint256 ComputeWitnessHash() const;
 
 public:
     /** Construct a CTransaction that qualifies as IsNull() */
@@ -254,12 +255,8 @@ public:
         return vin.empty() && vout.empty();
     }
 
-    const uint256& GetHash() const {
-        return hash;
-    }
-
-    // Compute a hash that includes both transaction and witness data
-    uint256 GetWitnessHash() const;
+    const uint256& GetHash() const { return hash; }
+    const uint256& GetWitnessHash() const { return m_witness_hash; };
 
     // Return sum of txouts.
     CAmount GetValueOut() const;
@@ -300,13 +297,14 @@ public:
         return false;
     }
 };
+
 template<typename Stream, typename TxType>
 inline void UnserializeTransaction(TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s >> tx.nVersion;
     if (tx.nVersion == CTransaction::CURRENT_VERSION_FORK){
-        s >> tx.preBlockHash;
+    	s >> tx.preBlockHash;
     }
     unsigned char flags = 0;
     tx.vin.clear();
@@ -343,7 +341,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
 
     s << tx.nVersion;
-    if (tx.nVersion == CTransaction::CURRENT_VERSION_FORK){
+	if (tx.nVersion == CTransaction::CURRENT_VERSION_FORK){
         s << tx.preBlockHash;
     }
     unsigned char flags = 0;
@@ -369,6 +367,7 @@ inline void SerializeTransaction(const TxType& tx, Stream& s) {
     }
     s << tx.nLockTime;
 }
+
 /** A mutable version of CTransaction. */
 struct CMutableTransaction
 {
@@ -376,10 +375,10 @@ struct CMutableTransaction
     std::vector<CTxOut> vout;
     int32_t nVersion;
     uint32_t nLockTime;
-    uint256 preBlockHash;
+	uint256 preBlockHash;
 
     CMutableTransaction();
-    CMutableTransaction(const CTransaction& tx);
+    explicit CMutableTransaction(const CTransaction& tx);
 
     template <typename Stream>
     inline void Serialize(Stream& s) const {
@@ -401,11 +400,6 @@ struct CMutableTransaction
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */
     uint256 GetHash() const;
-
-    friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
-    {
-        return a.GetHash() == b.GetHash();
-    }
 
     bool HasWitness() const
     {

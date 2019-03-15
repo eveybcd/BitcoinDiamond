@@ -446,10 +446,6 @@
         <translation>Adres</translation>
     </message>
     <message>
-        <source>New receiving address</source>
-        <translation>Yeni alış adresi</translation>
-    </message>
-    <message>
         <source>New sending address</source>
         <translation>Yeni gönderim adresi</translation>
     </message>
@@ -464,10 +460,6 @@
     <message>
         <source>The entered address "%1" is not a valid Bitcoin address.</source>
         <translation>Girilen adres "%1" Bitcoin adresiyle eşleşmiyor.</translation>
-    </message>
-    <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>Girilen adres "%1" adres defterinde zaten kayıtlı.</translation>
     </message>
     <message>
         <source>New key generation failed.</source>
@@ -495,23 +487,7 @@
         <source>Command-line options</source>
         <translation>Komut satırı ayarları</translation>
     </message>
-    <message>
-        <source>Usage:</source>
-        <translation>Kullanım:</translation>
-    </message>
-    <message>
-        <source>command-line options</source>
-        <translation>komut satırı ayarları</translation>
-    </message>
-    <message>
-        <source>UI Options:</source>
-        <translation>UI Ayarları:</translation>
-    </message>
-    <message>
-        <source>Set language, for example "de_DE" (default: system locale)</source>
-        <translation>Bir dil seçin, örneğin "de_DE" (seçilen: Sistem dili)</translation>
-    </message>
-    </context>
+</context>
 <context>
     <name>Intro</name>
     <message>
@@ -1011,6 +987,10 @@
         <source>Message</source>
         <translation>Mesaj</translation>
     </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Cüzdan</translation>
+    </message>
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
@@ -1104,6 +1084,10 @@
     <message>
         <source>or</source>
         <translation>ya da</translation>
+    </message>
+    <message>
+        <source>Transaction fee</source>
+        <translation>Gönderim ücreti</translation>
     </message>
     <message>
         <source>Confirm send coins</source>
@@ -1403,36 +1387,12 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>Options:</source>
-        <translation>Ayarlar:</translation>
-    </message>
-    <message>
-        <source>Accept command line and JSON-RPC commands</source>
-        <translation>JSON-RPC komutları ile komut satırını onaylayın</translation>
-    </message>
-    <message>
         <source>Bitcoin Core</source>
         <translation>Bitcoin Çekirdeği</translation>
     </message>
     <message>
-        <source>&lt;category&gt; can be:</source>
-        <translation>&lt;category&gt; can be:</translation>
-    </message>
-    <message>
-        <source>Block creation options:</source>
-        <translation>Blok oluşturma ayarları:</translation>
-    </message>
-    <message>
-        <source>Connection options:</source>
-        <translation>Bağlantı ayarları:</translation>
-    </message>
-    <message>
         <source>Copyright (C) %i-%i</source>
         <translation>Copyright (C) %i-%i</translation>
-    </message>
-    <message>
-        <source>Debugging/Testing options:</source>
-        <translation>Hata giderme/test ayarları:</translation>
     </message>
     <message>
         <source>Error: Disk space is low!</source>
@@ -1447,28 +1407,12 @@
         <translation>Ban listesi yükleniyor...</translation>
     </message>
     <message>
-        <source>Print this help message and exit</source>
-        <translation>Bu yardım mesajını yazdır ve çıkış yap</translation>
-    </message>
-    <message>
-        <source>Print version and exit</source>
-        <translation>Versiyonu yazdır ve çıkış yap</translation>
-    </message>
-    <message>
         <source>Verifying blocks...</source>
         <translation>Bloklar Onaylanıyor...</translation>
     </message>
     <message>
         <source>Wallet needed to be rewritten: restart %s to complete</source>
         <translation>%s tamamlanması için cüzdanın yeniden başlatılması gerekiyor</translation>
-    </message>
-    <message>
-        <source>Wallet options:</source>
-        <translation>Cüzdan Ayarları</translation>
-    </message>
-    <message>
-        <source>(default: %u)</source>
-        <translation>(varsayılan: %u)</translation>
     </message>
     <message>
         <source>Error reading from database, shutting down.</source>
@@ -1483,24 +1427,12 @@
         <translation>Hatalı -onion adresi ya da host adı: '%s'</translation>
     </message>
     <message>
-        <source>RPC server options:</source>
-        <translation>RPC sunucu ayarları</translation>
-    </message>
-    <message>
         <source>This is experimental software.</source>
         <translation>Bu deneysel bir yazılımdır.</translation>
     </message>
     <message>
-        <source>Tor control port password (default: empty)</source>
-        <translation>Tor kontrolü portu şifresi (varsayılan: boş bırakınız)</translation>
-    </message>
-    <message>
         <source>Transaction too large</source>
         <translation>İşlem çok büyük</translation>
-    </message>
-    <message>
-        <source>Username for JSON-RPC connections</source>
-        <translation>JSON-RPC bağlantıları için kullanıcı adı</translation>
     </message>
     <message>
         <source>Verifying wallet(s)...</source>
@@ -1509,30 +1441,6 @@
     <message>
         <source>Warning</source>
         <translation>Uyarı</translation>
-    </message>
-    <message>
-        <source>Password for JSON-RPC connections</source>
-        <translation>JSON-RPC bağlantıları için şifre</translation>
-    </message>
-    <message>
-        <source>(default: %s)</source>
-        <translation>(varsayılan: %s)</translation>
-    </message>
-    <message>
-        <source>Specify configuration file (default: %s)</source>
-        <translation>Yapılandırma dosyasını belirle (varsayılan: %s)</translation>
-    </message>
-    <message>
-        <source>Specify connection timeout in milliseconds (minimum: 1, default: %d)</source>
-        <translation>Milisaniyelik zaman aşımına uğramış bağlantıyı belirle (minimum: 1, varsayılan: %d)</translation>
-    </message>
-    <message>
-        <source>Specify pid file (default: %s)</source>
-        <translation>Pid dosyasını belirle (Varsayılan: %s)</translation>
-    </message>
-    <message>
-        <source>Spend unconfirmed change when sending transactions (default: %u)</source>
-        <translation>İşlem gönderiminde onaylanmamış değişimi öde (Varsayılan: %u)</translation>
     </message>
     <message>
         <source>Starting network threads...</source>
@@ -1549,10 +1457,6 @@
     <message>
         <source>This is the transaction fee you will pay if you send a transaction.</source>
         <translation>Bir işlem göndermeniz durumunda işlem ücretiniz budur</translation>
-    </message>
-    <message>
-        <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
-        <translation>Sorunlu emsalleri koparma eşiği (Varsayılan: %u)</translation>
     </message>
     <message>
         <source>Transaction amounts must not be negative</source>

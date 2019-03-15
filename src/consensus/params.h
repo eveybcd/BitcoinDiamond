@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -49,8 +49,8 @@ struct BIP9Deployment {
 struct Params {
     uint256 hashGenesisBlock;
     int nSubsidyHalvingInterval;
-    /** Block height at which BIP16 becomes active */
-    int BIP16Height;
+    /* Block hash that is excepted from BIP16 enforcement */
+    uint256 BIP16Exception;
     /** Block height and hash at which BIP34 becomes active */
     int BIP34Height;
     uint256 BIP34Hash;
@@ -58,8 +58,8 @@ struct Params {
     int BIP65Height;
     /** Block height at which BIP66 becomes active */
     int BIP66Height;
-
-    int BCDHeight;
+	
+	int BCDHeight;
     int64_t BCDGenesisBlockReward;
     int BCDLastRewardHeight;
     uint256 BCDBeginPowLimit;

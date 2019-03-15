@@ -40,4 +40,6 @@ What problems do Bitcoin Diamond attempt to solve?
 After nine years of rapid development of Bitcoin, high transactions fees and Bitcoin no longer meets the 
 demands from rising numbers of clients. And various kinds of problems have arisen, which mainly consist 
 of the following aspects: 
-1. Lack of privacy protection.2. Slow transaction confirmations.3. High threshold for new members.
+1. Lack of privacy protection.
+2. Slow transaction confirmations.
+3. High threshold for new members.
