@@ -16,7 +16,7 @@ Clean up the files you don't need:
 
 ```sh
 diskutil unmount /Volumes/Xcode
-rm MacOSX10.11.sdk.tar.gz Xcode_7.3.1.dmg
+rm Xcode_7.3.1.dmg
 ```
 
 Non-MacOS host:
@@ -37,16 +37,17 @@ rm -rf 5.hfs MacOSX10.11.sdk
 
 Copy SDK to Gitian VM:
 ----------------------
-Copy it to the Gitian VM, e.g.:
+Copy it to the Gitian VM and clean up, e.g.:
 
 ```bash
 scp MacOSX10.11.sdk.tar.gz gitian:
+rm MacOSX10.11.sdk.tar.gz
 ```
 
 Login to the VM and:
 
 ```bash
-mkdir gitian-builder/inputs
+mkdir -p gitian-builder/inputs
 mv MacOSX10.11.sdk.tar.gz gitian-builder/inputs
 ```
 

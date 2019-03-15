@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,10 +12,8 @@
 #include <serialize.h>
 #include <uint256.h>
 #include <version.h>
-#include <crypto/common.h>
 
 #include <vector>
-
 #include "crypto/x13hash/sph_blake.h"
 #include "crypto/x13hash/sph_bmw.h"
 #include "crypto/x13hash/sph_groestl.h"
@@ -66,7 +64,6 @@ GLOBAL sph_fugue512_context     z_fugue;
     sph_fugue512_init(&z_fugue); \
 } while (0) 
 typedef uint256 ChainCode;
-
 template<typename T1>
 inline uint256 HashX13(const T1 pbegin, const T1 pend)
 
@@ -233,8 +230,6 @@ inline uint256 HashX13sm3(const T1 pbegin, const T1 pend)
 
     return hash[24];
 }
-
-
 /** A hasher class for Bitcoin's 256-bit hash (double SHA-256). */
 class CHash256 {
 private:
@@ -356,15 +351,6 @@ public:
         return result;
     }
 
-       /**
-     * Returns the first 64 bits from the resulting hash.
-     */
-    inline uint64_t GetCheapHash() {
-        unsigned char result[CHash256::OUTPUT_SIZE];
-        ctx.Finalize(result);
-        return ReadLE64(result);
-    }
-
     template<typename T>
     CHashWriter& operator<<(const T& obj) {
         // Serialize to this stream
@@ -400,7 +386,7 @@ public:
     }
 
     template<typename T>
-    CHashVerifier<Source>& operator>>(T& obj)
+    CHashVerifier<Source>& operator>>(T&& obj)
     {
         // Unserialize from this stream
         ::Unserialize(*this, obj);

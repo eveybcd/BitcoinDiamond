@@ -1,9 +1,9 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef BITCOIN_POLICYESTIMATOR_H
-#define BITCOIN_POLICYESTIMATOR_H
+#ifndef BITCOIN_POLICY_FEES_H
+#define BITCOIN_POLICY_FEES_H
 
 #include <amount.h>
 #include <policy/feerate.h>
@@ -69,7 +69,7 @@ class TxConfirmStats;
 
 /* Identifier for each of the 3 different TxConfirmStats which will track
  * history over different time horizons. */
-enum FeeEstimateHorizon {
+enum class FeeEstimateHorizon {
     SHORT_HALFLIFE = 0,
     MED_HALFLIFE = 1,
     LONG_HALFLIFE = 2
@@ -224,17 +224,16 @@ public:
     bool Read(CAutoFile& filein);
 
     /** Empty mempool transactions on shutdown to record failure to confirm for txs still in mempool */
-    void FlushUnconfirmed(CTxMemPool& pool);
+    void FlushUnconfirmed();
 
     /** Calculation of highest target that estimates are tracked for */
     unsigned int HighestTargetTracked(FeeEstimateHorizon horizon) const;
 
 private:
-    mutable CCriticalSection m_cs_fee_estimator;
-    unsigned int nBestSeenHeight GUARDED_BY(m_cs_fee_estimator);
-    unsigned int firstRecordedHeight GUARDED_BY(m_cs_fee_estimator);
-    unsigned int historicalFirst GUARDED_BY(m_cs_fee_estimator);
-    unsigned int historicalBest GUARDED_BY(m_cs_fee_estimator);
+    unsigned int nBestSeenHeight;
+    unsigned int firstRecordedHeight;
+    unsigned int historicalFirst;
+    unsigned int historicalBest;
 
     struct TxStatsInfo
     {
@@ -244,12 +243,12 @@ private:
     };
 
     // map of txids to information about that transaction
-     std::map<uint256, TxStatsInfo> mapMemPoolTxs GUARDED_BY(m_cs_fee_estimator);
+    std::map<uint256, TxStatsInfo> mapMemPoolTxs;
 
     /** Classes to track historical data on transaction confirmations */
-    std::unique_ptr<TxConfirmStats> feeStats PT_GUARDED_BY(m_cs_fee_estimator);
-    std::unique_ptr<TxConfirmStats> shortStats PT_GUARDED_BY(m_cs_fee_estimator);
-    std::unique_ptr<TxConfirmStats> longStats PT_GUARDED_BY(m_cs_fee_estimator);
+    std::unique_ptr<TxConfirmStats> feeStats;
+    std::unique_ptr<TxConfirmStats> shortStats;
+    std::unique_ptr<TxConfirmStats> longStats;
 
     unsigned int trackedTxs;
     unsigned int untrackedTxs;
@@ -296,4 +295,4 @@ private:
     FastRandomContext insecure_rand;
 };
 
-#endif /*BITCOIN_POLICYESTIMATOR_H */
+#endif // BITCOIN_POLICY_FEES_H

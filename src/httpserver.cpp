@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2017 The Bitcoin Core developers
+// Copyright (c) 2015-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -224,20 +224,24 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
     }
     std::unique_ptr<HTTPRequest> hreq(new HTTPRequest(req));
 
-    LogPrint(BCLog::HTTP, "Received a %s request for %s from %s\n",
-             RequestMethodString(hreq->GetRequestMethod()), hreq->GetURI(), hreq->GetPeer().ToString());
-
     // Early address-based allow check
     if (!ClientAllowed(hreq->GetPeer())) {
+        LogPrint(BCLog::HTTP, "HTTP request from %s rejected: Client network is not allowed RPC access\n",
+                 hreq->GetPeer().ToString());
         hreq->WriteReply(HTTP_FORBIDDEN);
         return;
     }
 
     // Early reject unknown HTTP methods
     if (hreq->GetRequestMethod() == HTTPRequest::UNKNOWN) {
+        LogPrint(BCLog::HTTP, "HTTP request from %s rejected: Unknown HTTP request method\n",
+                 hreq->GetPeer().ToString());
         hreq->WriteReply(HTTP_BADMETHOD);
         return;
     }
+
+    LogPrint(BCLog::HTTP, "Received a %s request for %s from %s\n",
+             RequestMethodString(hreq->GetRequestMethod()), SanitizeString(hreq->GetURI(), SAFE_CHARS_URI).substr(0, 100), hreq->GetPeer().ToString());
 
     // Find registered handler for prefix
     std::string strURI = hreq->GetURI();
@@ -364,8 +368,8 @@ bool InitHTTPServer()
     // Update libevent's log handling. Returns false if our version of
     // libevent doesn't support debug logging, in which case we should
     // clear the BCLog::LIBEVENT flag.
-    if (!UpdateHTTPServerLogging(logCategories & BCLog::LIBEVENT)) {
-        logCategories &= ~BCLog::LIBEVENT;
+    if (!UpdateHTTPServerLogging(g_logger->WillLogCategory(BCLog::LIBEVENT))) {
+        g_logger->DisableCategory(BCLog::LIBEVENT);
     }
 
 #ifdef WIN32
@@ -423,7 +427,7 @@ std::thread threadHTTP;
 std::future<bool> threadResult;
 static std::vector<std::thread> g_thread_http_workers;
 
-bool StartHTTPServer()
+void StartHTTPServer()
 {
     LogPrint(BCLog::HTTP, "Starting HTTP server\n");
     int rpcThreads = std::max((long)gArgs.GetArg("-rpcthreads", DEFAULT_HTTP_THREADS), 1L);
@@ -435,13 +439,16 @@ bool StartHTTPServer()
     for (int i = 0; i < rpcThreads; i++) {
         g_thread_http_workers.emplace_back(HTTPWorkQueueRun, workQueue);
     }
-    return true;
 }
 
 void InterruptHTTPServer()
 {
     LogPrint(BCLog::HTTP, "Interrupting HTTP server\n");
     if (eventHTTP) {
+        // Unlisten sockets
+        for (evhttp_bound_socket *socket : boundSockets) {
+            evhttp_del_accept_socket(eventHTTP, socket);
+        }
         // Reject requests on current connections
         evhttp_set_gencb(eventHTTP, http_reject_request_cb, nullptr);
     }
@@ -461,14 +468,10 @@ void StopHTTPServer()
         delete workQueue;
         workQueue = nullptr;
     }
-    // Unlisten sockets, these are what make the event loop running, which means
-    // that after this and all connections are closed the event loop will quit.
-    for (evhttp_bound_socket *socket : boundSockets) {
-        evhttp_del_accept_socket(eventHTTP, socket);
-    }
-    boundSockets.clear();
     if (eventBase) {
         LogPrint(BCLog::HTTP, "Waiting for HTTP event thread to exit\n");
+        // Exit the event loop as soon as there are no active events.
+        event_base_loopexit(eventBase, nullptr);
         // Give event loop a few seconds to exit (to send back last RPC responses), then break it
         // Before this was solved with event_base_loopexit, but that didn't work as expected in
         // at least libevent 2.0.21 and always introduced a delay. In libevent
@@ -500,7 +503,7 @@ struct event_base* EventBase()
 static void httpevent_callback_fn(evutil_socket_t, short, void* data)
 {
     // Static handler: simply call inner handler
-    HTTPEvent *self = ((HTTPEvent*)data);
+    HTTPEvent *self = static_cast<HTTPEvent*>(data);
     self->handler();
     if (self->deleteWhenTriggered)
         delete self;

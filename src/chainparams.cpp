@@ -1,5 +1,5 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,6 @@
 #include <utilstrencodings.h>
 
 #include <assert.h>
-#include <memory>
 
 #include <chainparamsseeds.h>
 
@@ -76,19 +75,17 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Height = 173805; // 00000000000000ce80a7e057163a4db1d5ad7b20fb6f598c9597b9665c8fb0d4 - April 1, 2012
+        consensus.BIP16Exception = uint256S("0x00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22");
         consensus.BIP34Height = 227931;
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.BIP65Height = 388381; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
         consensus.BIP66Height = 363725; // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
-        consensus.BCDHeight = 495867;
+		consensus.BCDHeight = 495867;
 
 
         consensus.BCDGenesisBlockReward = 1400 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 826002;
         consensus.BCDBeginPowLimit = uint256S("0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-
-
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -135,7 +132,7 @@ public:
 
         // Note that of those which support the service bits prefix, most only support a subset of
         // possible options.
-        // This is fine at runtime as we'll fall back to using them as a oneshot if they dont support the
+        // This is fine at runtime as we'll fall back to using them as a oneshot if they don't support the
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
         vSeeds.emplace_back("seed1.dns.btcd.io");  
@@ -144,6 +141,7 @@ public:
         vSeeds.emplace_back("seed4.dns.btcd.io");  
         vSeeds.emplace_back("seed5.dns.btcd.io");  
         vSeeds.emplace_back("seed6.dns.btcd.io");  
+
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,0);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
@@ -173,7 +171,8 @@ public:
                 {225430, uint256S("0x00000000000001c108384350f74090433e7fcf79a606b8e797f065b130575932")},
                 {250000, uint256S("0x000000000000003887df1f29024b06fc2200b55f8af8f35453d7be294df2d214")},
                 {279000, uint256S("0x0000000000000001ae8c72a0b0c301f67e3afca10e819efa9041e458e9bd7e40")},
-                {495867, uint256S("0x458535405446053c9db6a16ec7e5b022429fedde605ce81bb24c6cfe6f43fc89")},
+                {295000, uint256S("0x00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983")},
+				{495867, uint256S("0x458535405446053c9db6a16ec7e5b022429fedde605ce81bb24c6cfe6f43fc89")},
             }
         };
 
@@ -183,7 +182,11 @@ public:
             274435369,  // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
             0.0046      // * estimated number of transactions per second after that timestamp
+
         };
+
+        /* disable fallback fee on mainnet */
+        m_fallback_fee_enabled = false;
     }
 };
 
@@ -195,19 +198,16 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 210000;
-        consensus.BIP16Height = 514; // 00000000040b4e986385315e14bee30ad876d8b47f748025b26683116d21aa65
+        consensus.BIP16Exception = uint256S("0x00000000dd30457c001f4095d208cc1296b0eed002427aa599874af7a432b105");
         consensus.BIP34Height = 21111;
         consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
         consensus.BIP65Height = 581885; // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
         consensus.BIP66Height = 330776; // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
-        
-        consensus.BCDHeight = 1065121;
+		consensus.BCDHeight = 1065121;
         consensus.BCDGenesisBlockReward = 140 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 1531604;        
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-
-        
-        
+		
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -251,8 +251,8 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         vSeeds.emplace_back("test1.dns.btcd.io");
-        
-        
+
+
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
@@ -271,7 +271,7 @@ public:
         checkpointData = {
             {
                 {546, uint256S("000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70")},
-                {1065121,uint256S("0x890f1ad9a143da58806298072ad6d66e7a6086c7e6629265c9efb649630baa1c")},
+				{1065121,uint256S("0x890f1ad9a143da58806298072ad6d66e7a6086c7e6629265c9efb649630baa1c")},
             }
         };
 
@@ -280,8 +280,11 @@ public:
             1532689441,
             13063720,
             0.0047
+
         };
 
+        /* enable fallback fee on testnet */
+        m_fallback_fee_enabled = true;
     }
 };
 
@@ -293,18 +296,16 @@ public:
     CRegTestParams() {
         strNetworkID = "regtest";
         consensus.nSubsidyHalvingInterval = 150;
-        consensus.BIP16Height = 0; // always enforce P2SH BIP16 on regtest
+        consensus.BIP16Exception = uint256();
         consensus.BIP34Height = 100000000; // BIP34 has not activated on regtest (far in the future so block v1 are not rejected in tests)
         consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
         consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in rpc activation tests)
-        
-        consensus.BCDHeight = 1;
+		consensus.BCDHeight = 1;
         consensus.BCDGenesisBlockReward = 500 * COIN;
         consensus.BCDLastRewardHeight = 1531604;
         consensus.BCDBeginPowLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        
-        
+		
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -366,6 +367,9 @@ public:
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
         bech32_hrp = "bcdrt";
+
+        /* enable fallback fee on regtest */
+        m_fallback_fee_enabled = true;
     }
 };
 

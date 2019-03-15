@@ -421,15 +421,7 @@
         <source>Command-line options</source>
         <translation>Opciones de línea de comandos</translation>
     </message>
-    <message>
-        <source>Usage:</source>
-        <translation>Uso:</translation>
-    </message>
-    <message>
-        <source>command-line options</source>
-        <translation>opciones de línea de comandos</translation>
-    </message>
-    </context>
+</context>
 <context>
     <name>Intro</name>
     <message>
@@ -584,6 +576,10 @@
         <source>Copy &amp;Address</source>
         <translation>&amp;Copiar Dirección</translation>
     </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Billetera</translation>
+    </message>
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
@@ -696,48 +692,8 @@
 <context>
     <name>bitcoin-core</name>
     <message>
-        <source>Options:</source>
-        <translation>Opciones:</translation>
-    </message>
-    <message>
-        <source>Specify data directory</source>
-        <translation>Especifique directorio de datos</translation>
-    </message>
-    <message>
-        <source>Connect to a node to retrieve peer addresses, and disconnect</source>
-        <translation>Conecte un nodo para recuperar direcciones pares, y desconecte</translation>
-    </message>
-    <message>
-        <source>Specify your own public address</source>
-        <translation>Especifique su propia dirección pública</translation>
-    </message>
-    <message>
-        <source>Accept command line and JSON-RPC commands</source>
-        <translation>Aceptar linea de comando y comandos JSON-RPC</translation>
-    </message>
-    <message>
-        <source>Run in the background as a daemon and accept commands</source>
-        <translation>Correr en segundo plano como daemon y aceptar comandos</translation>
-    </message>
-    <message>
         <source>Bitcoin Core</source>
         <translation>Bitcoin Core</translation>
-    </message>
-    <message>
-        <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
-        <translation>Enlazar dirección dada y siempre escuchar en ella. Usar [host]:port notación para IPv6</translation>
-    </message>
-    <message>
-        <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
-        <translation>Borrar todas las transacciones de la billetera y solo recuperar aquellas partes de la cadena de bloques a través de -rescan en el inicio del sistema.</translation>
-    </message>
-    <message>
-        <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>
-        <translation>Ejecutar comando cuando una transacción de la billetera cambia (%s en cmd es reemplazado por TxID)</translation>
-    </message>
-    <message>
-        <source>Set the number of script verification threads (%u to %d, 0 = auto, &lt;0 = leave that many cores free, default: %d)</source>
-        <translation>Fija el número de verificación de hilos de script (%u a %d, 0 = auto, &lt;0 = leave that many cores free, default: %d)</translation>
     </message>
     <message>
         <source>Information</source>

@@ -210,7 +210,6 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
 			return state.DoS(10, false, REJECT_INVALID, "bad-tx-preblockhash");
 		}
     }
-
     return true;
 }
 

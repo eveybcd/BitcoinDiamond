@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2017 The Bitcoin Core developers
+// Copyright (c) 2011-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,6 +15,10 @@
 
 class ClientModel;
 class PeerTablePriv;
+
+namespace interfaces {
+class Node;
+}
 
 QT_BEGIN_NAMESPACE
 class QTimer;
@@ -47,7 +51,7 @@ class PeerTableModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    explicit PeerTableModel(ClientModel *parent = 0);
+    explicit PeerTableModel(interfaces::Node& node, ClientModel *parent = 0);
     ~PeerTableModel();
     const CNodeCombinedStats *getNodeStats(int idx);
     int getRowByNodeId(NodeId nodeid);
@@ -78,6 +82,7 @@ public Q_SLOTS:
     void refresh();
 
 private:
+    interfaces::Node& m_node;
     ClientModel *clientModel;
     QStringList columns;
     std::unique_ptr<PeerTablePriv> priv;
