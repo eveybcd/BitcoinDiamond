@@ -415,6 +415,14 @@ void BitcoinApplication::requestShutdown()
     qDebug() << __func__ << ": Requesting shutdown";
     startThread();
     window->hide();
+    // Must disconnect node signals otherwise current thread can deadlock since
+    // no event loop is running.
+    window->unsubscribeFromCoreSignals();
+    // Request node shutdown, which can interrupt long operations, like
+    // rescanning a wallet.
+    m_node.startShutdown();
+    // Unsetting the client model can cause the current thread to wait for node
+    // to complete an operation, like wait for a RPC execution to complate.
     window->setClientModel(0);
     pollShutdownTimer->stop();
 
@@ -427,8 +435,6 @@ void BitcoinApplication::requestShutdown()
 #endif
     delete clientModel;
     clientModel = 0;
-
-    m_node.startShutdown();
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
