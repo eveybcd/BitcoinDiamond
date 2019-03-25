@@ -130,6 +130,9 @@ UniValue importprivkey(const JSONRPCRequest& request)
             + HelpExampleRpc("importprivkey", "\"mykey\", \"testing\", false")
         );
 
+    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Cannot import private keys to a wallet with private keys disabled");
+    }
 
     WalletRescanReserver reserver(pwallet);
     bool fRescan = true;
