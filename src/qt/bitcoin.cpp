@@ -324,15 +324,17 @@ BitcoinApplication::~BitcoinApplication()
     }
 
     delete window;
-    window = 0;
+    window = nullptr;
 #ifdef ENABLE_WALLET
     delete paymentServer;
-    paymentServer = 0;
+    paymentServer = nullptr;
+    delete m_wallet_controller;
+    m_wallet_controller = nullptr;
 #endif
     delete optionsModel;
-    optionsModel = 0;
+    optionsModel = nullptr;
     delete platformStyle;
-    platformStyle = 0;
+    platformStyle = nullptr;
 }
 
 #ifdef ENABLE_WALLET
