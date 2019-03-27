@@ -23,5 +23,6 @@ CPubKey AddrToPubKey(CKeyStore* const keystore, const std::string& addr_in);
 CScript CreateMultisigRedeemscript(const int required, const std::vector<CPubKey>& pubkeys);
 
 UniValue DescribeAddress(const CTxDestination& dest);
-
+//! Parse a JSON range specified as int64, or [int64, int64]
+std::pair<int64_t, int64_t> ParseRange(const UniValue& value);
 #endif // BITCOIN_RPC_UTIL_H
