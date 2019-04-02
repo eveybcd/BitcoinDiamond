@@ -2839,14 +2839,18 @@ bool CChainState::InvalidateBlock(CValidationState& state, const CChainParams& c
     CBlockIndex *invalid_walk_tip = chainActive.Tip();
 
     DisconnectedBlockTransactions disconnectpool;
+    int disconnected = 0;
     while (chainActive.Contains(pindex)) {
         pindex_was_in_chain = true;
         // ActivateBestChain considers blocks already in chainActive
         // unconditionally valid already, so force disconnect away from it.
-        if (!DisconnectTip(state, chainparams, &disconnectpool)) {
-            // It's probably hopeless to try to make the mempool consistent
-            // here if DisconnectTip failed, but we can try.
-            UpdateMempoolForReorg(disconnectpool, false);
+        bool ret = DisconnectTip(state, chainparams, &disconnectpool);
+        // transactions back to the mempool if disconnecting was succesful,
+        // and we're not doing a very deep invalidation (in which case
+        // keeping the mempool up to date is probably futile anyway).
+        UpdateMempoolForReorg(disconnectpool, /* fAddToMempool = */ (++disconnected <= 10) && ret);
+
+        if (!ret) {
             return false;
         }
     }
