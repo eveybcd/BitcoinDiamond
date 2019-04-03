@@ -835,6 +835,13 @@ static UniValue ProcessImport(CWallet * const pwallet, const UniValue& data, con
         bool isP2SH = strRedeemScript.length() > 0;
         const std::string& output = isScript ? scriptPubKey.get_str() : scriptPubKey["address"].get_str();
 
+        const bool add_keypool = data.exists("keypool") ? data["keypool"].get_bool() : false;
+
+        // Add to keypool only works with privkeys disabled
+        if (add_keypool && !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Keys can only be imported to the keypool when private keys are disabled");
+        }
+
         // Parse the output.
         CScript script;
         CTxDestination dest;
