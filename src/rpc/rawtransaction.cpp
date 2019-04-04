@@ -227,7 +227,7 @@ static UniValue gettxoutproof(const JSONRPCRequest& request)
     std::set<uint256> setTxids;
     uint256 oneTxid;
     UniValue txids = request.params[0].get_array();
-    if (txs.empty()) {
+    if (txids.empty()) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Parameter 'txs' cannot be empty");
     }
     for (unsigned int idx = 0; idx < txids.size(); idx++) {
