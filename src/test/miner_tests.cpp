@@ -92,8 +92,8 @@ static CBlockIndex CreateBlockIndex(int nHeight)
 
 static bool TestSequenceLocks(const CTransaction &tx, int flags)
 {
-    LOCK(mempool.cs);
-    return CheckSequenceLocks(tx, flags);
+    LOCK(::mempool.cs);
+    return CheckSequenceLocks(::mempool, tx, flags);
 }
 
 // Test suite for ancestor feerate transaction selection.
