@@ -4853,16 +4853,11 @@ bool DumpMempool(void)
     std::map<uint256, CAmount> mapDeltas;
     std::vector<TxMempoolInfo> vinfo;
 
-    static Mutex dump_mutex;
-    LOCK(dump_mutex);
-
-    {
-        LOCK(mempool.cs);
-        for (const auto &i : mempool.mapDeltas) {
-            mapDeltas[i.first] = i.second;
-        }
-        vinfo = mempool.infoAll();
+    LOCK(mempool.cs);
+    for (const auto &i : mempool.mapDeltas) {
+        mapDeltas[i.first] = i.second;
     }
+    vinfo = mempool.infoAll();
 
     int64_t mid = GetTimeMicros();
 
