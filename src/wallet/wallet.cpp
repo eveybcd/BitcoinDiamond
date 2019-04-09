@@ -2115,9 +2115,9 @@ CAmount CWallet::GetBalance(const isminefilter& filter, const int min_depth) con
         LOCK2(cs_main, cs_wallet);
         for (const auto& entry : mapWallet)
         {
-            const CWalletTx* pcoin = &entry.second;
-            if (pcoin->IsTrusted() && pcoin->GetDepthInMainChain() >= min_depth) {
-                nTotal += pcoin->GetAvailableCredit(true, filter);
+            const CWalletTx& pcoin = entry.second;
+            if (pcoin.IsTrusted() && pcoin.GetDepthInMainChain() >= min_depth) {
+                nTotal += pcoin.GetAvailableCredit(true, filter);
             }
         }
     }
@@ -2132,9 +2132,9 @@ CAmount CWallet::GetUnconfirmedBalance() const
         LOCK2(cs_main, cs_wallet);
         for (const auto& entry : mapWallet)
         {
-            const CWalletTx* pcoin = &entry.second;
-            if (!pcoin->IsTrusted() && pcoin->GetDepthInMainChain() == 0 && pcoin->InMempool())
-                nTotal += pcoin->GetAvailableCredit();
+            const CWalletTx& pcoin = entry.second;
+            if (!pcoin.IsTrusted() && pcoin.GetDepthInMainChain() == 0 && pcoin.InMempool())
+                nTotal += pcoin.GetAvailableCredit();
         }
     }
     return nTotal;
@@ -2147,8 +2147,8 @@ CAmount CWallet::GetImmatureBalance() const
         LOCK2(cs_main, cs_wallet);
         for (const auto& entry : mapWallet)
         {
-            const CWalletTx* pcoin = &entry.second;
-            nTotal += pcoin->GetImmatureCredit();
+            const CWalletTx& pcoin = entry.second;
+            nTotal += pcoin.GetImmatureCredit();
         }
     }
     return nTotal;
