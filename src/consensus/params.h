@@ -87,6 +87,7 @@ struct Params {
     int64_t nZawyLwmaAveragingWindow;
     int64_t nZawyLwmaAdjustedWeight;  // k = (N+1)/2 * 0.998 * T
     int64_t nZawyLwmaMinDenominator;
+    unsigned int difficulityTolerable;
     bool bZawyLwmaSolvetimeLimitation;
 };
 } // namespace Consensus

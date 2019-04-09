@@ -65,7 +65,13 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
         return BCDGetNextWorkRequired(pindexLast, params, interval);
     }
     // LWMA
-    return LwmaGetNextWorkRequired(pindexLast, pblock, params);
+    unsigned int legacyDifficulty = BCDGetNextWorkRequired(pindexLast, params, interval);
+    unsigned int lwmaDifficulty = LwmaGetNextWorkRequired(pindexLast, pblock, params);
+    LogPrintf("GetNextWorkRequired legacyDifficulty=%u, lwmaDifficulty=%u \n", legacyDifficulty, lwmaDifficulty);
+    if (legacyDifficulty <= lwmaDifficulty + params.difficulityTolerable) {
+        return legacyDifficulty;
+    }
+    return lwmaDifficulty;
 }
 
 unsigned int BCDGetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, int interval) {
