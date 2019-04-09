@@ -82,6 +82,12 @@ public:
         consensus.BIP66Height = 363725; // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
 		consensus.BCDHeight = 495867;
 
+		//introduce Zawy's LWMA
+		consensus.ZawyLWMAHeight = 888888;//TODO: to be update
+		consensus.nZawyLwmaAveragingWindow = 45;
+		consensus.nZawyLwmaAdjustedWeight = 13772;
+		consensus.nZawyLwmaMinDenominator = 10;
+		consensus.bZawyLwmaSolvetimeLimitation = true;
 
         consensus.BCDGenesisBlockReward = 1400 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 826002;
