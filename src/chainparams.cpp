@@ -213,7 +213,14 @@ public:
         consensus.BCDGenesisBlockReward = 140 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 1531604;        
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-		
+
+        //introduce Zawy's LWMA
+        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
+        consensus.nZawyLwmaAveragingWindow = 45;
+        consensus.nZawyLwmaAdjustedWeight = 13772;
+        consensus.nZawyLwmaMinDenominator = 10;
+        consensus.bZawyLwmaSolvetimeLimitation = false;
+
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -311,7 +318,14 @@ public:
         consensus.BCDGenesisBlockReward = 500 * COIN;
         consensus.BCDLastRewardHeight = 1531604;
         consensus.BCDBeginPowLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-		
+
+        //introduce Zawy's LWMA
+        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
+        consensus.nZawyLwmaAveragingWindow = 45;
+        consensus.nZawyLwmaAdjustedWeight = 13772;
+        consensus.nZawyLwmaMinDenominator = 10;
+        consensus.bZawyLwmaSolvetimeLimitation = true;
+
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
