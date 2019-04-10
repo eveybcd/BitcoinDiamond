@@ -36,6 +36,10 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     	interval = params.DifficultyAdjustmentInterval();
     }
 
+    if (params.fPowNoRetargeting) {
+        return pindexLast->nBits;
+    }
+
     if (pindexLast->nHeight+1 < params.ZawyLWMAHeight) {
         return BCDGetNextWorkRequired(pindexLast, pblock, params, height, interval, nProofOfWorkLimit);
     }
@@ -76,9 +80,6 @@ unsigned int BCDGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockH
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
 {
-    if (params.fPowNoRetargeting)
-        return pindexLast->nBits;
-
     int limit, powTargetTimespan;
     if (pindexLast->nHeight+1 > params.BCDHeight) {
         powTargetTimespan = 72 * params.nPowTargetSpacing;
@@ -130,10 +131,6 @@ unsigned int LwmaGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlock
 
 unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params)
 {
-    if (params.fPowNoRetargeting) {
-        return pindexLast->nBits;
-    }
-
     const int height = pindexLast->nHeight + 1;
     const int64_t T = params.nPowTargetSpacing;
     const int64_t N = params.nZawyLwmaAveragingWindow;
