@@ -179,10 +179,10 @@ BITCOIN_CORE_H = \
   txmempool.h \
   ui_interface.h \
   undo.h \
-  util.h \
-  utilmemory.h \
-  utilmoneystr.h \
-  utiltime.h \
+  util/system.h \
+  util/memory.h \
+  util/moneystr.h \
+  util/time.h \
   validation.h \
   validationinterface.h \
   versionbits.h \
@@ -396,8 +396,8 @@ libbitcoin_consensus_a_SOURCES = \
   tinyformat.h \
   uint256.cpp \
   uint256.h \
-  utilstrencodings.cpp \
-  utilstrencodings.h \
+  util/strencodings.cpp \
+  util/strencodings.h \
   version.h
 
 # common: shared between bitcoind, and bitcoin-qt and non-server tools
@@ -447,10 +447,10 @@ libbitcoin_util_a_SOURCES = \
   support/cleanse.cpp \
   sync.cpp \
   threadinterrupt.cpp \
-  util.cpp \
-  utilmoneystr.cpp \
-  utilstrencodings.cpp \
-  utiltime.cpp \
+  util/system.cpp \
+  util/moneystr.cpp \
+  util/strencodings.cpp \
+  util/time.cpp \
   $(BITCOIN_CORE_H)
 
 if GLIBC_BACK_COMPAT
