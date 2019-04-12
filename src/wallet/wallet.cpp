@@ -178,7 +178,7 @@ const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
 CPubKey CWallet::GenerateNewKey(WalletBatch &batch, bool internal)
 {
     assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet);
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
 
     CKey secret;
@@ -259,7 +259,7 @@ void CWallet::DeriveNewChildKey(WalletBatch &batch, CKeyMetadata& metadata, CKey
 
 bool CWallet::AddKeyPubKeyWithDB(WalletBatch &batch, const CKey& secret, const CPubKey &pubkey)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet);
 
     // CCryptoKeyStore has no concept of wallet databases, but calls AddCryptedKey
     // which is overridden below.  To avoid flushes, the database handle is
@@ -286,9 +286,7 @@ bool CWallet::AddKeyPubKeyWithDB(WalletBatch &batch, const CKey& secret, const C
     }
 
     if (!IsCrypted()) {
-        return batch.WriteKey(pubkey,
-                                                 secret.GetPrivKey(),
-                                                 mapKeyMetadata[pubkey.GetID()]);
+        return batch.WriteKey(pubkey, secret.GetPrivKey(), mapKeyMetadata[pubkey.GetID()]);
     }
     return true;
 }
@@ -319,14 +317,14 @@ bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
 
 void CWallet::LoadKeyMetadata(const CKeyID& keyID, const CKeyMetadata &meta)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet);
     UpdateTimeFirstKey(meta.nCreateTime);
     mapKeyMetadata[keyID] = meta;
 }
 
 void CWallet::LoadScriptMetadata(const CScriptID& script_id, const CKeyMetadata &meta)
 {
-    AssertLockHeld(cs_wallet); // m_script_metadata
+    AssertLockHeld(cs_wallet);
     UpdateTimeFirstKey(meta.nCreateTime);
     m_script_metadata[script_id] = meta;
 }
@@ -3795,7 +3793,7 @@ void CWallet::ListLockedCoins(std::vector<COutPoint>& vOutpts) const
 /** @} */ // end of Actions
 
 void CWallet::GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet);
     mapKeyBirth.clear();
 
     // get birth times for keys with metadata
@@ -4083,7 +4081,7 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(const std::string& name, 
         }
     }
 
-    int prev_version = walletInstance->nWalletVersion;
+    int prev_version = walletInstance->GetVersion();
     if (gArgs.GetBoolArg("-upgradewallet", fFirstRun))
     {
         int nMaxVersion = gArgs.GetArg("-upgradewallet", 0);
@@ -4108,7 +4106,7 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(const std::string& name, 
         LOCK(walletInstance->cs_wallet);
 
         // Do not upgrade versions to any version between HD_SPLIT and FEATURE_PRE_SPLIT_KEYPOOL unless already supporting HD_SPLIT
-        int max_version = walletInstance->nWalletVersion;
+        int max_version = walletInstance->GetVersion();
         if (!walletInstance->CanSupportFeature(FEATURE_HD_SPLIT) && max_version >=FEATURE_HD_SPLIT && max_version < FEATURE_PRE_SPLIT_KEYPOOL) {
             InitError(_("Cannot upgrade a non HD split wallet without upgrading to support pre split keypool. Please use -upgradewallet=169900 or -upgradewallet with no version specified."));
             return nullptr;
