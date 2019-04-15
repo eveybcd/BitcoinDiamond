@@ -61,7 +61,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (params.fPowNoRetargeting)
         return pindexLast->nBits;
 
-    if (height < params.ZawyLWMAHeight) {
+    if (pindexLast->nHeight+1 < params.ZawyLWMAHeight) {
         return BCDGetNextWorkRequired(pindexLast, params, interval);
     }
     // LWMA
