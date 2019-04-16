@@ -5,8 +5,8 @@
 DIST_SUBDIRS = secp256k1 univalue
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) $(GPROF_LDFLAGS) $(SANITIZER_LDFLAGS)
-AM_CXXFLAGS = $(DEBUG_CXXFLAGS) $(HARDENED_CXXFLAGS) $(WARN_CXXFLAGS) $(NOWARN_CXXFLAGS) $(ERROR_CXXFLAGS) $(GPROF_CXXFLAGS) $(SANITIZER_CXXFLAGS)
-AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(HARDENED_CPPFLAGS)
+AM_CXXFLAGS = $(DEBUG_CXXFLAGS) $(HARDENED_CXXFLAGS) $(WARN_CXXFLAGS) $(NOWARN_CXXFLAGS) $(ERROR_CXXFLAGS) $(GPROF_CXXFLAGS) $(SANITIZER_CXXFLAGS) -DETH_FATDB=1
+AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(HARDENED_CPPFLAGS) -DQTUM_BUILD
 AM_LIBTOOLFLAGS = --preserve-dup-deps
 EXTRA_LIBRARIES =
 
@@ -19,7 +19,7 @@ else
 LIBUNIVALUE = $(UNIVALUE_LIBS)
 endif
 
-BITCOIN_INCLUDES=-I$(builddir) $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+BITCOIN_INCLUDES=-I$(builddir) $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS) -I$(srcdir)/aleth/utils -I$(srcdir)/aleth
 
 BITCOIN_INCLUDES += -I$(srcdir)/secp256k1/include
 BITCOIN_INCLUDES += $(UNIVALUE_CFLAGS)
@@ -340,7 +340,22 @@ crypto_libbitcoin_crypto_base_a_SOURCES = \
   crypto/x13hash/sph_simd.h  \
   crypto/x13hash/sph_skein.h  \
   crypto/x13hash/sph_sm3.h  \
-  crypto/x13hash/sph_types.h
+  crypto/x13hash/sph_types.h \
+  aleth/utils/libscrypt/b64.c \
+  aleth/utils/libscrypt/b64.h \
+  aleth/utils/libscrypt/crypto-mcf.c \
+  aleth/utils/libscrypt/crypto_scrypt-check.c \
+  aleth/utils/libscrypt/crypto_scrypt-hash.c \
+  aleth/utils/libscrypt/crypto_scrypt-hexconvert.c \
+  aleth/utils/libscrypt/crypto_scrypt-hexconvert.h \
+  aleth/utils/libscrypt/crypto_scrypt-nosse.c \
+  aleth/utils/libscrypt/crypto-scrypt-saltgen.c \
+  aleth/utils/libscrypt/libscrypt.h \
+  aleth/utils/libscrypt/sha256.c \
+  aleth/utils/libscrypt/sha256.h \
+  aleth/utils/libscrypt/slowequals.c \
+  aleth/utils/libscrypt/slowequals.h \
+  aleth/utils/libscrypt/sysendian.h
 
 if USE_ASM
 crypto_libbitcoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
@@ -401,8 +416,9 @@ libbitcoin_consensus_a_SOURCES = \
   version.h
 
 # common: shared between bitcoind, and bitcoin-qt and non-server tools
-libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DQTUM_BUILD
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+#libbitcoin_common_a_CFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -std=c99
 libbitcoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
@@ -424,7 +440,188 @@ libbitcoin_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
+  aleth/libdevcore/Base64.cpp \
+  aleth/libdevcore/Base64.h \
+  aleth/libdevcore/Common.cpp \
+  aleth/libdevcore/Common.h \
+  aleth/libdevcore/CommonData.cpp \
+  aleth/libdevcore/CommonData.h \
+  aleth/libdevcore/CommonIO.cpp \
+  aleth/libdevcore/CommonIO.h \
+  aleth/libdevcore/CommonJS.cpp \
+  aleth/libdevcore/CommonJS.h \
+  aleth/libdevcore/FileSystem.cpp \
+  aleth/libdevcore/FileSystem.h \
+  aleth/libdevcore/FixedHash.cpp \
+  aleth/libdevcore/FixedHash.h \
+  aleth/libdevcore/Guards.cpp \
+  aleth/libdevcore/Guards.h \
+  aleth/libdevcore/Hash.cpp \
+  aleth/libdevcore/Hash.h \
+  aleth/libdevcore/Log.cpp \
+  aleth/libdevcore/Log.h \
+  aleth/libdevcore/MemoryDB.cpp \
+  aleth/libdevcore/MemoryDB.h \
+  aleth/libdevcore/OverlayDB.cpp \
+  aleth/libdevcore/OverlayDB.h \
+  aleth/libdevcore/RLP.cpp \
+  aleth/libdevcore/RLP.h \
+  aleth/libdevcore/SHA3.cpp \
+  aleth/libdevcore/SHA3.h \
+  aleth/libdevcore/TransientDirectory.cpp \
+  aleth/libdevcore/TransientDirectory.h \
+  aleth/libdevcore/TrieCommon.cpp \
+  aleth/libdevcore/TrieCommon.h \
+  aleth/libdevcore/Worker.cpp \
+  aleth/libdevcore/Worker.h \
+  aleth/libevm/ExtVMFace.cpp \
+  aleth/libevm/ExtVMFace.h \
+  aleth/libevm/VM.cpp \
+  aleth/libevm/VM.h \
+  aleth/libevm/VMOpt.cpp \
+  aleth/libevm/VMCalls.cpp \
+  aleth/libevm/VMFactory.cpp \
+  aleth/libevm/VMFactory.h \
+  aleth/libevmcore/Instruction.cpp \
+  aleth/libevmcore/Instruction.h \
+  aleth/libevmcore/Exceptions.h \
+  aleth/libevmcore/EVMSchedule.h \
+  aleth/libethereum/Account.cpp \
+  aleth/libethereum/Defaults.cpp \
+  aleth/libethereum/GasPricer.cpp \
+  aleth/libethereum/State.cpp \
+  aleth/libethcore/ABI.cpp \
+  aleth/libethcore/ChainOperationParams.cpp \
+  aleth/libethcore/Common.cpp \
+  aleth/libethcore/ICAP.cpp \
+  aleth/libethcore/Precompiled.cpp \
+  aleth/libdevcore/TrieDB.cpp \
+  aleth/libdevcrypto/Common.cpp \
+  aleth/libdevcrypto/CryptoPP.cpp \
+  aleth/libdevcrypto/AES.cpp \
+  aleth/libdevcrypto/ECDHE.cpp \
+  aleth/libethashseal/GenesisInfo.cpp \
+  aleth/libethereum/ChainParams.cpp \
+  aleth/libethcore/Transaction.cpp \
+  aleth/libethereum/Transaction.cpp \
+  aleth/libethereum/Executive.cpp \
+  aleth/libethereum/ExtVM.cpp \
+  aleth/libethereum/Block.cpp \
+  aleth/libethereum/BlockChain.cpp \
+  aleth/libethereum/BlockDetails.cpp \
+  aleth/libethereum/TransactionQueue.cpp \
+  aleth/libethereum/BlockQueue.cpp \
+  aleth/libethcore/BlockHeader.cpp \
+  aleth/libdevcore/RLP.cpp \
+  aleth/libethereum/TransactionReceipt.cpp \
+  aleth/libethcore/SealEngine.cpp \
+  aleth/libdevcore/TrieHash.cpp \
+  aleth/libethereum/GenesisInfo.cpp \
+  aleth/libethashseal/Ethash.cpp \
+  aleth/libethashseal/EthashCPUMiner.cpp \
+  aleth/libethashseal/EthashAux.cpp \
+  aleth/libethashseal/EthashProofOfWork.cpp \
+  aleth/libethereum/Account.h \
+  aleth/libethereum/Defaults.h \
+  aleth/libethereum/GasPricer.h \
+  aleth/libethereum/State.h \
+  aleth/libethcore/ABI.h \
+  aleth/libethcore/ChainOperationParams.h \
+  aleth/libethcore/Common.h \
+  aleth/libethcore/ICAP.h \
+  aleth/libethcore/Precompiled.h \
+  aleth/libdevcore/TrieDB.h \
+  aleth/libdevcrypto/Common.h \
+  aleth/libdevcrypto/CryptoPP.h \
+  aleth/libdevcrypto/AES.h \
+  aleth/libdevcrypto/ECDHE.h \
+  aleth/libethashseal/GenesisInfo.h \
+  aleth/libethereum/ChainParams.h \
+  aleth/libethcore/Transaction.h \
+  aleth/libethcore/Exceptions.h \
+  aleth/libethereum/Transaction.h \
+  aleth/libethereum/Executive.h \
+  aleth/libethereum/ExtVM.h \
+  aleth/libethereum/Block.h \
+  aleth/libethereum/BlockChain.h \
+  aleth/libethereum/BlockDetails.h \
+  aleth/libethereum/TransactionQueue.h \
+  aleth/libethereum/BlockQueue.h \
+  aleth/libethcore/BlockHeader.h \
+  aleth/libdevcore/RLP.h \
+  aleth/libethereum/TransactionReceipt.h \
+  aleth/libethcore/SealEngine.h \
+  aleth/libdevcore/TrieHash.h \
+  aleth/libethereum/GenesisInfo.h \
+  aleth/libethashseal/Ethash.h \
+  aleth/libethashseal/EthashCPUMiner.h \
+  aleth/libethashseal/EthashAux.h \
+  aleth/libethashseal/EthashProofOfWork.h \
+  aleth/libethash/internal.c \
+  aleth/libethash/io.c \
+  aleth/libethash/sha3.c \
+  aleth/libethash/internal.h \
+  aleth/libethash/io.h \
+  aleth/libethash/sha3.h \
+  aleth/libdevcore/vector_ref.h \
+  aleth/libdevcore/Exceptions.h \
+  aleth/libdevcore/db.h \
+  aleth/libdevcore/concurrent_queue.h \
+  aleth/libdevcore/Terminal.h \
+  aleth/libethereum/CodeSizeCache.h \
+  aleth/libethereum/VerifiedBlock.h \
+  aleth/libdevcore/Assertions.h \
+  aleth/libdevcore/debugbreak.h \
+  aleth/libethereum/GenericMiner.h \
+  aleth/libevm/VMFace.h \
+  aleth/libethereum/GenericFarm.h \
+  aleth/libethereum/Interface.h \
+  aleth/libethcore/CommonJS.h \
+  aleth/libdevcore/picosha2.h \
+  aleth/libevm/VMConfig.h \
+  aleth/libethereum/LogFilter.h \
+  aleth/libdevcrypto/Exceptions.h \
+  aleth/libethashseal/genesis/mainNetwork.cpp \
+  aleth/libethashseal/genesis/eip150Test.cpp \
+  aleth/libethashseal/genesis/eip158Test.cpp \
+  aleth/libethashseal/genesis/frontierTest.cpp \
+  aleth/libethashseal/genesis/homesteadTest.cpp \
+  aleth/libethashseal/genesis/mainNetworkTest.cpp \
+  aleth/libethashseal/genesis/metropolisTest.cpp \
+  aleth/libethashseal/genesis/qtumMainNetwork.cpp \
+  aleth/libethashseal/genesis/qtumTestNetwork.cpp \
+  aleth/libethashseal/genesis/ropsten.cpp \
+  aleth/libethashseal/genesis/transitionnetTest.cpp \
+  aleth/libethash/ethash.h \
+  aleth/libethash/compiler.h \
+  aleth/libethash/data_sizes.h \
+  aleth/libethash/fnv.h \
+  aleth/libethash/mmap.h \
+  aleth/libethash/endian.h \
+  aleth/libethash/io.h \
+  aleth/libethash/ethash.h \
+  aleth/libethash/internal.h \
+  aleth/libethash/mmap_win32.c \
+  aleth/utils/json_spirit/JsonSpiritHeaders.h \
+  aleth/utils/json_spirit/json_spirit.h \
+  aleth/utils/json_spirit/json_spirit_error_position.h \
+  aleth/utils/json_spirit/json_spirit_reader.h \
+  aleth/utils/json_spirit/json_spirit_reader_template.h \
+  aleth/utils/json_spirit/json_spirit_stream_reader.h \
+  aleth/utils/json_spirit/json_spirit_utils.h \
+  aleth/utils/json_spirit/json_spirit_value.h \
+  aleth/utils/json_spirit/json_spirit_writer.h \
+  aleth/utils/json_spirit/json_spirit_writer_template.h \
   $(BITCOIN_CORE_H)
+#only added json_spirit so that `make dist` works properly
+
+if TARGET_WINDOWS
+  libbitcoin_common_a_SOURCES += \
+    aleth/libethash/io_win32.c \
+    aleth/libethash/util_win32.c
+else
+  libbitcoin_common_a_SOURCES += aleth/libethash/io_posix.c
+endif
 
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc

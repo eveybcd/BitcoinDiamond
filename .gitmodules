@@ -1,0 +1,3 @@
+[submodule "src/aleth"]
+	path = src/aleth
+	url = https://github.com/NelsonZenGlenn/cpp-eth-qtum.git
