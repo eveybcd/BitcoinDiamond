@@ -69,7 +69,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     unsigned int lwmaDifficulty = LwmaGetNextWorkRequired(pindexLast, pblock, params);
     LogPrintf("GetNextWorkRequired legacyDifficulty=%u, lwmaDifficulty=%u \n", legacyDifficulty, lwmaDifficulty);
     LogPrintf("legacyDifficulty-lwmaDifficulty=%u\n", legacyDifficulty-lwmaDifficulty);
-    if (legacyDifficulty <= lwmaDifficulty + params.difficulityTolerable) {
+    if (legacyDifficulty <= lwmaDifficulty + params.difficultyTolerable) {
         return legacyDifficulty;
     }
     return lwmaDifficulty;

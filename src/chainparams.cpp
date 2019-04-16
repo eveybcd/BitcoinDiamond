@@ -87,7 +87,7 @@ public:
 		consensus.nZawyLwmaAveragingWindow = 45;
 		consensus.nZawyLwmaAdjustedWeight = 13772;
 		consensus.nZawyLwmaMinDenominator = 10;
-		consensus.difficulityTolerable = 100; //TODO: to be update
+		consensus.difficultyTolerable = 100; //TODO: to be update
 		consensus.bZawyLwmaSolvetimeLimitation = true;
 
         consensus.BCDGenesisBlockReward = 1400 * 10000 * COIN;
@@ -216,11 +216,11 @@ public:
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
         //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 1090066;//TODO: to be update
+        consensus.ZawyLWMAHeight = 1090066;
         consensus.nZawyLwmaAveragingWindow = 45;
         consensus.nZawyLwmaAdjustedWeight = 13772;
         consensus.nZawyLwmaMinDenominator = 10;
-        consensus.difficulityTolerable = 1000; //TODO: to be update
+        consensus.difficultyTolerable = 30000;
         consensus.bZawyLwmaSolvetimeLimitation = false;
 
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -326,7 +326,7 @@ public:
         consensus.nZawyLwmaAveragingWindow = 45;
         consensus.nZawyLwmaAdjustedWeight = 13772;
         consensus.nZawyLwmaMinDenominator = 10;
-        consensus.difficulityTolerable = 100; //TODO: to be update
+        consensus.difficultyTolerable = 100; //TODO: to be update
         consensus.bZawyLwmaSolvetimeLimitation = true;
 
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
