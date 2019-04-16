@@ -68,6 +68,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     unsigned int legacyDifficulty = BCDGetNextWorkRequired(pindexLast, params, interval);
     unsigned int lwmaDifficulty = LwmaGetNextWorkRequired(pindexLast, pblock, params);
     LogPrintf("GetNextWorkRequired legacyDifficulty=%u, lwmaDifficulty=%u \n", legacyDifficulty, lwmaDifficulty);
+    LogPrintf("legacyDifficulty-lwmaDifficulty=%u\n", legacyDifficulty-lwmaDifficulty);
     if (legacyDifficulty <= lwmaDifficulty + params.difficulityTolerable) {
         return legacyDifficulty;
     }
@@ -179,6 +180,7 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexLast, const 
         next_target = pow_limit;
     }
 
+    LogPrintf("After lwma:  %08x  %s\n", next_target.GetCompact(), next_target.ToString());
     return next_target.GetCompact();
 }
 

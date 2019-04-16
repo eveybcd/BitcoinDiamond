@@ -216,11 +216,11 @@ public:
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
         //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
+        consensus.ZawyLWMAHeight = 1090066;//TODO: to be update
         consensus.nZawyLwmaAveragingWindow = 45;
         consensus.nZawyLwmaAdjustedWeight = 13772;
         consensus.nZawyLwmaMinDenominator = 10;
-        consensus.difficulityTolerable = 100; //TODO: to be update
+        consensus.difficulityTolerable = 1000; //TODO: to be update
         consensus.bZawyLwmaSolvetimeLimitation = false;
 
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
