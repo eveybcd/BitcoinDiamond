@@ -12,11 +12,11 @@
 #include <streams.h>
 #include <tinyformat.h>
 #include <ui_interface.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 #include <validationinterface.h>
 #include <script/ismine.h>
 #include <script/sign.h>
-#include <util/system.h>
+#include <util.h>
 #include <wallet/crypter.h>
 #include <wallet/coinselection.h>
 #include <wallet/walletdb.h>
@@ -1010,7 +1010,7 @@ public:
     bool NewKeyPool();
     size_t KeypoolCountExternalKeys() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     bool TopUpKeyPool(unsigned int kpSize = 0);
-    void AddKeypoolPubkeyWithDB(const CPubKey& pubkey, const bool internal, WalletBatch& batch);
+
     /**
      * Reserves a key from the keypool and sets nIndex to its index
      *
@@ -1051,7 +1051,6 @@ public:
     isminetype IsMine(const CTxOut& txout) const;
     CAmount GetCredit(const CTxOut& txout, const isminefilter& filter) const;
     bool IsChange(const CTxOut& txout) const;
-    bool IsChange(const CScript& script) const;
     CAmount GetChange(const CTxOut& txout) const;
     bool IsMine(const CTransaction& tx) const;
     /** should probably be renamed to IsRelevantToMe */

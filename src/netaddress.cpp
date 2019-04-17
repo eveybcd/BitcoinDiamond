@@ -5,7 +5,7 @@
 
 #include <netaddress.h>
 #include <hash.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 #include <tinyformat.h>
 
 static const unsigned char pchIPv4[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
@@ -172,7 +172,7 @@ bool CNetAddr::IsTor() const
 
 bool CNetAddr::IsLocal() const
 {
-    // IPv4 loopback (127.0.0.0/8 or 0.0.0.0/8)
+    // IPv4 loopback
    if (IsIPv4() && (GetByte(3) == 127 || GetByte(3) == 0))
        return true;
 

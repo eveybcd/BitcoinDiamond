@@ -9,7 +9,7 @@
 
 #include <qt/paymentrequestplus.h>
 
-#include <util/system.h>
+#include <util.h>
 
 #include <stdexcept>
 

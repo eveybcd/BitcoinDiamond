@@ -7,8 +7,8 @@
 #include <consensus/merkle.h>
 
 #include <tinyformat.h>
-#include <util/system.h>
-#include <util/strencodings.h>
+#include <util.h>
+#include <utilstrencodings.h>
 
 #include <assert.h>
 
@@ -82,12 +82,6 @@ public:
         consensus.BIP66Height = 363725; // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
 		consensus.BCDHeight = 495867;
 
-        //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = true;
 
         consensus.BCDGenesisBlockReward = 1400 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 826002;
@@ -213,14 +207,7 @@ public:
         consensus.BCDGenesisBlockReward = 140 * 10000 * COIN;
         consensus.BCDLastRewardHeight = 1531604;        
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-
-        //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = false;
-
+		
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -318,14 +305,7 @@ public:
         consensus.BCDGenesisBlockReward = 500 * COIN;
         consensus.BCDLastRewardHeight = 1531604;
         consensus.BCDBeginPowLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-
-        //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 888888;//TODO: to be update
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = true;
-
+		
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;

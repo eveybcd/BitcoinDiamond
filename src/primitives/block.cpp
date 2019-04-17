@@ -7,7 +7,7 @@
 
 #include <hash.h>
 #include <tinyformat.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 #include <crypto/common.h>
 #include "versionbits.h"
 
@@ -33,13 +33,6 @@ std::string CBlock::ToString() const
         hashPrevBlock.ToString(),
         hashMerkleRoot.ToString(),
         nTime, nBits, nNonce,
-        //BCD-2019
-        hashStateRoot.ToString(),
-        hashUTXORoot.ToString(),
-        HexStr(vchBlockSig),
-        IsProofOfStake() ? "PoS" : "PoW",
-        prevoutStake.ToString(),
-        //end BCD-2019
         vtx.size());
     for (const auto& tx : vtx) {
         s << "  " << tx->ToString() << "\n";

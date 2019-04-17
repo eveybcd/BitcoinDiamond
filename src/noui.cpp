@@ -6,7 +6,7 @@
 #include <noui.h>
 
 #include <ui_interface.h>
-#include <util/system.h>
+#include <util.h>
 
 #include <cstdio>
 #include <stdint.h>

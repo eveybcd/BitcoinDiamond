@@ -11,7 +11,7 @@
 #include <net.h>
 #include <netbase.h>
 #include <chainparams.h>
-#include <util/system.h>
+#include <util.h>
 
 #include <memory>
 

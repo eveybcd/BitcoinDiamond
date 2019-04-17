@@ -31,7 +31,7 @@
 #include <rpc/server.h>
 #include <ui_interface.h>
 #include <uint256.h>
-#include <util/system.h>
+#include <util.h>
 #include <warnings.h>
 
 #include <walletinitinterface.h>
@@ -324,17 +324,15 @@ BitcoinApplication::~BitcoinApplication()
     }
 
     delete window;
-    window = nullptr;
+    window = 0;
 #ifdef ENABLE_WALLET
     delete paymentServer;
-    paymentServer = nullptr;
-    delete m_wallet_controller;
-    m_wallet_controller = nullptr;
+    paymentServer = 0;
 #endif
     delete optionsModel;
-    optionsModel = nullptr;
+    optionsModel = 0;
     delete platformStyle;
-    platformStyle = nullptr;
+    platformStyle = 0;
 }
 
 #ifdef ENABLE_WALLET
@@ -415,14 +413,6 @@ void BitcoinApplication::requestShutdown()
     qDebug() << __func__ << ": Requesting shutdown";
     startThread();
     window->hide();
-    // Must disconnect node signals otherwise current thread can deadlock since
-    // no event loop is running.
-    window->unsubscribeFromCoreSignals();
-    // Request node shutdown, which can interrupt long operations, like
-    // rescanning a wallet.
-    m_node.startShutdown();
-    // Unsetting the client model can cause the current thread to wait for node
-    // to complete an operation, like wait for a RPC execution to complate.
     window->setClientModel(0);
     pollShutdownTimer->stop();
 
@@ -435,6 +425,8 @@ void BitcoinApplication::requestShutdown()
 #endif
     delete clientModel;
     clientModel = 0;
+
+    m_node.startShutdown();
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
@@ -562,10 +554,6 @@ static void SetupUIArgs()
 #ifndef BITCOIN_QT_TEST
 int main(int argc, char *argv[])
 {
-#ifdef WIN32
-    util::WinCmdLineArgs winArgs;
-    std::tie(argc, argv) = winArgs.get();
-#endif
     SetupEnvironment();
 
     std::unique_ptr<interfaces::Node> node = interfaces::MakeNode();

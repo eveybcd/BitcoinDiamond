@@ -18,7 +18,7 @@
 #include <protocol.h>
 #include <script/script.h>
 #include <script/standard.h>
-#include <util/system.h>
+#include <util.h>
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT

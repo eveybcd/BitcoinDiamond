@@ -10,8 +10,8 @@
 #include <script/standard.h>
 
 #include <span.h>
-#include <util/system.h>
-#include <util/strencodings.h>
+#include <util.h>
+#include <utilstrencodings.h>
 
 #include <memory>
 #include <string>

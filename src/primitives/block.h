@@ -9,10 +9,6 @@
 #include <primitives/transaction.h>
 #include <serialize.h>
 #include <uint256.h>
-#include <hash.h>
-
-//BCD-2019
-static const int SER_WITHOUT_SIGNATURE = 1 << 3;
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -32,14 +28,6 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
 
-    //BCD-2019
-    uint256 hashStateRoot;
-    uint256 hashUTXORoot;
-    // proof-of-stake specific fields
-    COutPoint prevoutStake;
-    std::vector<unsigned char> vchBlockSig;
-    //end BCD-2019
-
     CBlockHeader()
     {
         SetNull();
@@ -55,13 +43,6 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-
-        //BCD-2019
-        READWRITE(hashStateRoot);
-        READWRITE(hashUTXORoot);
-        READWRITE(prevoutStake);
-        if (!(s.GetType() & SER_WITHOUT_SIGNATURE))
-            READWRITE(vchBlockSig);
     }
 
     void SetNull()
@@ -72,12 +53,6 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
-
-        //BCD-2019
-        hashStateRoot.SetNull();
-        hashUTXORoot.SetNull();
-        vchBlockSig.clear();
-        prevoutStake.SetNull();
     }
 
     bool IsNull() const
@@ -93,52 +68,6 @@ public:
     {
         return (int64_t)nTime;
     }
-
-    //BCD-2019
-    uint256 GetHashWithoutSign() const
-    {
-        return SerializeHash(*this, SER_GETHASH | SER_WITHOUT_SIGNATURE);
-    }
-// ppcoin: two types of block: proof-of-work or proof-of-stake
-    virtual bool IsProofOfStake() const
-    {
-        return !prevoutStake.IsNull();
-    }
-
-    virtual bool IsProofOfWork() const
-    {
-        return !IsProofOfStake();
-    }
-
-    virtual uint32_t StakeTime() const
-    {
-        uint32_t ret = 0;
-        if(IsProofOfStake())
-        {
-            ret = nTime;
-        }
-        return ret;
-    }
-
-    CBlockHeader& operator=(const CBlockHeader& other)
-    {
-        if (this != &other)
-        {
-            this->nVersion       = other.nVersion;
-            this->hashPrevBlock  = other.hashPrevBlock;
-            this->hashMerkleRoot = other.hashMerkleRoot;
-            this->nTime          = other.nTime;
-            this->nBits          = other.nBits;
-            this->nNonce         = other.nNonce;
-            this->hashStateRoot  = other.hashStateRoot;
-            this->hashUTXORoot   = other.hashUTXORoot;
-            this->vchBlockSig    = other.vchBlockSig;
-            this->prevoutStake   = other.prevoutStake;
-        }
-        return *this;
-    }
-
-    //end BCD-2019
 };
 
 
@@ -186,21 +115,10 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        //BCD-2019
-        block.hashStateRoot  = hashStateRoot;
-        block.hashUTXORoot   = hashUTXORoot;
-        block.vchBlockSig    = vchBlockSig;
-        block.prevoutStake   = prevoutStake;
         return block;
     }
 
     std::string ToString() const;
-
-    //BCD-2019
-    std::pair<COutPoint, unsigned int> GetProofOfStake() const
-    {
-        return IsProofOfStake()? std::make_pair(prevoutStake, nTime) : std::make_pair(COutPoint(), (unsigned int)0);
-    }
 };
 
 /** Describes a place in the block chain to another node such that if the

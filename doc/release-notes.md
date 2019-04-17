@@ -10,4 +10,15 @@ Please report bugs using the issue tracker at GitHub:
   <https://github.com/eveybcd/BitcoinDiamond/issues>
 
 This release includes the following features and fixes:
- - to be filled in
+ - Changed configuration options
+ - GUI changes
+ - External wallet files
+ - Newly created wallet format
+ - Dynamic loading and creation of wallets
+ - Partial spend avoidance
+ - Configuration sections for testnet and regtest
+ - 'label' and 'account' APIs for wallet
+ - BIP 174 Partially Signed Bitcoin Transactions support
+ - Introduce several new RPC methods
+ - Upgrading non-HD wallets to HD wallets
+ - HD Master key rotation

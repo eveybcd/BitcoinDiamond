@@ -7,7 +7,7 @@
 
 #include <hash.h>
 #include <tinyformat.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 
 std::string COutPoint::ToString() const
 {

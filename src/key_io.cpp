@@ -7,7 +7,7 @@
 #include <base58.h>
 #include <bech32.h>
 #include <script/script.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -142,9 +142,7 @@ CKey DecodeSecret(const std::string& str)
             key.Set(data.begin() + privkey_prefix.size(), data.begin() + privkey_prefix.size() + 32, compressed);
         }
     }
-    if (!data.empty()) {
-        memory_cleanse(data.data(), data.size());
-    }
+    memory_cleanse(data.data(), data.size());
     return key;
 }
 

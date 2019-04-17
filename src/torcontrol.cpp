@@ -4,10 +4,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <torcontrol.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 #include <netbase.h>
 #include <net.h>
-#include <util/system.h>
+#include <util.h>
 #include <crypto/hmac_sha256.h>
 
 #include <vector>

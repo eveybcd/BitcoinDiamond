@@ -40,15 +40,15 @@ void WalletFrame::setClientModel(ClientModel *_clientModel)
     this->clientModel = _clientModel;
 }
 
-void WalletFrame::addWallet(WalletModel *walletModel)
+bool WalletFrame::addWallet(WalletModel *walletModel)
 {
     if (!gui || !clientModel || !walletModel) {
-        return;
+        return false;
     }
 
     const QString name = walletModel->getWalletName();
     if (mapWalletViews.count(name) > 0) {
-        return;
+        return false;
     }
 
     WalletView *walletView = new WalletView(platformStyle, this);
@@ -72,30 +72,30 @@ void WalletFrame::addWallet(WalletModel *walletModel)
 
     connect(walletView, SIGNAL(outOfSyncWarningClicked()), this, SLOT(outOfSyncWarningClicked()));
 
-    return;
+    return true;
 }
 
-void WalletFrame::setCurrentWallet(const QString& name)
+bool WalletFrame::setCurrentWallet(const QString& name)
 {
     if (mapWalletViews.count(name) == 0)
-        return;
+        return false;
 
     WalletView *walletView = mapWalletViews.value(name);
     walletStack->setCurrentWidget(walletView);
     assert(walletView);
     walletView->updateEncryptionStatus();
-    return;
+    return true;
 }
 
-void WalletFrame::removeWallet(const QString &name)
+bool WalletFrame::removeWallet(const QString &name)
 {
     if (mapWalletViews.count(name) == 0)
-        return;
+        return false;
 
     WalletView *walletView = mapWalletViews.take(name);
     walletStack->removeWidget(walletView);
     delete walletView;
-    return;
+    return true;
 }
 
 void WalletFrame::removeAllWallets()

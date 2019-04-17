@@ -9,7 +9,7 @@
 #include <test/test_bitcoin.h>
 #include <boost/test/unit_test.hpp>
 #include <script/descriptor.h>
-#include <util/strencodings.h>
+#include <utilstrencodings.h>
 
 namespace {
 

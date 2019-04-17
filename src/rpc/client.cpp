@@ -5,7 +5,7 @@
 
 #include <rpc/client.h>
 #include <rpc/protocol.h>
-#include <util/system.h>
+#include <util.h>
 
 #include <set>
 #include <stdint.h>

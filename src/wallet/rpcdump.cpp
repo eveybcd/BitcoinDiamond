@@ -9,8 +9,8 @@
 #include <script/script.h>
 #include <script/standard.h>
 #include <sync.h>
-#include <util/system.h>
-#include <util/time.h>
+#include <util.h>
+#include <utiltime.h>
 #include <wallet/wallet.h>
 #include <merkleblock.h>
 #include <core_io.h>
@@ -130,9 +130,6 @@ UniValue importprivkey(const JSONRPCRequest& request)
             + HelpExampleRpc("importprivkey", "\"mykey\", \"testing\", false")
         );
 
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-        throw JSONRPCError(RPC_WALLET_ERROR, "Cannot import private keys to a wallet with private keys disabled");
-    }
 
     WalletRescanReserver reserver(pwallet);
     bool fRescan = true;
@@ -835,13 +832,6 @@ static UniValue ProcessImport(CWallet * const pwallet, const UniValue& data, con
         bool isP2SH = strRedeemScript.length() > 0;
         const std::string& output = isScript ? scriptPubKey.get_str() : scriptPubKey["address"].get_str();
 
-        const bool add_keypool = data.exists("keypool") ? data["keypool"].get_bool() : false;
-
-        // Add to keypool only works with privkeys disabled
-        if (add_keypool && !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Keys can only be imported to the keypool when private keys are disabled");
-        }
-
         // Parse the output.
         CScript script;
         CTxDestination dest;
@@ -886,12 +876,6 @@ static UniValue ProcessImport(CWallet * const pwallet, const UniValue& data, con
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid redeem script");
         }
 
-        bool keypool = data.exists("keypool") ? data["keypool"].get_bool() : false;
-
-        // Add to keypool only works with privkeys disabled
-        if (keypool && !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Keys can only be imported to the keypool when private keys are disabled");
-        }
         // Process. //
 
         // P2SH
