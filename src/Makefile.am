@@ -620,6 +620,9 @@ libbitcoin_common_a_SOURCES = \
   bcd/qtumstate.h \
   bcd/qtumstate.cpp \
   bcd/qtumtransaction.h \
+  bcd/cchainstate.h \
+  bcd/cchainstate.cpp \
+  bcd/connecttrace.h \
   $(BITCOIN_CORE_H)
 #only added json_spirit so that `make dist` works properly
 

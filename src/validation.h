@@ -30,6 +30,8 @@
 #include <vector>
 
 #include <atomic>
+//BCD-2019
+#include <bcd/cchainstate.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -40,7 +42,7 @@ class CConnman;
 class CScriptCheck;
 class CBlockPolicyEstimator;
 class CTxMemPool;
-class CValidationState;
+
 struct ChainTxData;
 
 struct PrecomputedTransactionData;
@@ -136,17 +138,12 @@ static const bool DEFAULT_PEERBLOOMFILTERS = true;
 /** Default for -stopatheight */
 static const int DEFAULT_STOPATHEIGHT = 0;
 
-struct BlockHasher
-{
-    size_t operator()(const uint256& hash) const { return hash.GetCheapHash(); }
-};
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
 extern CBlockPolicyEstimator feeEstimator;
 extern CTxMemPool mempool;
 extern std::atomic_bool g_is_mempool_loaded;
-typedef std::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap& mapBlockIndex GUARDED_BY(cs_main);
 extern uint64_t nLastBlockTx;
 extern uint64_t nLastBlockWeight;
@@ -460,8 +457,7 @@ extern std::unique_ptr<CCoinsViewDB> pcoinsdbview;
 /** Global variable that points to the active CCoinsView (protected by cs_main) */
 extern std::unique_ptr<CCoinsViewCache> pcoinsTip;
 
-/** Global variable that points to the active block tree (protected by cs_main) */
-extern std::unique_ptr<CBlockTreeDB> pblocktree;
+
 
 /**
  * Return the spend height, which is one more than the inputs.GetBestBlock().
