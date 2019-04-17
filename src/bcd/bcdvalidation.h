@@ -5,8 +5,17 @@
 #ifndef BITCOINDIAMOND_BCDVALIDATION_H
 #define BITCOINDIAMOND_BCDVALIDATION_H
 
+#include <amount.h>
 #include <bcd/qtumtransaction.h>
+#include <primitives/transaction.h>
+#include <primitives/block.h>
+#include <bcd/qtumstate.h>
+#include <chain.h>
+
 static const size_t MAX_CONTRACT_VOUTS = 1000;
+extern std::unique_ptr<QtumState> globalState;
+extern std::shared_ptr<dev::eth::SealEngineFace> globalSealEngine;
+
 
 struct ByteCodeExecResult{
     uint64_t usedGas = 0;

@@ -616,6 +616,7 @@ libbitcoin_common_a_SOURCES = \
   bcd/util/utilstrencodings.h \
   bcd/util/utilstrencodings.cpp \
   bcd/bcdvalidation.h \
+  bcd/bcdvalidation.cpp \
   bcd/qtumstate.h \
   bcd/qtumstate.cpp \
   bcd/qtumtransaction.h \
