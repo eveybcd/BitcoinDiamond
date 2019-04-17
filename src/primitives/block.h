@@ -100,7 +100,7 @@ public:
         return SerializeHash(*this, SER_GETHASH | SER_WITHOUT_SIGNATURE);
     }
 // ppcoin: two types of block: proof-of-work or proof-of-stake
-    virtual bool IsProofOfStake() const //qtum
+    virtual bool IsProofOfStake() const
     {
         return !prevoutStake.IsNull();
     }
@@ -120,7 +120,7 @@ public:
         return ret;
     }
 
-    CBlockHeader& operator=(const CBlockHeader& other) //qtum
+    CBlockHeader& operator=(const CBlockHeader& other)
     {
         if (this != &other)
         {

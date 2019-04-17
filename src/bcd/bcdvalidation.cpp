@@ -4,11 +4,7 @@
 
 #include <bcd/bcdvalidation.h>
 
-
-
-
-
-
+/*
 bool ByteCodeExec::performByteCode(dev::eth::Permanence type){
     for(QtumTransaction& tx : txs){
         //validate VM version
@@ -108,3 +104,4 @@ dev::Address ByteCodeExec::EthAddrFromScript(const CScript& script){
     //if not standard or not a pubkey or pubkeyhash output, then return 0
     return dev::Address();
 }
+ */
