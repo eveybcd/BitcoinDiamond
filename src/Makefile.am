@@ -612,8 +612,7 @@ libbitcoin_common_a_SOURCES = \
   aleth/utils/json_spirit/json_spirit_value.h \
   aleth/utils/json_spirit/json_spirit_writer.h \
   aleth/utils/json_spirit/json_spirit_writer_template.h \
-  bcd/util/uint256.cpp \
-  bcd/util/uint256.h \
+  bcd/util/bcduint256.h \
   bcd/util/utilstrencodings.h \
   bcd/util/utilstrencodings.cpp \
   bcd/bcdvalidation.h \

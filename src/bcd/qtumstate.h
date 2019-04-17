@@ -4,7 +4,7 @@
 #include <libevm/ExtVMFace.h>
 #include <crypto/sha256.h>
 #include <crypto/ripemd160.h>
-#include <bcd/util/uint256.h>
+#include <bcd/util/bcduint256.h>
 #include <primitives/transaction.h>
 #include <bcd/qtumtransaction.h>
 

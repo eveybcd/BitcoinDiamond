@@ -3,13 +3,11 @@
 #include <validation.h>
 #include <chainparams.h>
 #include <bcd/qtumstate.h>
-#include <bcd/util/uint256.h>
 #include <aleth/libethereum/Transaction.h>
 #include <aleth/libethereum/State.h>
 #include <aleth/libevm/ExtVMFace.h>
 #include <aleth/libdevcrypto/Common.h>
 #include <bcd/bcdvalidation.h>
-//#include <bcd/util/uint256.h>
 
 using namespace std;
 using namespace dev;
