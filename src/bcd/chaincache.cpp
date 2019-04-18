@@ -1,7 +1,7 @@
 // Copyright (c) 2019 The BCD Core developers
 
 #include <bcd/chaincache.h>
-
+#include <bcd/cchainstate.h>
 
 
 bool fRequireStandard = true;

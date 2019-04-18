@@ -6,7 +6,7 @@
 
 #include <bcd/validationcommon.h>
 #include <bcd/fileoperator.h>
-#include <bcd/cchainstate.h>
+#include <versionbits.h>
 
 
 /** Global variable that points to the active CCoinsView (protected by cs_main) */
@@ -19,8 +19,7 @@ extern CBlockPolicyEstimator feeEstimator;
 
 extern bool fRequireStandard;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
-/** The currently-connected chain of blocks (protected by cs_main). */
-extern CChain& chainActive;
+
 
 
 /** A fee rate smaller than this is considered zero fee (for relaying, mining and transaction creation) */

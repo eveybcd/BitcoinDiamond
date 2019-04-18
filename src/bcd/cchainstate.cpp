@@ -2,6 +2,7 @@
 
 #include <bcd/cchainstate.h>
 #include <versionbits.h>
+#include <bcd/chaincache.h>
 
 static int64_t nTimeCheck = 0;
 static int64_t nTimeForks = 0;

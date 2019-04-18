@@ -357,5 +357,8 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 
 
 
+/** The currently-connected chain of blocks (protected by cs_main). */
+extern CChain& chainActive;
+
 
 #endif //BITCOINDIAMOND_CCHAINSTATE_H

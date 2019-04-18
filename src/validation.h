@@ -32,6 +32,7 @@
 
 #include <bcd/cverifydb.h>
 #include <bcd/chaincache.h>
+#include <bcd/cchainstate.h>
 
 class CBlockIndex;
 class CBlockTreeDB;

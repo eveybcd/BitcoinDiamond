@@ -2,6 +2,7 @@
 
 #include <bcd/fileoperator.h>
 #include <bcd/cchainstate.h>
+#include <bcd/chaincache.h>
 
 
 std::atomic_bool fReindex(false);
