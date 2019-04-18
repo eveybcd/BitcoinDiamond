@@ -249,65 +249,11 @@ void InvalidChainFound(CBlockIndex* pindexNew)
     CheckForkWarningConditions();
 }
 
-
-bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize)
-{
-    pos.nFile = nFile;
-
-    LOCK(gBlockStorage.cs_LastBlockFile);
-
-    unsigned int nNewSize;
-    pos.nPos = gBlockStorage.vinfoBlockFile[nFile].nUndoSize;
-    nNewSize = gBlockStorage.vinfoBlockFile[nFile].nUndoSize += nAddSize;
-    gBlockStorage.setDirtyFileInfo.insert(nFile);
-
-    unsigned int nOldChunks = (pos.nPos + UNDOFILE_CHUNK_SIZE - 1) / UNDOFILE_CHUNK_SIZE;
-    unsigned int nNewChunks = (nNewSize + UNDOFILE_CHUNK_SIZE - 1) / UNDOFILE_CHUNK_SIZE;
-    if (nNewChunks > nOldChunks) {
-        if (fPruneMode)
-            gBlockStorage.fCheckForPruning = true;
-        if (gBlockStorage.CheckDiskSpace(nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos, true)) {
-            FILE *file = gBlockStorage.OpenUndoFile(pos);
-            if (file) {
-                LogPrintf("Pre-allocating up to position 0x%x in rev%05u.dat\n", nNewChunks * UNDOFILE_CHUNK_SIZE, pos.nFile);
-                AllocateFileRange(file, pos.nPos, nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos);
-                fclose(file);
-            }
-        }
-        else
-            return state.Error("out of disk space");
-    }
-
-    return true;
-}
-
-
-
-bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams)
-{
-    // Write undo information to disk
-    if (pindex->GetUndoPos().IsNull()) {
-        CDiskBlockPos _pos;
-        if (!FindUndoPos(state, pindex->nFile, _pos, ::GetSerializeSize(blockundo, SER_DISK, CLIENT_VERSION) + 40))
-            return error("ConnectBlock(): FindUndoPos failed");
-        if (!gBlockStorage.UndoWriteToDisk(blockundo, _pos, pindex->pprev->GetBlockHash(), chainparams.MessageStart()))
-            return AbortNode(state, "Failed to write undo data");
-
-        // update nUndoPos in block index
-        pindex->nUndoPos = _pos.nPos;
-        pindex->nStatus |= BLOCK_HAVE_UNDO;
-        gBlockStorage.setDirtyBlockIndex.insert(pindex);
-    }
-
-    return true;
-}
-
-
 void CChainState::InvalidBlockFound(CBlockIndex *pindex, const CValidationState &state) {
     if (!state.CorruptionPossible()) {
         pindex->nStatus |= BLOCK_FAILED_VALID;
         m_failed_blocks.insert(pindex);
-        gBlockStorage.setDirtyBlockIndex.insert(pindex);
+        gBlockStorage.setDirtyBlockIndex(pindex);
         setBlockIndexCandidates.erase(pindex);
         InvalidChainFound(pindex);
     }
@@ -640,12 +586,12 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     if (fJustCheck)
         return true;
 
-    if (!WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
+    if (!gBlockStorage.WriteUndoDataForBlock(blockundo, state, pindex, chainparams))
         return false;
 
     if (!pindex->IsValid(BLOCK_VALID_SCRIPTS)) {
         pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
-        gBlockStorage.setDirtyBlockIndex.insert(pindex);
+        gBlockStorage.setDirtyBlockIndex(pindex);
     }
 
     assert(pindex->phashBlock);
@@ -1108,14 +1054,14 @@ bool CChainState::InvalidateBlock(CValidationState& state, const CChainParams& c
     // (note this may not be all descendants).
     while (pindex_was_in_chain && invalid_walk_tip != pindex) {
         invalid_walk_tip->nStatus |= BLOCK_FAILED_CHILD;
-        gBlockStorage.setDirtyBlockIndex.insert(invalid_walk_tip);
+        gBlockStorage.setDirtyBlockIndex(invalid_walk_tip);
         setBlockIndexCandidates.erase(invalid_walk_tip);
         invalid_walk_tip = invalid_walk_tip->pprev;
     }
 
     // Mark the block itself as invalid.
     pindex->nStatus |= BLOCK_FAILED_VALID;
-    gBlockStorage.setDirtyBlockIndex.insert(pindex);
+    gBlockStorage.setDirtyBlockIndex(pindex);
     setBlockIndexCandidates.erase(pindex);
     m_failed_blocks.insert(pindex);
 
@@ -1153,7 +1099,7 @@ void CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
     while (it != mapBlockIndex.end()) {
         if (!it->second->IsValid() && it->second->GetAncestor(nHeight) == pindex) {
             it->second->nStatus &= ~BLOCK_FAILED_MASK;
-            gBlockStorage.setDirtyBlockIndex.insert(it->second);
+            gBlockStorage.setDirtyBlockIndex(it->second);
             if (it->second->IsValid(BLOCK_VALID_TRANSACTIONS) && it->second->nChainTx && setBlockIndexCandidates.value_comp()(chainActive.Tip(), it->second)) {
                 setBlockIndexCandidates.insert(it->second);
             }
@@ -1170,7 +1116,7 @@ void CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
     while (pindex != nullptr) {
         if (pindex->nStatus & BLOCK_FAILED_MASK) {
             pindex->nStatus &= ~BLOCK_FAILED_MASK;
-            gBlockStorage.setDirtyBlockIndex.insert(pindex);
+            gBlockStorage.setDirtyBlockIndex(pindex);
             m_failed_blocks.erase(pindex);
         }
         pindex = pindex->pprev;
@@ -1209,7 +1155,7 @@ CBlockIndex* CChainState::AddToBlockIndex(const CBlockHeader& block)
     if (pindexBestHeader == nullptr || pindexBestHeader->nChainWork < pindexNew->nChainWork)
         pindexBestHeader = pindexNew;
 
-    gBlockStorage.setDirtyBlockIndex.insert(pindexNew);
+    gBlockStorage.setDirtyBlockIndex(pindexNew);
 
     return pindexNew;
 }
@@ -1227,7 +1173,7 @@ void CChainState::ReceivedBlockTransactions(const CBlock& block, CBlockIndex* pi
         pindexNew->nStatus |= BLOCK_OPT_WITNESS;
     }
     pindexNew->RaiseValidity(BLOCK_VALID_TRANSACTIONS);
-    gBlockStorage.setDirtyBlockIndex.insert(pindexNew);
+    gBlockStorage.setDirtyBlockIndex(pindexNew);
 
     if (pindexNew->pprev == nullptr || pindexNew->pprev->nChainTx) {
         // If pindexNew is the genesis block or all parents are BLOCK_VALID_TRANSACTIONS.
@@ -1312,7 +1258,7 @@ bool CChainState::AcceptBlockHeader(const CBlockHeader& block, CValidationState&
                     CBlockIndex* invalid_walk = pindexPrev;
                     while (invalid_walk != failedit) {
                         invalid_walk->nStatus |= BLOCK_FAILED_CHILD;
-                        gBlockStorage.setDirtyBlockIndex.insert(invalid_walk);
+                        gBlockStorage.setDirtyBlockIndex(invalid_walk);
                         invalid_walk = invalid_walk->pprev;
                     }
                     return state.DoS(100, error("%s: prev block invalid", __func__), REJECT_INVALID, "bad-prevblk");
@@ -1382,7 +1328,7 @@ bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CVali
         !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
             pindex->nStatus |= BLOCK_FAILED_VALID;
-            gBlockStorage.setDirtyBlockIndex.insert(pindex);
+            gBlockStorage.setDirtyBlockIndex(pindex);
         }
         return error("%s: %s", __func__, FormatStateMessage(state));
     }
@@ -1470,7 +1416,7 @@ bool CChainState::LoadBlockIndex(const Consensus::Params& consensus_params, CBlo
         }
         if (!(pindex->nStatus & BLOCK_FAILED_MASK) && pindex->pprev && (pindex->pprev->nStatus & BLOCK_FAILED_MASK)) {
             pindex->nStatus |= BLOCK_FAILED_CHILD;
-            gBlockStorage.setDirtyBlockIndex.insert(pindex);
+            gBlockStorage.setDirtyBlockIndex(pindex);
         }
         if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS) && (pindex->nChainTx || pindex->pprev == nullptr))
             setBlockIndexCandidates.insert(pindex);
@@ -1637,7 +1583,7 @@ bool CChainState::RewindBlockIndex(const CChainParams& params)
             pindexIter->nChainTx = 0;
             pindexIter->nSequenceId = 0;
             // Make sure it gets written.
-            gBlockStorage.setDirtyBlockIndex.insert(pindexIter);
+            gBlockStorage.setDirtyBlockIndex(pindexIter);
             // Update indexes
             setBlockIndexCandidates.erase(pindexIter);
             std::pair<std::multimap<CBlockIndex*, CBlockIndex*>::iterator, std::multimap<CBlockIndex*, CBlockIndex*>::iterator> ret = mapBlocksUnlinked.equal_range(pindexIter->pprev);

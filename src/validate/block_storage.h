@@ -16,7 +16,7 @@ extern uint64_t nPruneTarget;
 
 class BlockStorage {
 
-public:
+private:
 /** Global flag to indicate we should check to see if there are
  *  block/undo files that should be deleted.  Set on startup
  *  or if we allocate more file space when we're in prune mode
@@ -24,14 +24,21 @@ public:
     bool fCheckForPruning = false;
     int nLastBlockFile = 0;
 /** Dirty block index entries. */
-    std::set<CBlockIndex *> setDirtyBlockIndex;
-
-/** Dirty block file entries. */
-    std::set<int> setDirtyFileInfo;
-
-    CCriticalSection cs_LastBlockFile;
+    std::set<CBlockIndex *> dirtyBlockIndex;
+    /** Dirty block file entries. */
+    std::set<int> dirtyFileInfo;
     std::vector<CBlockFileInfo> vinfoBlockFile;
+    CCriticalSection cs_LastBlockFile;
 
+public:
+    //bool getFCheckForPruning() { return fCheckForPruning;}
+    void setFCheckForPruning(bool fCheckForPruningTmp) { fCheckForPruning = fCheckForPruningTmp;}
+    void setDirtyBlockIndex(CBlockIndex * cBlockIndex) {dirtyBlockIndex.insert(cBlockIndex);}
+    void clearDirtyBlockIndex() {dirtyBlockIndex.clear();}
+    void setLastBlockFile(int lastBlockFile) {nLastBlockFile = lastBlockFile;}
+    void clearDirtyFileInfo() {dirtyFileInfo.clear();}
+    void setDirtyFileInfo(int dirtyFileInfoTmp) {dirtyFileInfo.insert(dirtyFileInfoTmp);}
+    void clearVinfoBlockFile() {vinfoBlockFile.clear();}
 
 //externale interface
 public:
@@ -92,9 +99,9 @@ public:
 /** Check whether NULLDUMMY (BIP 147) has activated. */
     bool IsNullDummyEnabled(const CBlockIndex *pindexPrev, const Consensus::Params &params);
 
-
-
     bool LoadBlockIndexDB(const CChainParams &chainparams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
+    bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams);
 
 private:
     FILE* OpenDiskFile(const CDiskBlockPos &pos, const char *prefix, bool fReadOnly);
@@ -117,6 +124,8 @@ private:
     void FindFilesToPruneManual(std::set<int> &setFilesToPrune, int nManualPruneHeight);
 
     void FindFilesToPrune(std::set<int> &setFilesToPrune, uint64_t nPruneAfterHeight);
+
+    bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize);
 
 } gBlockStorage;
 

@@ -277,16 +277,16 @@ bool BlockStorage::FlushStateToDisk(const CChainParams& chainparams, CValidation
                 // Then update all block file information (which may refer to block and undo files).
                 {
                     std::vector<std::pair<int, const CBlockFileInfo*> > vFiles;
-                    vFiles.reserve(setDirtyFileInfo.size());
-                    for (std::set<int>::iterator it = setDirtyFileInfo.begin(); it != setDirtyFileInfo.end(); ) {
+                    vFiles.reserve(dirtyFileInfo.size());
+                    for (std::set<int>::iterator it = dirtyFileInfo.begin(); it != dirtyFileInfo.end(); ) {
                         vFiles.push_back(std::make_pair(*it, &vinfoBlockFile[*it]));
-                        setDirtyFileInfo.erase(it++);
+                        dirtyFileInfo.erase(it++);
                     }
                     std::vector<const CBlockIndex*> vBlocks;
-                    vBlocks.reserve(setDirtyBlockIndex.size());
-                    for (std::set<CBlockIndex*>::iterator it = setDirtyBlockIndex.begin(); it != setDirtyBlockIndex.end(); ) {
+                    vBlocks.reserve(dirtyBlockIndex.size());
+                    for (std::set<CBlockIndex*>::iterator it = dirtyBlockIndex.begin(); it != dirtyBlockIndex.end(); ) {
                         vBlocks.push_back(*it);
-                        setDirtyBlockIndex.erase(it++);
+                        dirtyBlockIndex.erase(it++);
                     }
                     if (!pblocktree->WriteBatchSync(vFiles, nLastBlockFile, vBlocks)) {
                         return AbortNode(state, "Failed to write to block index database");
@@ -496,7 +496,7 @@ void BlockStorage::PruneOneBlockFile(const int fileNumber)
             pindex->nFile = 0;
             pindex->nDataPos = 0;
             pindex->nUndoPos = 0;
-            setDirtyBlockIndex.insert(pindex);
+            setDirtyBlockIndex(pindex);
 
             // Prune from mapBlocksUnlinked -- any block we prune would have
             // to be downloaded again in order to consider its chain, at which
@@ -514,7 +514,7 @@ void BlockStorage::PruneOneBlockFile(const int fileNumber)
     }
 
     vinfoBlockFile[fileNumber].SetNull();
-    setDirtyFileInfo.insert(fileNumber);
+    dirtyFileInfo.insert(fileNumber);
 }
 
 void BlockStorage::PruneAndFlush() {
@@ -729,7 +729,7 @@ bool BlockStorage::FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsig
         }
     }
 
-    setDirtyFileInfo.insert(nFile);
+    dirtyFileInfo.insert(nFile);
     return true;
 }
 
@@ -873,6 +873,56 @@ bool BlockStorage::LoadBlockIndexDB(const CChainParams& chainparams) EXCLUSIVE_L
     bool fReindexing = false;
     pblocktree->ReadReindexing(fReindexing);
     if(fReindexing) fReindex = true;
+
+    return true;
+}
+
+bool BlockStorage::FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize)
+{
+    pos.nFile = nFile;
+
+    LOCK(gBlockStorage.cs_LastBlockFile);
+
+    unsigned int nNewSize;
+    pos.nPos = gBlockStorage.vinfoBlockFile[nFile].nUndoSize;
+    nNewSize = gBlockStorage.vinfoBlockFile[nFile].nUndoSize += nAddSize;
+    gBlockStorage.setDirtyFileInfo(nFile);
+
+    unsigned int nOldChunks = (pos.nPos + UNDOFILE_CHUNK_SIZE - 1) / UNDOFILE_CHUNK_SIZE;
+    unsigned int nNewChunks = (nNewSize + UNDOFILE_CHUNK_SIZE - 1) / UNDOFILE_CHUNK_SIZE;
+    if (nNewChunks > nOldChunks) {
+        if (fPruneMode)
+            gBlockStorage.setFCheckForPruning(true);
+        if (gBlockStorage.CheckDiskSpace(nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos, true)) {
+            FILE *file = gBlockStorage.OpenUndoFile(pos);
+            if (file) {
+                LogPrintf("Pre-allocating up to position 0x%x in rev%05u.dat\n", nNewChunks * UNDOFILE_CHUNK_SIZE, pos.nFile);
+                AllocateFileRange(file, pos.nPos, nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos);
+                fclose(file);
+            }
+        }
+        else
+            return state.Error("out of disk space");
+    }
+
+    return true;
+}
+
+bool BlockStorage::WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams)
+{
+    // Write undo information to disk
+    if (pindex->GetUndoPos().IsNull()) {
+        CDiskBlockPos _pos;
+        if (!FindUndoPos(state, pindex->nFile, _pos, ::GetSerializeSize(blockundo, SER_DISK, CLIENT_VERSION) + 40))
+            return error("ConnectBlock(): FindUndoPos failed");
+        if (!gBlockStorage.UndoWriteToDisk(blockundo, _pos, pindex->pprev->GetBlockHash(), chainparams.MessageStart()))
+            return AbortNode(state, "Failed to write undo data");
+
+        // update nUndoPos in block index
+        pindex->nUndoPos = _pos.nPos;
+        pindex->nStatus |= BLOCK_HAVE_UNDO;
+        gBlockStorage.setDirtyBlockIndex(pindex);
+    }
 
     return true;
 }

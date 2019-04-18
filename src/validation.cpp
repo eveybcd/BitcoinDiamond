@@ -380,11 +380,9 @@ bool LoadChainTip(const CChainParams& chainparams)
 }
 
 
-
 bool ReplayBlocks(const CChainParams& params, CCoinsView* view) {
     return g_chainstate.ReplayBlocks(params, view);
 }
-
 
 bool RewindBlockIndex(const CChainParams& params) {
     if (!g_chainstate.RewindBlockIndex(params)) {
@@ -405,7 +403,6 @@ bool RewindBlockIndex(const CChainParams& params) {
     return true;
 }
 
-
 // May NOT be used after any connections are up as much
 // of the peer-processing logic assumes a consistent
 // block index state
@@ -417,10 +414,10 @@ void UnloadBlockIndex()
     pindexBestHeader = nullptr;
     mempool.clear();
     mapBlocksUnlinked.clear();
-    gBlockStorage.vinfoBlockFile.clear();
-    gBlockStorage.nLastBlockFile = 0;
-    gBlockStorage.setDirtyBlockIndex.clear();
-    gBlockStorage.setDirtyFileInfo.clear();
+    gBlockStorage.clearVinfoBlockFile();
+    gBlockStorage.setLastBlockFile(0);
+    gBlockStorage.clearDirtyBlockIndex();
+    gBlockStorage.clearDirtyFileInfo();
     versionbitscache.Clear();
     for (int b = 0; b < VERSIONBITS_NUM_BITS; b++) {
         warningcache[b].clear();
