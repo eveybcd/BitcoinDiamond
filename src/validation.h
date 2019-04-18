@@ -79,8 +79,7 @@ extern bool fEnableReplacement;
 
 
 
-/** Minimum disk space required - used in CheckDiskSpace() */
-static const uint64_t nMinDiskSpace = 52428800;
+
 
 
 
