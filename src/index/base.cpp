@@ -120,7 +120,7 @@ void BaseIndex::ThreadSync()
             }
 
             CBlock block;
-            if (!ReadBlockFromDisk(block, pindex, consensus_params)) {
+            if (!gBlockStorage.ReadBlockFromDisk(block, pindex, consensus_params)) {
                 FatalError("%s: Failed to read block %s from disk",
                            __func__, pindex->GetBlockHash().ToString());
                 return;
@@ -197,7 +197,7 @@ void BaseIndex::ChainStateFlushed(const CBlockLocator& locator)
     const CBlockIndex* locator_tip_index;
     {
         LOCK(cs_main);
-        locator_tip_index = LookupBlockIndex(locator_tip_hash);
+        locator_tip_index = gBlockStorage.LookupBlockIndex(locator_tip_hash);
     }
 
     if (!locator_tip_index) {

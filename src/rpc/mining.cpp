@@ -396,7 +396,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
                 throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block decode failed");
 
             uint256 hash = block.GetHash();
-            const CBlockIndex* pindex = LookupBlockIndex(hash);
+            const CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(hash);
             if (pindex) {
                 if (pindex->IsValid(BLOCK_VALID_SCRIPTS))
                     return "duplicate";
@@ -726,7 +726,7 @@ static UniValue submitblock(const JSONRPCRequest& request)
     uint256 hash = block.GetHash();
     {
         LOCK(cs_main);
-        const CBlockIndex* pindex = LookupBlockIndex(hash);
+        const CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(hash);
         if (pindex) {
             if (pindex->IsValid(BLOCK_VALID_SCRIPTS)) {
                 return "duplicate";
@@ -739,7 +739,7 @@ static UniValue submitblock(const JSONRPCRequest& request)
 
     {
         LOCK(cs_main);
-        const CBlockIndex* pindex = LookupBlockIndex(block.hashPrevBlock);
+        const CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(block.hashPrevBlock);
         if (pindex) {
             UpdateUncommittedBlockStructures(block, pindex, Params().GetConsensus());
         }

@@ -14,100 +14,111 @@ extern size_t nCoinCacheUsage;
 extern uint64_t nPruneTarget;
 
 
+class BlockStorage {
 
+public:
 /** Global flag to indicate we should check to see if there are
  *  block/undo files that should be deleted.  Set on startup
  *  or if we allocate more file space when we're in prune mode
  */
-bool fCheckForPruning = false;
-int nLastBlockFile = 0;
+    bool fCheckForPruning = false;
+    int nLastBlockFile = 0;
 /** Dirty block index entries. */
-std::set<CBlockIndex*> setDirtyBlockIndex;
+    std::set<CBlockIndex *> setDirtyBlockIndex;
 
 /** Dirty block file entries. */
-std::set<int> setDirtyFileInfo;
+    std::set<int> setDirtyFileInfo;
 
-CCriticalSection cs_LastBlockFile;
-std::vector<CBlockFileInfo> vinfoBlockFile;
-
-
+    CCriticalSection cs_LastBlockFile;
+    std::vector<CBlockFileInfo> vinfoBlockFile;
 
 
 //externale interface
+public:
+
 /** Calculate the amount of disk space the block & undo files currently use */
-uint64_t CalculateCurrentUsage();
-CBlockIndex* LookupBlockIndex(const uint256& hash);
+    uint64_t CalculateCurrentUsage();
+
+    CBlockIndex *LookupBlockIndex(const uint256 &hash);
+
 /** Open a block file (blk?????.dat) */
-FILE* OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly = false);
+    FILE *OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly = false);
+
 /** Functions for disk access for blocks */
-bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus::Params& consensusParams);
-bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex, const CMessageHeader::MessageStartChars& message_start);
+    bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex, const Consensus::Params &consensusParams);
+
+    bool ReadRawBlockFromDisk(std::vector<uint8_t> &block, const CBlockIndex *pindex,
+                              const CMessageHeader::MessageStartChars &message_start);
+
 /** Flush all state, indexes and buffers to disk. */
-void FlushStateToDisk();
+    void FlushStateToDisk();
+
 /** Prune block files and flush state to disk. */
-void PruneAndFlush();
+    void PruneAndFlush();
+
 /** Translation to a filesystem path */
-fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
+    fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
+
 /** Import blocks from an external file */
-bool LoadExternalBlockFile(const CChainParams& chainparams, FILE* fileIn, CDiskBlockPos *dbp = nullptr);
+    bool LoadExternalBlockFile(const CChainParams &chainparams, FILE *fileIn, CDiskBlockPos *dbp = nullptr);
+
 /** Check whether enough disk space is available for an incoming block */
-bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
+    bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
 
 
+public:
+    FILE *OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
 
+    bool UndoWriteToDisk(const CBlockUndo &blockundo, CDiskBlockPos &pos, const uint256 &hashBlock,
+                         const CMessageHeader::MessageStartChars &messageStart);
 
+    bool WriteBlockToDisk(const CBlock &block, CDiskBlockPos &pos, const CMessageHeader::MessageStartChars &messageStart);
 
+    bool UndoReadFromDisk(CBlockUndo &blockundo, const CBlockIndex *pindex);
 
-//chainstate
-FILE* OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
-bool UndoWriteToDisk(const CBlockUndo& blockundo, CDiskBlockPos& pos, const uint256& hashBlock, const CMessageHeader::MessageStartChars& messageStart);
-bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
+    bool FlushStateToDisk(const CChainParams &chainParams, CValidationState &state, FlushStateMode mode,
+                          int nManualPruneHeight = 0);
 
-//chainstate verifyDb
-bool UndoReadFromDisk(CBlockUndo& blockundo, const CBlockIndex *pindex);
-//chainstate validate
-bool FlushStateToDisk(const CChainParams& chainparams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight);
-// See definition for documentation
-bool FlushStateToDisk(const CChainParams& chainParams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight=0);
+    void FlushBlockFile(bool fFinalize = false);
 
-//chainstate
-void FlushBlockFile(bool fFinalize = false);
-
-
-
-
-//internal
-/** Functions for disk access for blocks */
-bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
-bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& message_start);
-void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight);
-void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight);
-/**
- *  Mark one block file as pruned.
- */
-void PruneOneBlockFile(const int fileNumber);
-
-/**
- *  Actually unlink the specified files
- */
-void UnlinkPrunedFiles(const std::set<int>& setFilesToPrune);
 /** Prune block files up to a given height */
-void PruneBlockFilesManual(int nManualPruneHeight);
+    void PruneBlockFilesManual(int nManualPruneHeight);
 
+    CDiskBlockPos SaveBlockToDisk(const CBlock &block, int nHeight, const CChainParams &chainparams, const CDiskBlockPos *dbp);
 
-
-
-
-
-
-
-bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown = false);
-CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp);
 // Returns the script flags which should be checked for a given block
-unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
+    unsigned int GetBlockScriptFlags(const CBlockIndex *pindex, const Consensus::Params &chainparams);
+
 /** Check whether NULLDUMMY (BIP 147) has activated. */
-bool IsNullDummyEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-bool IsScriptWitnessEnabled(const Consensus::Params& params);
+    bool IsNullDummyEnabled(const CBlockIndex *pindexPrev, const Consensus::Params &params);
+
+
+
+    bool LoadBlockIndexDB(const CChainParams &chainparams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
+private:
+    FILE* OpenDiskFile(const CDiskBlockPos &pos, const char *prefix, bool fReadOnly);
+    bool IsScriptWitnessEnabled(const Consensus::Params &params);
+    bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown = false);
+    /**
+     *  Actually unlink the specified files
+     */
+    void UnlinkPrunedFiles(const std::set<int> &setFilesToPrune);
+    /**
+     *  Mark one block file as pruned.
+     */
+    void PruneOneBlockFile(const int fileNumber);
+    /** Functions for disk access for blocks */
+    bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, const Consensus::Params &consensusParams);
+
+    bool ReadRawBlockFromDisk(std::vector<uint8_t> &block, const CDiskBlockPos &pos,
+                              const CMessageHeader::MessageStartChars &message_start);
+
+    void FindFilesToPruneManual(std::set<int> &setFilesToPrune, int nManualPruneHeight);
+
+    void FindFilesToPrune(std::set<int> &setFilesToPrune, uint64_t nPruneAfterHeight);
+
+} gBlockStorage;
 
 
 #endif //BITCOINDIAMOND_FILEOPERATOR_H

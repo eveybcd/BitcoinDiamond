@@ -1169,7 +1169,7 @@ void CWallet::MarkConflicted(const uint256& hashBlock, const uint256& hashTx)
     LOCK2(cs_main, cs_wallet);
 
     int conflictconfirms = 0;
-    CBlockIndex* pindex = LookupBlockIndex(hashBlock);
+    CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(hashBlock);
     if (pindex && chainActive.Contains(pindex)) {
         conflictconfirms = -(chainActive.Height() - pindex->nHeight + 1);
     }
@@ -1756,7 +1756,7 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, CBlock
             }
 
             CBlock block;
-            if (ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
+            if (gBlockStorage.ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
                 LOCK2(cs_main, cs_wallet);
                 if (pindex && !chainActive.Contains(pindex)) {
                     // Abort scan if current block is no longer active, to prevent
@@ -3810,7 +3810,7 @@ void CWallet::GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) c
     for (const auto& entry : mapWallet) {
         // iterate over all wallet transactions...
         const CWalletTx &wtx = entry.second;
-        CBlockIndex* pindex = LookupBlockIndex(wtx.hashBlock);
+        CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(wtx.hashBlock);
         if (pindex && chainActive.Contains(pindex)) {
             // ... which are already in a block
             int nHeight = pindex->nHeight;
@@ -3858,7 +3858,7 @@ unsigned int CWallet::ComputeTimeSmart(const CWalletTx& wtx) const
 {
     unsigned int nTimeSmart = wtx.nTimeReceived;
     if (!wtx.hashUnset()) {
-        if (const CBlockIndex* pindex = LookupBlockIndex(wtx.hashBlock)) {
+        if (const CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(wtx.hashBlock)) {
             int64_t latestNow = wtx.nTimeReceived;
             int64_t latestEntry = 0;
 
@@ -4398,7 +4398,7 @@ int CMerkleTx::GetDepthInMainChain() const
     AssertLockHeld(cs_main);
 
     // Find the block it claims to be in
-    CBlockIndex* pindex = LookupBlockIndex(hashBlock);
+    CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(hashBlock);
     if (!pindex || !chainActive.Contains(pindex))
         return 0;
 

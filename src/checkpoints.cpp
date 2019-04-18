@@ -21,7 +21,7 @@ namespace Checkpoints {
         for (const MapCheckpoints::value_type& i : reverse_iterate(checkpoints))
         {
             const uint256& hash = i.second;
-            CBlockIndex* pindex = LookupBlockIndex(hash);
+            CBlockIndex* pindex = gBlockStorage.LookupBlockIndex(hash);
             if (pindex) {
                 return pindex;
             }

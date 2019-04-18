@@ -427,7 +427,7 @@ bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool& pool,
         // There is a similar check in CreateNewBlock() to prevent creating
         // invalid blocks (using TestBlockValidity), however allowing such
         // transactions into the mempool can be exploited as a DoS attack.
-        unsigned int currentBlockScriptVerifyFlags = GetBlockScriptFlags(chainActive.Tip(), Params().GetConsensus());
+        unsigned int currentBlockScriptVerifyFlags = gBlockStorage.GetBlockScriptFlags(chainActive.Tip(), Params().GetConsensus());
         if (!CheckInputsFromMempoolAndCache(tx, state, view, pool, currentBlockScriptVerifyFlags, true, txdata)) {
             return error("%s: BUG! PLEASE REPORT THIS! CheckInputs failed against latest-block but not STANDARD flags %s, %s",
                          __func__, hash.ToString(), FormatStateMessage(state));
@@ -511,7 +511,7 @@ bool CheckFinalTx(const CTransaction &tx, int flags)
 int GetSpendHeight(const CCoinsViewCache& inputs)
 {
     LOCK(cs_main);
-    CBlockIndex* pindexPrev = LookupBlockIndex(inputs.GetBestBlock());
+    CBlockIndex* pindexPrev = gBlockStorage.LookupBlockIndex(inputs.GetBestBlock());
     return pindexPrev->nHeight + 1;
 }
 
@@ -603,7 +603,7 @@ bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& poo
     }
     // After we've (potentially) uncached entries, ensure our coins cache is still within its size limits
     CValidationState stateDummy;
-    FlushStateToDisk(chainparams, stateDummy, FlushStateMode::PERIODIC);
+    gBlockStorage.FlushStateToDisk(chainparams, stateDummy, FlushStateMode::PERIODIC);
     return res;
 }
 
