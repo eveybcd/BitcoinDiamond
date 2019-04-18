@@ -1522,10 +1522,10 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const C
         }
     }
 
-    // Additional validation for spend-to-script-hash transactions:
+    // Additional validate for spend-to-script-hash transactions:
     if ((flags & SCRIPT_VERIFY_P2SH) && scriptPubKey.IsPayToScriptHash())
     {
-        // scriptSig must be literals-only or validation fails
+        // scriptSig must be literals-only or validate fails
         if (!scriptSig.IsPushOnly())
             return set_error(serror, SCRIPT_ERR_SIG_PUSHONLY);
 

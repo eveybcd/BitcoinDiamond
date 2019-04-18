@@ -117,7 +117,7 @@ void CallFunctionInValidationInterfaceQueue(std::function<void ()> func) {
 
 void SyncWithValidationInterfaceQueue() {
     AssertLockNotHeld(cs_main);
-    // Block until the validation queue drains
+    // Block until the validate queue drains
     std::promise<void> promise;
     CallFunctionInValidationInterfaceQueue([&promise] {
         promise.set_value();

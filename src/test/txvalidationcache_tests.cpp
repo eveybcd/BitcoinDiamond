@@ -35,9 +35,9 @@ ToMemPool(const CMutableTransaction& tx)
 
 BOOST_FIXTURE_TEST_CASE(tx_mempool_block_doublespend, TestChain100Setup)
 {
-    // Make sure skipping validation of transactions that were
+    // Make sure skipping validate of transactions that were
     // validated going into the memory pool does not allow
-    // double-spends in blocks to pass validation when they should not.
+    // double-spends in blocks to pass validate when they should not.
 
     CScript scriptPubKey = CScript() <<  ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
 
@@ -209,7 +209,7 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup)
 
         // Test that CheckInputs returns true iff DERSIG-enforcing flags are
         // not present.  Don't add these checks to the cache, so that we can
-        // test later that block validation works fine in the absence of cached
+        // test later that block validate works fine in the absence of cached
         // successes.
         ValidateCheckInputsForAllFlags(spend_tx, SCRIPT_VERIFY_DERSIG | SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_STRICTENC, false);
     }

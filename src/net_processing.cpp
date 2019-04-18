@@ -1445,7 +1445,7 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
                 // network by mining a block right at the 2 hour boundary.
                 //
                 // TODO: update the DoS logic (or, rather, rewrite the
-                // DoS-interface between validation and net_processing) so that
+                // DoS-interface between validate and net_processing) so that
                 // the interface is cleaner, and so that we disconnect on all the
                 // reasons that a peer's headers chain is incompatible
                 // with ours (eg block->nVersion softforks, MTP violations,
@@ -2565,7 +2565,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         if (fRevertToHeaderProcessing) {
             // Headers received from HB compact block peers are permitted to be
-            // relayed before full validation (see BIP 152), so we don't want to disconnect
+            // relayed before full validate (see BIP 152), so we don't want to disconnect
             // the peer if the header turns out to be for an invalid block.
             // Note that if a peer tries to build on an invalid chain, that
             // will be detected and the peer will be banned.

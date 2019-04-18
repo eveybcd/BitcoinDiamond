@@ -329,7 +329,7 @@ static UniValue syncwithvalidationinterfacequeue(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() > 0) {
         throw std::runtime_error(
             "syncwithvalidationinterfacequeue\n"
-            "\nWaits for the validation interface queue to catch up on everything that was there when we entered this function.\n"
+            "\nWaits for the validate interface queue to catch up on everything that was there when we entered this function.\n"
             "\nExamples:\n"
             + HelpExampleCli("syncwithvalidationinterfacequeue","")
             + HelpExampleRpc("syncwithvalidationinterfacequeue","")

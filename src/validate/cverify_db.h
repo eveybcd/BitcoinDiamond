@@ -3,7 +3,7 @@
 #ifndef BITCOINDIAMOND_CVERIFYDB_H
 #define BITCOINDIAMOND_CVERIFYDB_H
 
-#include <bcd/validationcommon.h>
+#include <validate/validation_common.h>
 
 
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */

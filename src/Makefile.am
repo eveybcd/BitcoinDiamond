@@ -424,15 +424,21 @@ libbitcoin_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
-  bcd/bcd/validationcommon.h \
-  bcd/cscriptcheck.h \
-  bcd/cchainstate.h \
-  bcd/cchainstate.cpp \
-  bcd/connecttrace.h \
-  bcd/fileoperator.h \
-  bcd/fileoperator.cpp \
-  bcd/chaincache.h \
-  bcd/chaincache.cpp \
+  validate/validation_common.h \
+  validate/validation_common.cpp \
+  validate/cscript_check.h \
+  validate/cchain_state.h \
+  validate/cchain_state.cpp \
+  validate/connect_trace.h \
+  validate/file_operator.h \
+  validate/file_operator.cpp \
+  validate/chain_cache.h \
+  validate/chain_cache.cpp \
+  validate/cverify_db.h \
+  validate/cverify_db.cpp \
+  validate/connection_trace.h \
+  validate/validate_block.h \
+  validate/validate_block.cpp \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.

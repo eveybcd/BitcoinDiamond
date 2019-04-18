@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(test_CheckQueue_Catches_Failure)
     tg.interrupt_all();
     tg.join_all();
 }
-// Test that a block validation which fails does not interfere with
+// Test that a block validate which fails does not interfere with
 // future blocks, ie, the bad state is cleared.
 BOOST_AUTO_TEST_CASE(test_CheckQueue_Recovers_From_Failure)
 {

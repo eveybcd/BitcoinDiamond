@@ -1,11 +1,9 @@
-//
-// Created by lh001 on 2019/4/17.
-//
+// Copyright (c) 2019 The BCD Core developers
 
 #ifndef BITCOINDIAMOND_CSCRIPTCHECK_H
 #define BITCOINDIAMOND_CSCRIPTCHECK_H
 
-#include <bcd/validationcommon.h>
+#include <validate/validation_common.h>
 
 /**
  * Closure representing one script verification

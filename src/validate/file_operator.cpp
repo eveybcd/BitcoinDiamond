@@ -1,8 +1,8 @@
 // Copyright (c) 2019 The BCD Core developers
 
-#include <bcd/fileoperator.h>
-#include <bcd/cchainstate.h>
-#include <bcd/chaincache.h>
+#include <validate/file_operator.h>
+#include <validate/cchain_state.h>
+#include <validate/chain_cache.h>
 
 
 std::atomic_bool fReindex(false);
@@ -690,23 +690,153 @@ CBlockIndex* LookupBlockIndex(const uint256& hash)
 }
 
 
-static void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main) {
-    bool fNotify = false;
-    bool fInitialBlockDownload = false;
-    static CBlockIndex* pindexHeaderOld = nullptr;
-    CBlockIndex* pindexHeader = nullptr;
-    {
-        LOCK(cs_main);
-        pindexHeader = pindexBestHeader;
 
-        if (pindexHeader != pindexHeaderOld) {
-            fNotify = true;
-            fInitialBlockDownload = IsInitialBlockDownload();
-            pindexHeaderOld = pindexHeader;
+static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown)
+{
+    LOCK(cs_LastBlockFile);
+
+    unsigned int nFile = fKnown ? pos.nFile : nLastBlockFile;
+    if (vinfoBlockFile.size() <= nFile) {
+        vinfoBlockFile.resize(nFile + 1);
+    }
+
+    if (!fKnown) {
+        while (vinfoBlockFile[nFile].nSize + nAddSize >= MAX_BLOCKFILE_SIZE) {
+            nFile++;
+            if (vinfoBlockFile.size() <= nFile) {
+                vinfoBlockFile.resize(nFile + 1);
+            }
+        }
+        pos.nFile = nFile;
+        pos.nPos = vinfoBlockFile[nFile].nSize;
+    }
+
+    if ((int)nFile != nLastBlockFile) {
+        if (!fKnown) {
+            LogPrintf("Leaving block file %i: %s\n", nLastBlockFile, vinfoBlockFile[nLastBlockFile].ToString());
+        }
+        FlushBlockFile(!fKnown);
+        nLastBlockFile = nFile;
+    }
+
+    vinfoBlockFile[nFile].AddBlock(nHeight, nTime);
+    if (fKnown)
+        vinfoBlockFile[nFile].nSize = std::max(pos.nPos + nAddSize, vinfoBlockFile[nFile].nSize);
+    else
+        vinfoBlockFile[nFile].nSize += nAddSize;
+
+    if (!fKnown) {
+        unsigned int nOldChunks = (pos.nPos + BLOCKFILE_CHUNK_SIZE - 1) / BLOCKFILE_CHUNK_SIZE;
+        unsigned int nNewChunks = (vinfoBlockFile[nFile].nSize + BLOCKFILE_CHUNK_SIZE - 1) / BLOCKFILE_CHUNK_SIZE;
+        if (nNewChunks > nOldChunks) {
+            if (fPruneMode)
+                fCheckForPruning = true;
+            if (CheckDiskSpace(nNewChunks * BLOCKFILE_CHUNK_SIZE - pos.nPos, true)) {
+                FILE *file = OpenBlockFile(pos);
+                if (file) {
+                    LogPrintf("Pre-allocating up to position 0x%x in blk%05u.dat\n", nNewChunks * BLOCKFILE_CHUNK_SIZE, pos.nFile);
+                    AllocateFileRange(file, pos.nPos, nNewChunks * BLOCKFILE_CHUNK_SIZE - pos.nPos);
+                    fclose(file);
+                }
+            }
+            else
+                return error("out of disk space");
         }
     }
-    // Send block tip changed notifications without cs_main
-    if (fNotify) {
-        uiInterface.NotifyHeaderTip(fInitialBlockDownload, pindexHeader);
+
+    setDirtyFileInfo.insert(nFile);
+    return true;
+}
+
+
+/** Store block on disk. If dbp is non-nullptr, the file is known to already reside on disk */
+static CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp) {
+    unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
+    CDiskBlockPos blockPos;
+    if (dbp != nullptr)
+        blockPos = *dbp;
+    if (!FindBlockPos(blockPos, nBlockSize+8, nHeight, block.GetBlockTime(), dbp != nullptr)) {
+        error("%s: FindBlockPos failed", __func__);
+        return CDiskBlockPos();
     }
+    if (dbp == nullptr) {
+        if (!WriteBlockToDisk(block, blockPos, chainparams.MessageStart())) {
+            AbortNode("Failed to write block");
+            return CDiskBlockPos();
+        }
+    }
+    return blockPos;
+}
+
+
+static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& consensusparams) {
+    AssertLockHeld(cs_main);
+
+    unsigned int flags = SCRIPT_VERIFY_NONE;
+
+    // BIP16 didn't become active until Apr 1 2012 (on mainnet, and
+    // retroactively applied to testnet)
+    // However, only one historical block violated the P2SH rules (on both
+    // mainnet and testnet), so for simplicity, always leave P2SH
+    // on except for the one violating block.
+    if (consensusparams.BIP16Exception.IsNull() || // no bip16 exception on this chain
+        pindex->phashBlock == nullptr || // this is a new candidate block, eg from TestBlockValidity()
+        *pindex->phashBlock != consensusparams.BIP16Exception) // this block isn't the historical exception
+    {
+        flags |= SCRIPT_VERIFY_P2SH;
+    }
+
+    // Enforce WITNESS rules whenever P2SH is in effect (and the segwit
+    // deployment is defined).
+    if (flags & SCRIPT_VERIFY_P2SH && IsScriptWitnessEnabled(consensusparams)) {
+        flags |= SCRIPT_VERIFY_WITNESS;
+    }
+
+    // Start enforcing the DERSIG (BIP66) rule
+    if (pindex->nHeight >= consensusparams.BIP66Height) {
+        flags |= SCRIPT_VERIFY_DERSIG;
+    }
+
+    // Start enforcing CHECKLOCKTIMEVERIFY (BIP65) rule
+    if (pindex->nHeight >= consensusparams.BIP65Height) {
+        flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+    }
+
+    // Start enforcing BIP68 (sequence locks) and BIP112 (CHECKSEQUENCEVERIFY) using versionbits logic.
+    if (VersionBitsState(pindex->pprev, consensusparams, Consensus::DEPLOYMENT_CSV, versionbitscache) == ThresholdState::ACTIVE) {
+        flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
+    }
+
+    if (IsNullDummyEnabled(pindex->pprev, consensusparams)) {
+        flags |= SCRIPT_VERIFY_NULLDUMMY;
+    }
+
+    return flags;
+}
+
+bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir)
+{
+    uint64_t nFreeBytesAvailable = fs::space(blocks_dir ? GetBlocksDir() : GetDataDir()).available;
+
+    // Check for nMinDiskSpace bytes (currently 50MB)
+    if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes)
+        return AbortNode("Disk space is low!", _("Error: Disk space is low!"));
+
+    return true;
+}
+
+
+bool IsNullDummyEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_SEGWIT, versionbitscache) == ThresholdState::ACTIVE);
+}
+
+// 0.13.0 was shipped with a segwit deployment defined for testnet, but not for
+// mainnet. We no longer need to support disabling the segwit deployment
+// except for testing purposes, due to limitations of the functional test
+// environment. See test/functional/p2p-segwit.py.
+static bool IsScriptWitnessEnabled(const Consensus::Params& params)
+{
+    return params.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout != 0;
 }

@@ -30,9 +30,9 @@
 
 #include <atomic>
 
-#include <bcd/cverifydb.h>
-#include <bcd/chaincache.h>
-#include <bcd/cchainstate.h>
+#include <validate/cverify_db.h>
+#include <validate/chain_cache.h>
+#include <validate/cchain_state.h>
 
 class CBlockIndex;
 class CBlockTreeDB;

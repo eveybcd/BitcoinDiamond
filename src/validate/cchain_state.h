@@ -4,14 +4,15 @@
 #define BITCOINDIAMOND_CCHAINSTATE_H
 
 
-#include <bcd/fileoperator.h>
-#include <bcd/cscriptcheck.h>
+#include <validate/file_operator.h>
+#include <validate/cscript_check.h>
 #include <versionbits.h>
+#include <validate/connect_trace.h>
 
 #define MICRO 0.000001
 #define MILLI 0.001
 
-class ConnectTrace;
+
 
 enum DisconnectResult
 {
@@ -21,129 +22,11 @@ enum DisconnectResult
 };
 
 
-
-/**
- * Global state
- */
-namespace {
-    struct CBlockIndexWorkComparator
-    {
-        bool operator()(const CBlockIndex *pa, const CBlockIndex *pb) const {
-            // First sort by most total work, ...
-            if (pa->nChainWork > pb->nChainWork) return false;
-            if (pa->nChainWork < pb->nChainWork) return true;
-
-            // ... then by earliest time received, ...
-            if (pa->nSequenceId < pb->nSequenceId) return false;
-            if (pa->nSequenceId > pb->nSequenceId) return true;
-
-            // Use pointer address as tie breaker (should only happen with blocks
-            // loaded from disk, as those all have id 0).
-            if (pa < pb) return false;
-            if (pa > pb) return true;
-
-            // Identical blocks.
-            return false;
-        }
-    };
-} // anon namespace
+//internal================
 
 
-struct PerBlockConnectTrace {
-    CBlockIndex* pindex = nullptr;
-    std::shared_ptr<const CBlock> pblock;
-    std::shared_ptr<std::vector<CTransactionRef>> conflictedTxs;
-    PerBlockConnectTrace() : conflictedTxs(std::make_shared<std::vector<CTransactionRef>>()) {}
-};
-
-/**
- * Determine what nVersion a new block should use.
- */
-int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-
-/**
- * Threshold condition checker that triggers when unknown versionbits are seen on the network.
- */
-class WarningBitsConditionChecker : public AbstractThresholdConditionChecker
-{
-private:
-    int bit;
-
-public:
-    explicit WarningBitsConditionChecker(int bitIn) : bit(bitIn) {}
-
-    int64_t BeginTime(const Consensus::Params& params) const override { return 0; }
-    int64_t EndTime(const Consensus::Params& params) const override { return std::numeric_limits<int64_t>::max(); }
-    int Period(const Consensus::Params& params) const override { return params.nMinerConfirmationWindow; }
-    int Threshold(const Consensus::Params& params) const override { return params.nRuleChangeActivationThreshold; }
-
-    bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
-    {
-        return ((pindex->nVersion & VERSIONBITS_TOP_MASK) == VERSIONBITS_TOP_BITS) &&
-               ((pindex->nVersion >> bit) & 1) != 0 &&
-               ((ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
-    }
-};
 
 
-/**
- * Used to track blocks whose transactions were applied to the UTXO state as a
- * part of a single ActivateBestChainStep call.
- *
- * This class also tracks transactions that are removed from the mempool as
- * conflicts (per block) and can be used to pass all those transactions
- * through SyncTransaction.
- *
- * This class assumes (and asserts) that the conflicted transactions for a given
- * block are added via mempool callbacks prior to the BlockConnected() associated
- * with those transactions. If any transactions are marked conflicted, it is
- * assumed that an associated block will always be added.
- *
- * This class is single-use, once you call GetBlocksConnected() you have to throw
- * it away and make a new one.
- */
-class ConnectTrace {
-private:
-    std::vector<PerBlockConnectTrace> blocksConnected;
-    CTxMemPool &pool;
-
-public:
-    explicit ConnectTrace(CTxMemPool &_pool) : blocksConnected(1), pool(_pool) {
-        pool.NotifyEntryRemoved.connect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
-    }
-
-    ~ConnectTrace() {
-        pool.NotifyEntryRemoved.disconnect(boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
-    }
-
-    void BlockConnected(CBlockIndex* pindex, std::shared_ptr<const CBlock> pblock) {
-        assert(!blocksConnected.back().pindex);
-        assert(pindex);
-        assert(pblock);
-        blocksConnected.back().pindex = pindex;
-        blocksConnected.back().pblock = std::move(pblock);
-        blocksConnected.emplace_back();
-    }
-
-    std::vector<PerBlockConnectTrace>& GetBlocksConnected() {
-        // We always keep one extra block at the end of our list because
-        // blocks are added after all the conflicted transactions have
-        // been filled in. Thus, the last entry should always be an empty
-        // one waiting for the transactions from the next block. We pop
-        // the last entry here to make sure the list we return is sane.
-        assert(!blocksConnected.back().pindex);
-        assert(blocksConnected.back().conflictedTxs->empty());
-        blocksConnected.pop_back();
-        return blocksConnected;
-    }
-
-    void NotifyEntryRemoved(CTransactionRef txRemoved, MemPoolRemovalReason reason) {
-        assert(!blocksConnected.back().pindex);
-        if (reason == MemPoolRemovalReason::CONFLICT) {
-            blocksConnected.back().conflictedTxs->emplace_back(std::move(txRemoved));
-        }
-    }
-};
 
 
 /**
@@ -276,20 +159,9 @@ namespace {
      */
     std::multimap<CBlockIndex*, CBlockIndex*>& mapBlocksUnlinked = g_chainstate.mapBlocksUnlinked;
 
-    CCriticalSection cs_LastBlockFile;
-    std::vector<CBlockFileInfo> vinfoBlockFile;
-    int nLastBlockFile = 0;
-    /** Global flag to indicate we should check to see if there are
-     *  block/undo files that should be deleted.  Set on startup
-     *  or if we allocate more file space when we're in prune mode
-     */
-    bool fCheckForPruning = false;
 
-    /** Dirty block index entries. */
-    std::set<CBlockIndex*> setDirtyBlockIndex;
 
-    /** Dirty block file entries. */
-    std::set<int> setDirtyFileInfo;
+
 } // anon namespace
 
 BlockMap& mapBlockIndex = g_chainstate.mapBlockIndex;
@@ -302,27 +174,6 @@ extern uint256 hashAssumeValid;
 /** Minimum work we will assume exists on some valid chain. */
 extern arith_uint256 nMinimumChainWork;
 
-// Returns the script flags which should be checked for a given block
-static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
-
-
-bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks = nullptr);
-
-/** Apply the effects of this transaction on the UTXO set represented by view */
-void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
-void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo &txundo, int nHeight);
-
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
-/** Check whether NULLDUMMY (BIP 147) has activated. */
-bool IsNullDummyEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-
-
-/** Guess verification progress (as a fraction between 0.0=genesis and 1.0=current tip). */
-double GuessVerificationProgress(const ChainTxData& data, const CBlockIndex* pindex);
-/** Check whether witness commitments are required for block. */
-bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const CChainParams& params, const CBlockIndex* pindexPrev, int64_t nAdjustedTime);
-static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 
 
 
@@ -335,30 +186,20 @@ extern uint256 g_best_block;
 /** Pruning-related variables and constants */
 /** True if any block files have ever been pruned. */
 extern bool fHavePruned;
-extern bool fCheckpointsEnabled;
+
 // Protected by cs_main
 static ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS];
 
 
 
-static CuckooCache::cache<uint256, SignatureCacheHasher> scriptExecutionCache;
-static uint256 scriptExecutionCacheNonce(GetRandHash());
-static int GetWitnessCommitmentIndex(const CBlock& block);
 
 
-
-/**
- * Find the best known block, and make it the tip of the block chain
- *
- * May not be called with cs_main held. May not be called in a
- * validationinterface callback.
- */
-bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>());
 
 
 
 /** The currently-connected chain of blocks (protected by cs_main). */
 extern CChain& chainActive;
+
 
 
 #endif //BITCOINDIAMOND_CCHAINSTATE_H

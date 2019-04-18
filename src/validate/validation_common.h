@@ -174,8 +174,7 @@ enum class FlushStateMode {
 bool IsInitialBlockDownload();
 
 static void AlertNotify(const std::string& strMessage);
-/** Check whether enough disk space is available for an incoming block */
-bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
+
 
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
@@ -185,6 +184,6 @@ static bool AbortNode(const std::string& strMessage, const std::string& userMess
 
 static bool AbortNode(CValidationState& state, const std::string& strMessage, const std::string& userMessage="");
 
-/** Context-independent validity checks */
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+static void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main);
+
 #endif //BITCOINDIAMOND_VALIDATIONCOMMON_H

@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(processnewblock_signals_ordering)
     RegisterValidationInterface(&sub);
 
     // create a bunch of threads that repeatedly process a block generated above at random
-    // this will create parallelism and randomness inside validation - the ValidationInterface
-    // will subscribe to events generated during block validation and assert on ordering invariance
+    // this will create parallelism and randomness inside validate - the ValidationInterface
+    // will subscribe to events generated during block validate and assert on ordering invariance
     boost::thread_group threads;
     for (int i = 0; i < 10; i++) {
         threads.create_thread([&blocks]() {

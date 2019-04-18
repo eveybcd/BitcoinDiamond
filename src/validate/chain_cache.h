@@ -4,9 +4,10 @@
 #ifndef BITCOINDIAMOND_CHAINCACHE_H
 #define BITCOINDIAMOND_CHAINCACHE_H
 
-#include <bcd/validationcommon.h>
-#include <bcd/fileoperator.h>
+#include <validate/validation_common.h>
+#include <validate/file_operator.h>
 #include <versionbits.h>
+#include <validate/validate_block.h>
 
 
 /** Global variable that points to the active CCoinsView (protected by cs_main) */

@@ -26,7 +26,7 @@
 
 BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
 
-// BOOST_CHECK_EXCEPTION predicates to check the specific validation error
+// BOOST_CHECK_EXCEPTION predicates to check the specific validate error
 class HasReason {
 public:
     HasReason(const std::string& reason) : m_reason(reason) {}
@@ -201,7 +201,7 @@ static void TestPackageSelection(const CChainParams& chainparams, const CScript&
     BOOST_CHECK(pblocktemplate->block.vtx[8]->GetHash() == hashLowFeeTx2);
 }
 
-// NOTE: These tests rely on CreateNewBlock doing its own self-validation!
+// NOTE: These tests rely on CreateNewBlock doing its own self-validate!
 BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 {
     // Note that by default, these tests run with size accounting enabled.
@@ -407,8 +407,8 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     tx.vout[0].nValue -= LOWFEE;
     hash = tx.GetHash();
     mempool.addUnchecked(hash, entry.Fee(LOWFEE).Time(GetTime()).SpendsCoinbase(false).FromTx(tx));
-    // Should throw block-validation-failed
-    BOOST_CHECK_EXCEPTION(AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey), std::runtime_error, HasReason("block-validation-failed"));
+    // Should throw block-validate-failed
+    BOOST_CHECK_EXCEPTION(AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey), std::runtime_error, HasReason("block-validate-failed"));
     mempool.clear();
 
     // Delete the dummy blocks again.

@@ -2,7 +2,9 @@
 
 
 
-#include <bcd/cverifydb.h>
+#include <validate/cverify_db.h>
+#include <validate/cchain_state.h>
+#include <validate/chain_cache.h>
 
 
 CVerifyDB::CVerifyDB()

@@ -31,7 +31,7 @@
 
        The vulnerability results from being able to send a block with such a
        transaction list, with the same merkle root, and the same block hash as
-       the original without duplication, resulting in failed validation. If the
+       the original without duplication, resulting in failed validate. If the
        receiving node proceeds to mark that block as permanently invalid
        however, it will fail to accept further unmodified (and thus potentially
        valid) versions of the same block. We defend against this by detecting

@@ -1296,7 +1296,7 @@ void CWallet::BlockUntilSyncedToCurrentChain() {
         }
     }
 
-    // ...otherwise put a callback in the validation interface queue and wait
+    // ...otherwise put a callback in the validate interface queue and wait
     // for the queue to drain enough to execute it (indicating we are caught up
     // at least with the time we entered this function).
     SyncWithValidationInterfaceQueue();
@@ -4333,7 +4333,7 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(const std::string& name, 
 
     uiInterface.LoadWallet(walletInstance);
 
-    // Register with the validation interface. It's ok to do this after rescan since we're still holding cs_main.
+    // Register with the validate interface. It's ok to do this after rescan since we're still holding cs_main.
     RegisterValidationInterface(walletInstance.get());
 
     walletInstance->SetBroadcastTransactions(gArgs.GetBoolArg("-walletbroadcast", DEFAULT_WALLETBROADCAST));

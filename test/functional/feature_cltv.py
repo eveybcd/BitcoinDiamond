@@ -130,7 +130,7 @@ class BIP65Test(BitcoinTestFramework):
             assert_equal(self.nodes[0].p2p.last_message["reject"].data, block.sha256)
             if self.nodes[0].p2p.last_message["reject"].code == REJECT_INVALID:
                 # Generic rejection when a block is invalid
-                assert_equal(self.nodes[0].p2p.last_message["reject"].reason, b'block-validation-failed')
+                assert_equal(self.nodes[0].p2p.last_message["reject"].reason, b'block-validate-failed')
             else:
                 assert b'Negative locktime' in self.nodes[0].p2p.last_message["reject"].reason
 

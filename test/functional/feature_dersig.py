@@ -119,14 +119,14 @@ class BIP66Test(BitcoinTestFramework):
         with mininode_lock:
             # We can receive different reject messages depending on whether
             # bitcoind is running with multiple script check threads. If script
-            # check threads are not in use, then transaction script validation
+            # check threads are not in use, then transaction script validate
             # happens sequentially, and bitcoind produces more specific reject
             # reasons.
             assert self.nodes[0].p2p.last_message["reject"].code in [REJECT_INVALID, REJECT_NONSTANDARD]
             assert_equal(self.nodes[0].p2p.last_message["reject"].data, block.sha256)
             if self.nodes[0].p2p.last_message["reject"].code == REJECT_INVALID:
                 # Generic rejection when a block is invalid
-                assert_equal(self.nodes[0].p2p.last_message["reject"].reason, b'block-validation-failed')
+                assert_equal(self.nodes[0].p2p.last_message["reject"].reason, b'block-validate-failed')
             else:
                 assert b'Non-canonical DER signature' in self.nodes[0].p2p.last_message["reject"].reason
 

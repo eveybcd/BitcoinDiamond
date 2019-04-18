@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(norecurse)
 {
     ScriptError err;
     // Make sure only the outer pay-to-script-hash does the
-    // extra-validation thing:
+    // extra-validate thing:
     CScript invalidAsScript;
     invalidAsScript << OP_INVALIDOPCODE << OP_INVALIDOPCODE;
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2019 The BCD Core developers
 
-#include <bcd/chaincache.h>
-#include <bcd/cchainstate.h>
+#include <validate/chain_cache.h>
+#include <validate/cchain_state.h>
 
 
 bool fRequireStandard = true;
@@ -402,7 +402,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         if (!CheckInputs(tx, state, view, true, scriptVerifyFlags, true, false, txdata)) {
             // SCRIPT_VERIFY_CLEANSTACK requires SCRIPT_VERIFY_WITNESS, so we
             // need to turn both off, and compare against just turning off CLEANSTACK
-            // to see if the failure is specifically due to witness validation.
+            // to see if the failure is specifically due to witness validate.
             CValidationState stateDummy; // Want reported failures to be from first CheckInputs
             if (!tx.HasWitness() && CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~(SCRIPT_VERIFY_WITNESS | SCRIPT_VERIFY_CLEANSTACK), true, false, txdata) &&
                 !CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~SCRIPT_VERIFY_CLEANSTACK, true, false, txdata)) {
@@ -654,7 +654,7 @@ static void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool,
     // been previously seen in a block.
     auto it = disconnectpool.queuedTx.get<insertion_order>().rbegin();
     while (it != disconnectpool.queuedTx.get<insertion_order>().rend()) {
-        // ignore validation errors in resurrected transactions
+        // ignore validate errors in resurrected transactions
         CValidationState stateDummy;
         if (!fAddToMempool || (*it)->IsCoinBase() ||
             !AcceptToMemoryPool(mempool, stateDummy, *it, nullptr /* pfMissingInputs */,

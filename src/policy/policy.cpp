@@ -198,7 +198,7 @@ bool IsWitnessStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs)
     for (unsigned int i = 0; i < tx.vin.size(); i++)
     {
         // We don't care if witness for this input is empty, since it must not be bloated.
-        // If the script is invalid without witness, it would be caught sooner or later during validation.
+        // If the script is invalid without witness, it would be caught sooner or later during validate.
         if (tx.vin[i].scriptWitness.IsNull())
             continue;
 
