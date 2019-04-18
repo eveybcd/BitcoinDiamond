@@ -424,6 +424,15 @@ libbitcoin_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
+  bcd/bcd/validationcommon.h \
+  bcd/cscriptcheck.h \
+  bcd/cchainstate.h \
+  bcd/cchainstate.cpp \
+  bcd/connecttrace.h \
+  bcd/fileoperator.h \
+  bcd/fileoperator.cpp \
+  bcd/chaincache.h \
+  bcd/chaincache.cpp \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.
