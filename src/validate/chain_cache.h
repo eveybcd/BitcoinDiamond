@@ -5,7 +5,7 @@
 #define BITCOINDIAMOND_CHAINCACHE_H
 
 #include <validate/validation_common.h>
-#include <validate/file_operator.h>
+#include <validate/block_storage.h>
 #include <versionbits.h>
 #include <validate/validate_block.h>
 

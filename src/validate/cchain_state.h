@@ -4,7 +4,7 @@
 #define BITCOINDIAMOND_CCHAINSTATE_H
 
 
-#include <validate/file_operator.h>
+#include <validate/block_storage.h>
 #include <validate/cscript_check.h>
 #include <versionbits.h>
 #include <validate/connect_trace.h>

@@ -1,6 +1,6 @@
 // Copyright (c) 2019 The BCD Core developers
 
-#include <validate/file_operator.h>
+#include <validate/block_storage.h>
 #include <validate/cchain_state.h>
 #include <validate/chain_cache.h>
 

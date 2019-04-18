@@ -430,8 +430,8 @@ libbitcoin_common_a_SOURCES = \
   validate/cchain_state.h \
   validate/cchain_state.cpp \
   validate/connect_trace.h \
-  validate/file_operator.h \
-  validate/file_operator.cpp \
+  validate/block_storage.h \
+  validate/block_storage.cpp \
   validate/chain_cache.h \
   validate/chain_cache.cpp \
   validate/cverify_db.h \
@@ -439,6 +439,8 @@ libbitcoin_common_a_SOURCES = \
   validate/connection_trace.h \
   validate/validate_block.h \
   validate/validate_block.cpp \
+  validate/coin_man.h \
+  validate/coin_man.cpp \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.

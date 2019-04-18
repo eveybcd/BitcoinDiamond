@@ -4,6 +4,7 @@
 #include <validate/cchain_state.h>
 #include <validate/chain_cache.h>
 #include <validate/validate_block.h>
+#include <validate/coin_man.h>
 
 static int64_t nTimeCheck = 0;
 static int64_t nTimeForks = 0;

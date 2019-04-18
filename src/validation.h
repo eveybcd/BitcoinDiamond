@@ -33,6 +33,7 @@
 #include <validate/cverify_db.h>
 #include <validate/chain_cache.h>
 #include <validate/cchain_state.h>
+#include <validate/coin_man.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
