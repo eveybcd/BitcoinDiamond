@@ -61,17 +61,17 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
 //chainstate
 FILE* OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
 bool UndoWriteToDisk(const CBlockUndo& blockundo, CDiskBlockPos& pos, const uint256& hashBlock, const CMessageHeader::MessageStartChars& messageStart);
-static bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
+bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart);
 
 //chainstate verifyDb
 bool UndoReadFromDisk(CBlockUndo& blockundo, const CBlockIndex *pindex);
 //chainstate validate
-bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight);
+bool FlushStateToDisk(const CChainParams& chainparams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight);
 // See definition for documentation
-static bool FlushStateToDisk(const CChainParams& chainParams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight=0);
+bool FlushStateToDisk(const CChainParams& chainParams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight=0);
 
 //chainstate
-void static FlushBlockFile(bool fFinalize = false);
+void FlushBlockFile(bool fFinalize = false);
 
 
 
@@ -80,8 +80,8 @@ void static FlushBlockFile(bool fFinalize = false);
 /** Functions for disk access for blocks */
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
 bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& message_start);
-static void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight);
-static void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight);
+void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight);
+void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight);
 /**
  *  Mark one block file as pruned.
  */
@@ -101,13 +101,13 @@ void PruneBlockFilesManual(int nManualPruneHeight);
 
 
 
-static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown = false);
-static CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp);
+bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown = false);
+CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp);
 // Returns the script flags which should be checked for a given block
-static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
+unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& chainparams);
 /** Check whether NULLDUMMY (BIP 147) has activated. */
 bool IsNullDummyEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-static bool IsScriptWitnessEnabled(const Consensus::Params& params);
+bool IsScriptWitnessEnabled(const Consensus::Params& params);
 
 
 #endif //BITCOINDIAMOND_FILEOPERATOR_H

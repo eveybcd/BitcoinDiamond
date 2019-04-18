@@ -4,7 +4,7 @@
 bool fPruneMode = false;
 CBlockIndex *pindexBestHeader = nullptr;
 int nScriptCheckThreads = 0;
-static void AlertNotify(const std::string& strMessage)
+void AlertNotify(const std::string& strMessage)
 {
     uiInterface.NotifyAlertChanged();
     std::string strCmd = gArgs.GetArg("-alertnotify", "");
@@ -27,7 +27,7 @@ static void AlertNotify(const std::string& strMessage)
 
 
 /** Abort with a message */
-static bool AbortNode(const std::string& strMessage, const std::string& userMessage)
+bool AbortNode(const std::string& strMessage, const std::string& userMessage)
 {
     SetMiscWarning(strMessage);
     LogPrintf("*** %s\n", strMessage);
@@ -38,7 +38,7 @@ static bool AbortNode(const std::string& strMessage, const std::string& userMess
     return false;
 }
 
-static bool AbortNode(CValidationState& state, const std::string& strMessage, const std::string& userMessage)
+bool AbortNode(CValidationState& state, const std::string& strMessage, const std::string& userMessage)
 {
     AbortNode(strMessage, userMessage);
     return state.Error(strMessage);
@@ -55,7 +55,7 @@ std::string FormatStateMessage(const CValidationState &state)
 
 
 
-static void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main) {
+void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main) {
     bool fNotify = false;
     bool fInitialBlockDownload = false;
     static CBlockIndex* pindexHeaderOld = nullptr;

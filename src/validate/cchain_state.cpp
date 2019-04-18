@@ -47,14 +47,14 @@ bool fHavePruned = false;
 
 
 /** Private helper function that concatenates warning messages. */
-static void AppendWarning(std::string& res, const std::string& warn)
+void AppendWarning(std::string& res, const std::string& warn)
 {
     if (!res.empty()) res += ", ";
     res += warn;
 }
 
 
-static void DoWarning(const std::string& strWarning)
+void DoWarning(const std::string& strWarning)
 {
     static bool fWarned = false;
     SetMiscWarning(strWarning);
@@ -65,7 +65,7 @@ static void DoWarning(const std::string& strWarning)
 }
 
 /** Check warning conditions and do some notifications on new chain tip set. */
-void static UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainParams) {
+void UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainParams) {
     // New best block
     mempool.AddTransactionsUpdated(1);
 
@@ -157,7 +157,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
 }
 
 
-static void CheckForkWarningConditions()
+void CheckForkWarningConditions()
 {
     AssertLockHeld(cs_main);
     // Before we get past initial download, we cannot reliably alert about forks
@@ -199,7 +199,7 @@ static void CheckForkWarningConditions()
 }
 
 
-static void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
+void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
 {
     AssertLockHeld(cs_main);
     // If we are on a fork that is sufficiently large, set a warning flag
@@ -233,7 +233,7 @@ static void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
 }
 
 
-void static InvalidChainFound(CBlockIndex* pindexNew)
+void InvalidChainFound(CBlockIndex* pindexNew)
 {
     if (!pindexBestInvalid || pindexNew->nChainWork > pindexBestInvalid->nChainWork)
         pindexBestInvalid = pindexNew;
@@ -250,7 +250,7 @@ void static InvalidChainFound(CBlockIndex* pindexNew)
 }
 
 
-static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize)
+bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize)
 {
     pos.nFile = nFile;
 
@@ -283,7 +283,7 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 
 
 
-static bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams)
+bool WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidationState& state, CBlockIndex* pindex, const CChainParams& chainparams)
 {
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull()) {

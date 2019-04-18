@@ -42,5 +42,5 @@ public:
 
     ScriptError GetScriptError() const { return error; }
 };
-static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
+CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 #endif //BITCOINDIAMOND_CSCRIPTCHECK_H

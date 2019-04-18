@@ -10,7 +10,7 @@ std::unique_ptr<CBlockTreeDB> pblocktree;
 size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 
-static FILE* OpenDiskFile(const CDiskBlockPos &pos, const char *prefix, bool fReadOnly)
+FILE* OpenDiskFile(const CDiskBlockPos &pos, const char *prefix, bool fReadOnly)
 {
     if (pos.IsNull())
         return nullptr;
@@ -74,7 +74,7 @@ FILE* OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly) {
 }
 
 
-static bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart)
+bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMessageHeader::MessageStartChars& messageStart)
 {
     // Open history file to append
     CAutoFile fileout(OpenBlockFile(pos), SER_DISK, CLIENT_VERSION);
@@ -221,7 +221,7 @@ void PruneBlockFilesManual(int nManualPruneHeight)
  * If FlushStateMode::NONE is used, then FlushStateToDisk(...) won't do anything
  * besides checking if we need to prune.
  */
-bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight) {
+bool FlushStateToDisk(const CChainParams& chainparams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight) {
     int64_t nMempoolUsage = mempool.DynamicMemoryUsage();
     LOCK(cs_main);
     static int64_t nLastWrite = 0;
@@ -326,7 +326,7 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
 }
 
 
-void static FlushBlockFile(bool fFinalize)
+void FlushBlockFile(bool fFinalize)
 {
     LOCK(cs_LastBlockFile);
 
@@ -397,7 +397,7 @@ void FlushStateToDisk() {
 
 
 /* Calculate the block/rev files to delete based on height specified by user with RPC command pruneblockchain */
-static void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight)
+void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight)
 {
     assert(fPruneMode && nManualPruneHeight > 0);
 
@@ -435,7 +435,7 @@ static void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPr
  *
  * @param[out]   setFilesToPrune   The set of file indices that can be unlinked will be returned
  */
-static void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight)
+void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight)
 {
     LOCK2(cs_main, cs_LastBlockFile);
     if (chainActive.Tip() == nullptr || nPruneTarget == 0) {
@@ -691,7 +691,7 @@ CBlockIndex* LookupBlockIndex(const uint256& hash)
 
 
 
-static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown)
+bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int nHeight, uint64_t nTime, bool fKnown)
 {
     LOCK(cs_LastBlockFile);
 
@@ -750,7 +750,7 @@ static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize, unsigned int
 
 
 /** Store block on disk. If dbp is non-nullptr, the file is known to already reside on disk */
-static CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp) {
+CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CChainParams& chainparams, const CDiskBlockPos* dbp) {
     unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
     CDiskBlockPos blockPos;
     if (dbp != nullptr)
@@ -769,7 +769,7 @@ static CDiskBlockPos SaveBlockToDisk(const CBlock& block, int nHeight, const CCh
 }
 
 
-static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& consensusparams) {
+unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consensus::Params& consensusparams) {
     AssertLockHeld(cs_main);
 
     unsigned int flags = SCRIPT_VERIFY_NONE;
@@ -836,7 +836,7 @@ bool IsNullDummyEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& 
 // mainnet. We no longer need to support disabling the segwit deployment
 // except for testing purposes, due to limitations of the functional test
 // environment. See test/functional/p2p-segwit.py.
-static bool IsScriptWitnessEnabled(const Consensus::Params& params)
+bool IsScriptWitnessEnabled(const Consensus::Params& params)
 {
     return params.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout != 0;
 }

@@ -188,7 +188,7 @@ extern uint256 g_best_block;
 extern bool fHavePruned;
 
 // Protected by cs_main
-static ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS];
+ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS];
 
 
 

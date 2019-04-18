@@ -173,17 +173,17 @@ enum class FlushStateMode {
 /** Check whether we are doing an initial block download (synchronizing from disk or network) */
 bool IsInitialBlockDownload();
 
-static void AlertNotify(const std::string& strMessage);
+void AlertNotify(const std::string& strMessage);
 
 
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
 
 /** Abort with a message */
-static bool AbortNode(const std::string& strMessage, const std::string& userMessage="");
+bool AbortNode(const std::string& strMessage, const std::string& userMessage="");
 
-static bool AbortNode(CValidationState& state, const std::string& strMessage, const std::string& userMessage="");
+bool AbortNode(CValidationState& state, const std::string& strMessage, const std::string& userMessage="");
 
-static void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main);
+void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main);
 
 #endif //BITCOINDIAMOND_VALIDATIONCOMMON_H

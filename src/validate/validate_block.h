@@ -27,8 +27,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 double GuessVerificationProgress(const ChainTxData& data, const CBlockIndex* pindex);
 /** Check whether witness commitments are required for block. */
 bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
-static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const CChainParams& params, const CBlockIndex* pindexPrev, int64_t nAdjustedTime);
-static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const CChainParams& params, const CBlockIndex* pindexPrev, int64_t nAdjustedTime);
+bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 
 
 bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks = nullptr);
@@ -37,11 +37,11 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
 
 
-static CuckooCache::cache<uint256, SignatureCacheHasher> scriptExecutionCache;
-static uint256 scriptExecutionCacheNonce(GetRandHash());
-static int GetWitnessCommitmentIndex(const CBlock& block);
+CuckooCache::cache<uint256, SignatureCacheHasher> scriptExecutionCache;
+uint256 scriptExecutionCacheNonce(GetRandHash());
+int GetWitnessCommitmentIndex(const CBlock& block);
 
-static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool isBCDBlock = false);
+bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool isBCDBlock = false);
 
 
 

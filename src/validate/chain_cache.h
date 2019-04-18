@@ -41,16 +41,16 @@ extern CFeeRate minRelayTxFee;
  */
 int GetSpendHeight(const CCoinsViewCache& inputs);
 
-static void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool fAddToMempool);
+void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool fAddToMempool);
 /** (try to) add transaction to memory pool
  * plTxnReplaced will be appended to with all transactions replaced from mempool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
                         bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced,
                         bool bypass_limits, const CAmount nAbsurdFee, bool test_accept=false);
 
-static void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age);
+void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age);
 
-static bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
+bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
                                        bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
                                        bool bypass_limits, const CAmount nAbsurdFee, bool test_accept);
 
