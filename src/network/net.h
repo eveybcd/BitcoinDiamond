@@ -6,8 +6,8 @@
 #ifndef BITCOIN_NET_H
 #define BITCOIN_NET_H
 
-#include <addrdb.h>
-#include <addrman.h>
+#include <network/addrdb.h>
+#include <network/addrman.h>
 #include <amount.h>
 #include <bloom.h>
 #include <compat.h>

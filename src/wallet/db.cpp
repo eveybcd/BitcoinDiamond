@@ -5,7 +5,7 @@
 
 #include <wallet/db.h>
 
-#include <addrman.h>
+#include <network/addrman.h>
 #include <hash.h>
 #include <network/protocol.h>
 #include <utilstrencodings.h>

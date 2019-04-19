@@ -9,7 +9,7 @@
 
 #include <init.h>
 
-#include <addrman.h>
+#include <network/addrman.h>
 #include <amount.h>
 #include <chain.h>
 #include <chainparams.h>

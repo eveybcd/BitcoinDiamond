@@ -3,9 +3,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <addrdb.h>
+#include <network/addrdb.h>
 
-#include <addrman.h>
+#include <network/addrman.h>
 #include <chainparams.h>
 #include <clientversion.h>
 #include <hash.h>
