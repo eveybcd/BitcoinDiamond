@@ -76,7 +76,8 @@ private:
     void handleVerack(CNode* pfrom, CConnman* connman, const CNetMsgMaker &msgMaker);
     bool handleVersion(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman, bool enable_bip61);
     bool handleReject(CDataStream& vRecv);
-
+    bool handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams, bool &isNeedReturn);
+    bool handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams, bool &isNeedReturn);
 
 private:
     int64_t m_stale_tip_check_time; //! Next time to check for stale tip
