@@ -10,7 +10,7 @@
 
 #include <primitives/transaction.h>
 #include <primitives/block.h>
-#include <uint256.h>
+#include <util/uint256.h>
 
 uint256 ComputeMerkleRoot(std::vector<uint256> hashes, bool* mutated = nullptr);
 

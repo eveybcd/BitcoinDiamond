@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <limits>
 #include <cmath>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <arith_uint256.h>
 #include <string>
 #include <version.h>

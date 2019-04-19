@@ -8,8 +8,8 @@
 #include <crypto/sha256.h>
 #include <pubkey.h>
 #include <script/script.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 
 
 typedef std::vector<unsigned char> valtype;

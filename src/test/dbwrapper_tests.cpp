@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <dbwrapper.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <random.h>
 #include <test/test_bitcoin.h>
 

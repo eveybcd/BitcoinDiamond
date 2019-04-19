@@ -4,7 +4,7 @@
 
 #include <bench/bench.h>
 
-#include <uint256.h>
+#include <util/uint256.h>
 #include <random.h>
 #include <consensus/merkle.h>
 

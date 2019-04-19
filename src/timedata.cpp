@@ -11,8 +11,8 @@
 #include <network/netaddress.h>
 #include <sync.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <warnings.h>
 
 

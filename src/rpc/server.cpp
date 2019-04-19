@@ -11,8 +11,8 @@
 #include <shutdown.h>
 #include <sync.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 
 #include <boost/bind.hpp>
 #include <boost/signals2/signal.hpp>

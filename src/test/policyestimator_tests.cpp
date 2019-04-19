@@ -5,8 +5,8 @@
 #include <policy/policy.h>
 #include <policy/fees.h>
 #include <txmempool.h>
-#include <uint256.h>
-#include <util.h>
+#include <util/uint256.h>
+#include <util/util.h>
 
 #include <test/test_bitcoin.h>
 

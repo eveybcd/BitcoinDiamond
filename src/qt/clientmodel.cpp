@@ -20,7 +20,7 @@
 #include <network/netbase.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <util.h>
+#include <util/util.h>
 #include <warnings.h>
 
 #include <stdint.h>

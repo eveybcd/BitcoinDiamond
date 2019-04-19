@@ -8,7 +8,7 @@
 #include <network/addrman.h>
 #include <hash.h>
 #include <network/protocol.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 #include <wallet/walletutil.h>
 
 #include <stdint.h>

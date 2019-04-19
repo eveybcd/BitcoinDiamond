@@ -8,8 +8,8 @@
 #include <memusage.h>
 #include <pubkey.h>
 #include <random.h>
-#include <uint256.h>
-#include <util.h>
+#include <util/uint256.h>
+#include <util/util.h>
 
 #include <cuckoocache.h>
 #include <boost/thread.hpp>

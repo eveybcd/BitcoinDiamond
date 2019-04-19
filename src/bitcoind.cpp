@@ -15,10 +15,10 @@
 #include <init.h>
 #include <noui.h>
 #include <shutdown.h>
-#include <util.h>
+#include <util/util.h>
 #include <network/httpserver.h>
 #include <network/httprpc.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 #include <walletinitinterface.h>
 
 #include <stdio.h>

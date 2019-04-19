@@ -5,8 +5,8 @@
 
 #include <arith_uint256.h>
 
-#include <uint256.h>
-#include <utilstrencodings.h>
+#include <util/uint256.h>
+#include <util/utilstrencodings.h>
 #include <crypto/common.h>
 
 #include <stdio.h>

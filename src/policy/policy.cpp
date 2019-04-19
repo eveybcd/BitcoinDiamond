@@ -11,8 +11,8 @@
 #include <validate/validation.h>
 #include <coins.h>
 #include <tinyformat.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 
 
 CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)

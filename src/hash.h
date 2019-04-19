@@ -10,7 +10,7 @@
 #include <crypto/sha256.h>
 #include <prevector.h>
 #include <serialize.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <version.h>
 
 #include <vector>

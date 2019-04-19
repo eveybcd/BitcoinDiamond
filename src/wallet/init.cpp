@@ -8,8 +8,8 @@
 #include <network/net.h>
 #include <scheduler.h>
 #include <outputtype.h>
-#include <util.h>
-#include <utilmoneystr.h>
+#include <util/util.h>
+#include <util/utilmoneystr.h>
 #include <validate/validation.h>
 #include <walletinitinterface.h>
 #include <wallet/rpcwallet.h>

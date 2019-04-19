@@ -19,7 +19,7 @@
 #include <random.h>
 #include <streams.h>
 #include <sync.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <threadinterrupt.h>
 
 #include <atomic>

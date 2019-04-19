@@ -21,8 +21,8 @@
 #include <primitives/transaction.h>
 #include <script/standard.h>
 #include <timedata.h>
-#include <util.h>
-#include <utilmoneystr.h>
+#include <util/util.h>
+#include <util/utilmoneystr.h>
 #include <validate/validationinterface.h>
 
 #include <algorithm>

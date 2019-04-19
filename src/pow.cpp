@@ -8,8 +8,8 @@
 #include <arith_uint256.h>
 #include <chain.h>
 #include <primitives/block.h>
-#include <uint256.h>
-#include <util.h>
+#include <util/uint256.h>
+#include <util/util.h>
 
 #include <consensus/consensus.h>
 

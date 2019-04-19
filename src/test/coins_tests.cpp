@@ -4,9 +4,9 @@
 
 #include <coins.h>
 #include <script/standard.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <undo.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 #include <test/test_bitcoin.h>
 #include <validate/validation.h>
 #include <consensus/validation.h>

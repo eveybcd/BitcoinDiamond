@@ -6,7 +6,7 @@
 
 #include <base58.h>
 #include <test/test_bitcoin.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 
 #include <univalue.h>
 

@@ -12,8 +12,8 @@
 #include <network/protocol.h>
 #include <serialize.h>
 #include <sync.h>
-#include <util.h>
-#include <utiltime.h>
+#include <util/util.h>
+#include <util/utiltime.h>
 #include <wallet/wallet.h>
 
 #include <atomic>

@@ -8,7 +8,7 @@
 #include <version.h>
 #include <validate/validation.h>
 #include <streams.h>
-#include <util.h>
+#include <util/util.h>
 
 void zmqError(const char *str)
 {

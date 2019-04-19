@@ -7,7 +7,7 @@
 
 #include <amount.h>
 #include <policy/feerate.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <random.h>
 #include <sync.h>
 

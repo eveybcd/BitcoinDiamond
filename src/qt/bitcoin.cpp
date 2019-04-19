@@ -30,8 +30,8 @@
 #include <interfaces/node.h>
 #include <rpc/server.h>
 #include <ui_interface.h>
-#include <uint256.h>
-#include <util.h>
+#include <util/uint256.h>
+#include <util/util.h>
 #include <warnings.h>
 
 #include <walletinitinterface.h>

@@ -25,9 +25,9 @@
 #include <tinyformat.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilmoneystr.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilmoneystr.h>
+#include <util/utilstrencodings.h>
 
 #include <memory>
 

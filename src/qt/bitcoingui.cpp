@@ -32,7 +32,7 @@
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 #include <ui_interface.h>
-#include <util.h>
+#include <util/util.h>
 
 #include <iostream>
 

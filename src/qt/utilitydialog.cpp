@@ -20,7 +20,7 @@
 #include <clientversion.h>
 #include <init.h>
 #include <interfaces/node.h>
-#include <util.h>
+#include <util/util.h>
 
 #include <stdio.h>
 

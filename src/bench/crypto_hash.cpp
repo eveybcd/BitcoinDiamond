@@ -8,8 +8,8 @@
 #include <bloom.h>
 #include <hash.h>
 #include <random.h>
-#include <uint256.h>
-#include <utiltime.h>
+#include <util/uint256.h>
+#include <util/utiltime.h>
 #include <crypto/ripemd160.h>
 #include <crypto/sha1.h>
 #include <crypto/sha256.h>

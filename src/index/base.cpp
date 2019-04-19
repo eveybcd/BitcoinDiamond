@@ -7,7 +7,7 @@
 #include <shutdown.h>
 #include <tinyformat.h>
 #include <ui_interface.h>
-#include <util.h>
+#include <util/util.h>
 #include <validate/validation.h>
 #include <warnings.h>
 

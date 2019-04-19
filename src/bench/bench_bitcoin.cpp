@@ -7,8 +7,8 @@
 #include <crypto/sha256.h>
 #include <key.h>
 #include <random.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <validate/validation.h>
 
 #include <memory>

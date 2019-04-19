@@ -7,8 +7,8 @@
 #include <consensus/merkle.h>
 
 #include <tinyformat.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 
 #include <assert.h>
 

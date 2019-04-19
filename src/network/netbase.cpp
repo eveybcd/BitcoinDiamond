@@ -7,11 +7,11 @@
 
 #include <hash.h>
 #include <sync.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <random.h>
 #include <tinyformat.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 
 #include <atomic>
 

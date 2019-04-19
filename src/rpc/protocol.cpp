@@ -7,9 +7,9 @@
 
 #include <random.h>
 #include <tinyformat.h>
-#include <util.h>
-#include <utilstrencodings.h>
-#include <utiltime.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
+#include <util/utiltime.h>
 #include <version.h>
 
 #include <fstream>

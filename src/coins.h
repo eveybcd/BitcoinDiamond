@@ -12,7 +12,7 @@
 #include <hash.h>
 #include <memusage.h>
 #include <serialize.h>
-#include <uint256.h>
+#include <util/uint256.h>
 
 #include <assert.h>
 #include <stdint.h>

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
-#include <utiltime.h>
+#include <util/util.h>
+#include <util/utiltime.h>
 #include <validate/validation.h>
 
 #include <test/test_bitcoin.h>

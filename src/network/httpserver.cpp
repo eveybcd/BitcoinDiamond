@@ -6,8 +6,8 @@
 
 #include <chainparamsbase.h>
 #include <compat.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <network/netbase.h>
 #include <rpc/protocol.h> // For HTTP status codes
 #include <sync.h>

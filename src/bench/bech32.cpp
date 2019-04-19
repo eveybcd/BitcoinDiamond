@@ -6,7 +6,7 @@
 
 #include <validate/validation.h>
 #include <bech32.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 
 #include <vector>
 #include <string>

@@ -8,7 +8,7 @@
 
 #include <amount.h>
 #include <rpc/protocol.h>
-#include <uint256.h>
+#include <util/uint256.h>
 
 #include <list>
 #include <map>

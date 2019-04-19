@@ -7,7 +7,7 @@
 
 #include <hash.h>
 #include <tinyformat.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 #include <crypto/common.h>
 #include "versionbits.h"
 

@@ -41,8 +41,8 @@
 #include <txmempool.h>
 #include <torcontrol.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilmoneystr.h>
+#include <util/util.h>
+#include <util/utilmoneystr.h>
 #include <validate/validationinterface.h>
 #include <warnings.h>
 #include <walletinitinterface.h>

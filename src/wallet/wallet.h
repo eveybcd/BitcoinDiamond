@@ -12,11 +12,11 @@
 #include <streams.h>
 #include <tinyformat.h>
 #include <ui_interface.h>
-#include <utilstrencodings.h>
+#include <util/utilstrencodings.h>
 #include <validate/validationinterface.h>
 #include <script/ismine.h>
 #include <script/sign.h>
-#include <util.h>
+#include <util/util.h>
 #include <wallet/crypter.h>
 #include <wallet/coinselection.h>
 #include <wallet/walletdb.h>

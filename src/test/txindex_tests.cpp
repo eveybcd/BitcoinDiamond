@@ -5,8 +5,8 @@
 #include <index/txindex.h>
 #include <script/standard.h>
 #include <test/test_bitcoin.h>
-#include <util.h>
-#include <utiltime.h>
+#include <util/util.h>
+#include <util/utiltime.h>
 #include <validate/validation.h>
 
 #include <boost/test/unit_test.hpp>

@@ -12,9 +12,9 @@
 #include <random.h>
 #include <serialize.h>
 #include <streams.h>
-#include <uint256.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/uint256.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <test/test_bitcoin.h>
 
 #include <vector>

@@ -18,7 +18,7 @@
 #include <network/netbase.h>
 #include <rpc/server.h>
 #include <rpc/client.h>
-#include <util.h>
+#include <util/util.h>
 
 #include <openssl/crypto.h>
 

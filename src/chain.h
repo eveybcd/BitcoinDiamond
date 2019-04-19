@@ -10,7 +10,7 @@
 #include <consensus/params.h>
 #include <primitives/block.h>
 #include <tinyformat.h>
-#include <uint256.h>
+#include <util/uint256.h>
 
 #include <vector>
 

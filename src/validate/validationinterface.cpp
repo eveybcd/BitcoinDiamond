@@ -9,7 +9,7 @@
 #include <scheduler.h>
 #include <sync.h>
 #include <txmempool.h>
-#include <util.h>
+#include <util/util.h>
 #include <validate/validation.h>
 
 #include <list>

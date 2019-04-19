@@ -6,8 +6,8 @@
 #include <chainparamsbase.h>
 
 #include <tinyformat.h>
-#include <util.h>
-#include <utilmemory.h>
+#include <util/util.h>
+#include <util/utilmemory.h>
 
 #include <assert.h>
 

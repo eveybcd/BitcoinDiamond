@@ -25,8 +25,8 @@
 #include <sync.h>
 #include <txdb.h>
 #include <txmempool.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <hash.h>
 #include <validate/validationinterface.h>
 #include <warnings.h>

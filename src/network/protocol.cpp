@@ -5,8 +5,8 @@
 
 #include <network/protocol.h>
 
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/util.h>
+#include <util/utilstrencodings.h>
 #include <consensus/consensus.h>
 
 #ifndef WIN32

@@ -19,7 +19,7 @@
 #include <sync.h>
 #include <timedata.h>
 #include <ui_interface.h>
-#include <uint256.h>
+#include <util/uint256.h>
 #include <validate/validation.h>
 #include <wallet/feebumper.h>
 #include <wallet/fees.h>
