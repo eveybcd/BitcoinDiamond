@@ -70,17 +70,21 @@ private:
     bool ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61);
 
 private:
-    bool handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
+    bool handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker);
     void handleSendcmpct(CNode* pfrom, CDataStream& vRecv);
-    bool handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool &isNeedReturn);
+    bool handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc);
     void handleVerack(CNode* pfrom, CConnman* connman, const CNetMsgMaker &msgMaker);
     bool handleVersion(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman, bool enable_bip61);
     bool handleReject(CDataStream& vRecv);
-    bool handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams, bool &isNeedReturn);
-    bool handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams, bool &isNeedReturn);
-    bool handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, bool &isNeedReturn);
-    bool handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
-    bool handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
+    bool handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams);
+    bool handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams);
+    bool handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams);
+    bool handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker);
+    bool handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker);
+    bool handleCmpctblock(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, int64_t nTimeReceived, const CChainParams& chainparams, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker);
+
+
+
 
 private:
     int64_t m_stale_tip_check_time; //! Next time to check for stale tip

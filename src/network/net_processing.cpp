@@ -722,11 +722,10 @@ void PeerLogicValidation::handleVerack(CNode* pfrom, CConnman* connman, const CN
     pfrom->fSuccessfullyConnected = true;
 }
 
-bool PeerLogicValidation::handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool &isNeedReturn)
+bool PeerLogicValidation::handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc)
 {
     std::vector<CAddress> vAddr;
     vRecv >> vAddr;
-    isNeedReturn = true;
     // Don't want addr from older versions unless seeding
     if (pfrom->nVersion < CADDR_TIME_VERSION && connman->GetAddressCount() > 1000)
     {
@@ -774,7 +773,6 @@ bool PeerLogicValidation::handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman*
         pfrom->fGetAddr = false;
     if (pfrom->fOneShot)
         pfrom->fDisconnect = true;
-    isNeedReturn = false;
     return true;
 }
 
@@ -801,7 +799,7 @@ void PeerLogicValidation::handleSendcmpct(CNode* pfrom, CDataStream& vRecv)
     }
 }
 
-bool PeerLogicValidation::handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker, bool &isNeedReturn)
+bool PeerLogicValidation::handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker)
 {
     std::vector<CInv> vInv;
     vRecv >> vInv;
@@ -856,11 +854,10 @@ bool PeerLogicValidation::handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* 
             }
         }
     }
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams, bool &isNeedReturn)
+bool PeerLogicValidation::handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams)
 {
     std::vector<CInv> vInv;
     vRecv >> vInv;
@@ -879,13 +876,11 @@ bool PeerLogicValidation::handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnm
 
     pfrom->vRecvGetData.insert(pfrom->vRecvGetData.end(), vInv.begin(), vInv.end());
     netBlockTxPtr->ProcessGetData(pfrom, chainparams, connman, interruptMsgProc);
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams, bool &isNeedReturn)
+bool PeerLogicValidation::handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams)
 {
-    isNeedReturn = true;
     CBlockLocator locator;
     uint256 hashStop;
     vRecv >> locator >> hashStop;
@@ -950,11 +945,10 @@ bool PeerLogicValidation::handleGetblocks(CNode* pfrom, CDataStream& vRecv, cons
             break;
         }
     }
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, bool &isNeedReturn)
+bool PeerLogicValidation::handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams)
 {
     BlockTransactionsRequest req;
     vRecv >> req;
@@ -1001,11 +995,10 @@ bool PeerLogicValidation::handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CC
     assert(ret);
 
     SendBlockTransactions(block, req, pfrom, connman);
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker, bool &isNeedReturn)
+bool PeerLogicValidation::handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker)
 {
     CBlockLocator locator;
     uint256 hashStop;
@@ -1070,11 +1063,10 @@ bool PeerLogicValidation::handleGetheaders(CNode* pfrom, CDataStream& vRecv, CCo
     // in the SendMessages logic.
     nodestate->pindexBestHeaderSent = pindex ? pindex : chainActive.Tip();
     connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::HEADERS, vHeaders));
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker, bool &isNeedReturn)
+bool PeerLogicValidation::handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker)
 {
     // Stop processing the transaction early if
     // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
@@ -1259,150 +1251,17 @@ bool PeerLogicValidation::handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* c
             Misbehaving(pfrom->GetId(), nDoS);
         }
     }
-    isNeedReturn = false;
     return true;
 }
 
-bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61)
+bool PeerLogicValidation::handleCmpctblock(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, int64_t nTimeReceived, const CChainParams& chainparams, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker)
 {
-    LogPrint(BCLog::NET, "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->GetId());
-    if (gArgs.IsArgSet("-dropmessagestest") && GetRand(gArgs.GetArg("-dropmessagestest", 0)) == 0)
+    CBlockHeaderAndShortTxIDs cmpctblock;
+    vRecv >> cmpctblock;
+
+    bool received_new_header = false;
+
     {
-        LogPrintf("dropmessagestest DROPPING RECV MESSAGE\n");
-        return true;
-    }
-
-
-    if (!(pfrom->GetLocalServices() & NODE_BLOOM) &&
-              (strCommand == NetMsgType::FILTERLOAD ||
-               strCommand == NetMsgType::FILTERADD))
-    {
-        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
-            LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 100);
-            return false;
-        } else {
-            pfrom->fDisconnect = true;
-            return false;
-        }
-    }
-
-    if (strCommand == NetMsgType::REJECT)
-    {
-        return handleReject(vRecv);
-    }
-    else if (strCommand == NetMsgType::VERSION)
-    {
-        return handleVersion(pfrom, strCommand, vRecv, connman, enable_bip61);
-    }
-    else if (pfrom->nVersion == 0)
-    {
-        // Must have a version message before anything else
-        LOCK(cs_main);
-        Misbehaving(pfrom->GetId(), 1);
-        return false;
-    }
-
-    // At this point, the outgoing message serialization version can't change.
-    const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
-
-    if (strCommand == NetMsgType::VERACK)
-    {
-        handleVerack(pfrom, connman, msgMaker);
-    }
-
-    else if (!pfrom->fSuccessfullyConnected)
-    {
-        // Must have a verack message before anything else
-        LOCK(cs_main);
-        Misbehaving(pfrom->GetId(), 1);
-        return false;
-    }
-
-    else if (strCommand == NetMsgType::ADDR)
-    {
-        bool isNeedReturn = false;
-        bool ret = handleAddr(pfrom, vRecv, connman, interruptMsgProc, isNeedReturn);
-        if (isNeedReturn)
-        {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::SENDHEADERS)
-    {
-        LOCK(cs_main);
-        State(pfrom->GetId())->fPreferHeaders = true;
-    }
-
-    else if (strCommand == NetMsgType::SENDCMPCT)
-    {
-        handleSendcmpct(pfrom, vRecv);
-    }
-
-    else if (strCommand == NetMsgType::INV)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleInv(pfrom, vRecv,connman, interruptMsgProc, msgMaker, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::GETDATA)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleGetdata(pfrom, vRecv,connman, interruptMsgProc, chainparams, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::GETBLOCKS)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleGetblocks(pfrom, vRecv, chainparams, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::GETBLOCKTXN)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleGetblocktxn(pfrom, vRecv, connman, chainparams, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-
-    else if (strCommand == NetMsgType::GETHEADERS)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleGetheaders(pfrom, vRecv, connman, chainparams, msgMaker, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::TX)
-    {
-        bool isNeedReturn = true;
-        bool ret = handleTx(pfrom, vRecv, connman, enable_bip61, strCommand, msgMaker, isNeedReturn);
-        if (isNeedReturn) {
-            return ret;
-        }
-    }
-
-    else if (strCommand == NetMsgType::CMPCTBLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
-    {
-        CBlockHeaderAndShortTxIDs cmpctblock;
-        vRecv >> cmpctblock;
-
-        bool received_new_header = false;
-
-        {
         LOCK(cs_main);
 
         if (!gBlockStorage.LookupBlockIndex(cmpctblock.header.hashPrevBlock)) {
@@ -1415,40 +1274,40 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
         if (!gBlockStorage.LookupBlockIndex(cmpctblock.header.GetHash())) {
             received_new_header = true;
         }
-        }
+    }
 
-        const CBlockIndex *pindex = nullptr;
-        CValidationState state;
-        if (!ProcessNewBlockHeaders({cmpctblock.header}, state, chainparams, &pindex)) {
-            int nDoS;
-            if (state.IsInvalid(nDoS)) {
-                if (nDoS > 0) {
-                    LOCK(cs_main);
-                    Misbehaving(pfrom->GetId(), nDoS, strprintf("Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId()));
-                } else {
-                    LogPrint(BCLog::NET, "Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId());
-                }
-                return true;
+    const CBlockIndex *pindex = nullptr;
+    CValidationState state;
+    if (!ProcessNewBlockHeaders({cmpctblock.header}, state, chainparams, &pindex)) {
+        int nDoS;
+        if (state.IsInvalid(nDoS)) {
+            if (nDoS > 0) {
+                LOCK(cs_main);
+                Misbehaving(pfrom->GetId(), nDoS, strprintf("Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId()));
+            } else {
+                LogPrint(BCLog::NET, "Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId());
             }
+            return true;
         }
+    }
 
-        // When we succeed in decoding a block's txids from a cmpctblock
-        // message we typically jump to the BLOCKTXN handling code, with a
-        // dummy (empty) BLOCKTXN message, to re-use the logic there in
-        // completing processing of the putative block (without cs_main).
-        bool fProcessBLOCKTXN = false;
-        CDataStream blockTxnMsg(SER_NETWORK, PROTOCOL_VERSION);
+    // When we succeed in decoding a block's txids from a cmpctblock
+    // message we typically jump to the BLOCKTXN handling code, with a
+    // dummy (empty) BLOCKTXN message, to re-use the logic there in
+    // completing processing of the putative block (without cs_main).
+    bool fProcessBLOCKTXN = false;
+    CDataStream blockTxnMsg(SER_NETWORK, PROTOCOL_VERSION);
 
-        // If we end up treating this as a plain headers message, call that as well
-        // without cs_main.
-        bool fRevertToHeaderProcessing = false;
+    // If we end up treating this as a plain headers message, call that as well
+    // without cs_main.
+    bool fRevertToHeaderProcessing = false;
 
-        // Keep a CBlock for "optimistic" compactblock reconstructions (see
-        // below)
-        std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
-        bool fBlockReconstructed = false;
+    // Keep a CBlock for "optimistic" compactblock reconstructions (see
+    // below)
+    std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
+    bool fBlockReconstructed = false;
 
-        {
+    {
         LOCK2(cs_main, g_cs_orphans);
         // If AcceptBlockHeader returned true, it set pindex
         assert(pindex);
@@ -1469,7 +1328,7 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
             return true;
 
         if (pindex->nChainWork <= chainActive.Tip()->nChainWork || // We know something better
-                pindex->nTx != 0) { // We had this block at some point, but pruned it
+            pindex->nTx != 0) { // We had this block at some point, but pruned it
             if (fAlreadyInFlight) {
                 // We requested this block for some reason, but our mempool will probably be useless
                 // so we just grab the block via normal getdata
@@ -1494,7 +1353,7 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
         // possibilities in compact block processing...
         if (pindex->nHeight <= chainActive.Height() + 2) {
             if ((!fAlreadyInFlight && nodestate->nBlocksInFlight < MAX_BLOCKS_IN_TRANSIT_PER_PEER) ||
-                 (fAlreadyInFlight && blockInFlightIt->second.first == pfrom->GetId())) {
+                (fAlreadyInFlight && blockInFlightIt->second.first == pfrom->GetId())) {
                 std::list<QueuedBlock>::iterator* queuedBlockIt = nullptr;
                 if (!netBlockTxPtr->MarkBlockAsInFlight(pfrom->GetId(), pindex->GetBlockHash(), pindex, &queuedBlockIt)) {
                     if (!(*queuedBlockIt)->partialBlock)
@@ -1566,54 +1425,161 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
                 fRevertToHeaderProcessing = true;
             }
         }
-        } // cs_main
+    } // cs_main
 
-        if (fProcessBLOCKTXN)
-            return ProcessMessage(pfrom, NetMsgType::BLOCKTXN, blockTxnMsg, nTimeReceived, chainparams, connman, interruptMsgProc, enable_bip61);
+    if (fProcessBLOCKTXN)
+        return ProcessMessage(pfrom, NetMsgType::BLOCKTXN, blockTxnMsg, nTimeReceived, chainparams, connman, interruptMsgProc, enable_bip61);
 
-        if (fRevertToHeaderProcessing) {
-            // Headers received from HB compact block peers are permitted to be
-            // relayed before full validate (see BIP 152), so we don't want to disconnect
-            // the peer if the header turns out to be for an invalid block.
-            // Note that if a peer tries to build on an invalid chain, that
-            // will be detected and the peer will be banned.
-            return ProcessHeadersMessage(pfrom, connman, {cmpctblock.header}, chainparams, /*punish_duplicate_invalid=*/false);
+    if (fRevertToHeaderProcessing) {
+        // Headers received from HB compact block peers are permitted to be
+        // relayed before full validate (see BIP 152), so we don't want to disconnect
+        // the peer if the header turns out to be for an invalid block.
+        // Note that if a peer tries to build on an invalid chain, that
+        // will be detected and the peer will be banned.
+        return ProcessHeadersMessage(pfrom, connman, {cmpctblock.header}, chainparams, /*punish_duplicate_invalid=*/false);
+    }
+
+    if (fBlockReconstructed) {
+        // If we got here, we were able to optimistically reconstruct a
+        // block that is in flight from some other peer.
+        {
+            LOCK(cs_main);
+            mapBlockSource.emplace(pblock->GetHash(), std::make_pair(pfrom->GetId(), false));
         }
-
-        if (fBlockReconstructed) {
-            // If we got here, we were able to optimistically reconstruct a
-            // block that is in flight from some other peer.
-            {
-                LOCK(cs_main);
-                mapBlockSource.emplace(pblock->GetHash(), std::make_pair(pfrom->GetId(), false));
-            }
-            bool fNewBlock = false;
-            // Setting fForceProcessing to true means that we bypass some of
-            // our anti-DoS protections in AcceptBlock, which filters
-            // unrequested blocks that might be trying to waste our resources
-            // (eg disk space). Because we only try to reconstruct blocks when
-            // we're close to caught up (via the CanDirectFetch() requirement
-            // above, combined with the behavior of not requesting blocks until
-            // we have a chain with at least nMinimumChainWork), and we ignore
-            // compact blocks with less work than our tip, it is safe to treat
-            // reconstructed compact blocks as having been requested.
-            ProcessNewBlock(chainparams, pblock, /*fForceProcessing=*/true, &fNewBlock);
-            if (fNewBlock) {
-                pfrom->nLastBlockTime = GetTime();
-            } else {
-                LOCK(cs_main);
-                mapBlockSource.erase(pblock->GetHash());
-            }
-            LOCK(cs_main); // hold cs_main for CBlockIndex::IsValid()
-            if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS)) {
-                // Clear download state for this block, which is in
-                // process from some other peer.  We do this after calling
-                // ProcessNewBlock so that a malleated cmpctblock announcement
-                // can't be used to interfere with block relay.
-                netBlockTxPtr->MarkBlockAsReceived(pblock->GetHash());
-            }
+        bool fNewBlock = false;
+        // Setting fForceProcessing to true means that we bypass some of
+        // our anti-DoS protections in AcceptBlock, which filters
+        // unrequested blocks that might be trying to waste our resources
+        // (eg disk space). Because we only try to reconstruct blocks when
+        // we're close to caught up (via the CanDirectFetch() requirement
+        // above, combined with the behavior of not requesting blocks until
+        // we have a chain with at least nMinimumChainWork), and we ignore
+        // compact blocks with less work than our tip, it is safe to treat
+        // reconstructed compact blocks as having been requested.
+        ProcessNewBlock(chainparams, pblock, /*fForceProcessing=*/true, &fNewBlock);
+        if (fNewBlock) {
+            pfrom->nLastBlockTime = GetTime();
+        } else {
+            LOCK(cs_main);
+            mapBlockSource.erase(pblock->GetHash());
         }
+        LOCK(cs_main); // hold cs_main for CBlockIndex::IsValid()
+        if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS)) {
+            // Clear download state for this block, which is in
+            // process from some other peer.  We do this after calling
+            // ProcessNewBlock so that a malleated cmpctblock announcement
+            // can't be used to interfere with block relay.
+            netBlockTxPtr->MarkBlockAsReceived(pblock->GetHash());
+        }
+    }
+    return true;
+}
 
+bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61)
+{
+    LogPrint(BCLog::NET, "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->GetId());
+    if (gArgs.IsArgSet("-dropmessagestest") && GetRand(gArgs.GetArg("-dropmessagestest", 0)) == 0)
+    {
+        LogPrintf("dropmessagestest DROPPING RECV MESSAGE\n");
+        return true;
+    }
+
+
+    if (!(pfrom->GetLocalServices() & NODE_BLOOM) &&
+              (strCommand == NetMsgType::FILTERLOAD ||
+               strCommand == NetMsgType::FILTERADD))
+    {
+        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
+            LOCK(cs_main);
+            Misbehaving(pfrom->GetId(), 100);
+            return false;
+        } else {
+            pfrom->fDisconnect = true;
+            return false;
+        }
+    }
+
+    if (strCommand == NetMsgType::REJECT)
+    {
+        return handleReject(vRecv);
+    }
+    else if (strCommand == NetMsgType::VERSION)
+    {
+        return handleVersion(pfrom, strCommand, vRecv, connman, enable_bip61);
+    }
+    else if (pfrom->nVersion == 0)
+    {
+        // Must have a version message before anything else
+        LOCK(cs_main);
+        Misbehaving(pfrom->GetId(), 1);
+        return false;
+    }
+
+    // At this point, the outgoing message serialization version can't change.
+    const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
+
+    if (strCommand == NetMsgType::VERACK)
+    {
+        handleVerack(pfrom, connman, msgMaker);
+    }
+
+    else if (!pfrom->fSuccessfullyConnected)
+    {
+        // Must have a verack message before anything else
+        LOCK(cs_main);
+        Misbehaving(pfrom->GetId(), 1);
+        return false;
+    }
+
+    else if (strCommand == NetMsgType::ADDR)
+    {
+        bool ret = handleAddr(pfrom, vRecv, connman, interruptMsgProc);
+    }
+
+    else if (strCommand == NetMsgType::SENDHEADERS)
+    {
+        LOCK(cs_main);
+        State(pfrom->GetId())->fPreferHeaders = true;
+    }
+
+    else if (strCommand == NetMsgType::SENDCMPCT)
+    {
+        handleSendcmpct(pfrom, vRecv);
+    }
+
+    else if (strCommand == NetMsgType::INV)
+    {
+        return handleInv(pfrom, vRecv,connman, interruptMsgProc, msgMaker);
+    }
+
+    else if (strCommand == NetMsgType::GETDATA)
+    {
+        return handleGetdata(pfrom, vRecv,connman, interruptMsgProc, chainparams);
+    }
+
+    else if (strCommand == NetMsgType::GETBLOCKS)
+    {
+        return handleGetblocks(pfrom, vRecv, chainparams);
+    }
+
+    else if (strCommand == NetMsgType::GETBLOCKTXN)
+    {
+        return handleGetblocktxn(pfrom, vRecv, connman, chainparams);
+    }
+
+    else if (strCommand == NetMsgType::GETHEADERS)
+    {
+        return handleGetheaders(pfrom, vRecv, connman, chainparams, msgMaker);
+    }
+
+    else if (strCommand == NetMsgType::TX)
+    {
+        return handleTx(pfrom, vRecv, connman, enable_bip61, strCommand, msgMaker);
+    }
+
+    else if (strCommand == NetMsgType::CMPCTBLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
+    {
+        return handleCmpctblock(pfrom, vRecv, connman, enable_bip61, nTimeReceived, chainparams, interruptMsgProc, msgMaker);
     }
 
     else if (strCommand == NetMsgType::BLOCKTXN && !fImporting && !fReindex) // Ignore blocks received while importing
