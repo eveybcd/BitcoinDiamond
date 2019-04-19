@@ -8,6 +8,7 @@
 
 #include <network/net_cnode_state.h>
 #include <network/net_blocktx.h>
+#include "netmessagemaker.h"
 
 
 /** Default for BIP61 (sending reject messages) */
@@ -67,6 +68,14 @@ public:
 private:
     bool ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::vector<CBlockHeader>& headers, const CChainParams& chainparams, bool punish_duplicate_invalid);
     bool ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61);
+
+private:
+    bool handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
+    void handleSendcmpct(CNode* pfrom, CDataStream& vRecv);
+    bool handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool &isNeedReturn);
+    void handleVerack(CNode* pfrom, CConnman* connman, const CNetMsgMaker &msgMaker);
+    bool handleVersion(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman, bool enable_bip61);
+    bool handleReject(CDataStream& vRecv);
 
 
 private:
