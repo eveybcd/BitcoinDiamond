@@ -145,8 +145,6 @@ struct CNodeState {
 };
 
 
-
-
 /** Map maintaining per-node state. */
 static std::map<NodeId, CNodeState> mapNodeState GUARDED_BY(cs_main);
 

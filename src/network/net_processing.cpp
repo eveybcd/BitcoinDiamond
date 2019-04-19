@@ -55,13 +55,6 @@ static constexpr int64_t MINIMUM_CONNECT_TIME = 30;
 static constexpr uint64_t RANDOMIZER_ID_ADDRESS_RELAY = 0x3cac0035b5866b90ULL;
 
 
-
-
-
-
-
-
-
 /** Average delay between local address broadcasts in seconds. */
 static constexpr unsigned int AVG_LOCAL_ADDRESS_BROADCAST_INTERVAL = 24 * 60 * 60;
 /** Average delay between peer address broadcasts in seconds. */
@@ -81,7 +74,6 @@ static constexpr unsigned int MAX_FEEFILTER_CHANGE_DELAY = 5 * 60;
 namespace {
     /** Number of nodes with fSyncStarted. */
     int nSyncStarted GUARDED_BY(cs_main) = 0;
-
 
 
     /**
@@ -106,23 +98,11 @@ namespace {
     std::unique_ptr<CRollingBloomFilter> recentRejects GUARDED_BY(cs_main);
     uint256 hashRecentRejectsChainTip GUARDED_BY(cs_main);
 
-
-
-
-
     /** Number of preferable block download peers. */
     int nPreferredDownload GUARDED_BY(cs_main) = 0;
 
-
-
     /** Number of outbound peers with m_chain_sync.m_protect. */
     int g_outbound_peers_with_protect_from_disconnect GUARDED_BY(cs_main) = 0;
-
-
-
-
-
-
 
 } // namespace
 
@@ -161,9 +141,6 @@ static void PushNodeVersion(CNode *pnode, CConnman* connman, int64_t nTime)
     }
 }
 
-
-
-
 } // namespace
 
 
@@ -174,20 +151,6 @@ static bool IsOutboundDisconnectionCandidate(const CNode *node)
     return !(node->fInbound || node->m_manual_connection || node->fFeeler || node->fOneShot);
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
 //
 // Messages
 //
@@ -519,6 +482,210 @@ bool PeerLogicValidation::ProcessHeadersMessage(CNode *pfrom, CConnman *connman,
     return true;
 }
 
+bool handleReject(CDataStream& vRecv)
+{
+    if (LogAcceptCategory(BCLog::NET)) {
+        try {
+            std::string strMsg; unsigned char ccode; std::string strReason;
+            vRecv >> LIMITED_STRING(strMsg, CMessageHeader::COMMAND_SIZE) >> ccode >> LIMITED_STRING(strReason, MAX_REJECT_MESSAGE_LENGTH);
+
+            std::ostringstream ss;
+            ss << strMsg << " code " << itostr(ccode) << ": " << strReason;
+
+            if (strMsg == NetMsgType::BLOCK || strMsg == NetMsgType::TX)
+            {
+                uint256 hash;
+                vRecv >> hash;
+                ss << ": hash " << hash.ToString();
+            }
+            LogPrint(BCLog::NET, "Reject %s\n", SanitizeString(ss.str()));
+        } catch (const std::ios_base::failure&) {
+            // Avoid feedback loops by preventing reject messages from triggering a new reject message.
+            LogPrint(BCLog::NET, "Unparseable reject message received\n");
+        }
+    }
+    return true;
+
+}
+
+bool handleVersion(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman, bool enable_bip61)
+{
+    // Each connection can only send one version message
+    if (pfrom->nVersion != 0)
+    {
+        if (enable_bip61) {
+            connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_DUPLICATE, std::string("Duplicate version message")));
+        }
+        LOCK(cs_main);
+        Misbehaving(pfrom->GetId(), 1);
+        return false;
+    }
+
+    int64_t nTime;
+    CAddress addrMe;
+    CAddress addrFrom;
+    uint64_t nNonce = 1;
+    uint64_t nServiceInt;
+    ServiceFlags nServices;
+    int nVersion;
+    int nSendVersion;
+    std::string strSubVer;
+    std::string cleanSubVer;
+    int nStartingHeight = -1;
+    bool fRelay = true;
+
+    vRecv >> nVersion >> nServiceInt >> nTime >> addrMe;
+    nSendVersion = std::min(nVersion, PROTOCOL_VERSION);
+    nServices = ServiceFlags(nServiceInt);
+    if (!pfrom->fInbound)
+    {
+        connman->SetServices(pfrom->addr, nServices);
+    }
+    if (!pfrom->fInbound && !pfrom->fFeeler && !pfrom->m_manual_connection && !HasAllDesirableServiceFlags(nServices))
+    {
+        LogPrint(BCLog::NET, "peer=%d does not offer the expected services (%08x offered, %08x expected); disconnecting\n", pfrom->GetId(), nServices, GetDesirableServiceFlags(nServices));
+        if (enable_bip61) {
+            connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_NONSTANDARD,
+                                                                              strprintf("Expected to offer services %08x", GetDesirableServiceFlags(nServices))));
+        }
+        pfrom->fDisconnect = true;
+        return false;
+    }
+
+    if (nVersion < MIN_PEER_PROTO_VERSION)
+    {
+        // disconnect from peers older than this proto version
+        LogPrint(BCLog::NET, "peer=%d using obsolete version %i; disconnecting\n", pfrom->GetId(), nVersion);
+        if (enable_bip61) {
+            connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                                                                              strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION)));
+        }
+        pfrom->fDisconnect = true;
+        return false;
+    }
+
+    if (nVersion == 10300)
+        nVersion = 300;
+    if (!vRecv.empty())
+        vRecv >> addrFrom >> nNonce;
+    if (!vRecv.empty()) {
+        vRecv >> LIMITED_STRING(strSubVer, MAX_SUBVERSION_LENGTH);
+        cleanSubVer = SanitizeString(strSubVer);
+    }
+    if (!vRecv.empty()) {
+        vRecv >> nStartingHeight;
+    }
+    if (!vRecv.empty())
+        vRecv >> fRelay;
+    // Disconnect if we connected to ourself
+    if (pfrom->fInbound && !connman->CheckIncomingNonce(nNonce))
+    {
+        LogPrintf("connected to self at %s, disconnecting\n", pfrom->addr.ToString());
+        pfrom->fDisconnect = true;
+        return true;
+    }
+
+    if (pfrom->fInbound && addrMe.IsRoutable())
+    {
+        SeenLocal(addrMe);
+    }
+
+    // Be shy and don't send version until we hear
+    if (pfrom->fInbound)
+        PushNodeVersion(pfrom, connman, GetAdjustedTime());
+
+    connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERACK));
+
+    pfrom->nServices = nServices;
+    pfrom->SetAddrLocal(addrMe);
+    {
+        LOCK(pfrom->cs_SubVer);
+        pfrom->strSubVer = strSubVer;
+        pfrom->cleanSubVer = cleanSubVer;
+    }
+    pfrom->nStartingHeight = nStartingHeight;
+
+    // set nodes not relaying blocks and tx and not serving (parts) of the historical blockchain as "clients"
+    pfrom->fClient = (!(nServices & NODE_NETWORK) && !(nServices & NODE_NETWORK_LIMITED));
+
+    // set nodes not capable of serving the complete blockchain history as "limited nodes"
+    pfrom->m_limited_node = (!(nServices & NODE_NETWORK) && (nServices & NODE_NETWORK_LIMITED));
+
+    {
+        LOCK(pfrom->cs_filter);
+        pfrom->fRelayTxes = fRelay; // set to true after we get the first filter* message
+    }
+
+    // Change version
+    pfrom->SetSendVersion(nSendVersion);
+    pfrom->nVersion = nVersion;
+
+    if((nServices & NODE_WITNESS))
+    {
+        LOCK(cs_main);
+        State(pfrom->GetId())->fHaveWitness = true;
+    }
+
+    // Potentially mark this peer as a preferred download peer.
+    {
+        LOCK(cs_main);
+        UpdatePreferredDownload(pfrom, State(pfrom->GetId()));
+    }
+
+    if (!pfrom->fInbound)
+    {
+        // Advertise our address
+        if (fListen && !IsInitialBlockDownload())
+        {
+            CAddress addr = GetLocalAddress(&pfrom->addr, pfrom->GetLocalServices());
+            FastRandomContext insecure_rand;
+            if (addr.IsRoutable())
+            {
+                LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
+                pfrom->PushAddress(addr, insecure_rand);
+            } else if (IsPeerAddrLocalGood(pfrom)) {
+                addr.SetIP(addrMe);
+                LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
+                pfrom->PushAddress(addr, insecure_rand);
+            }
+        }
+
+        // Get recent addresses
+        if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION || connman->GetAddressCount() < 1000)
+        {
+            connman->PushMessage(pfrom, CNetMsgMaker(nSendVersion).Make(NetMsgType::GETADDR));
+            pfrom->fGetAddr = true;
+        }
+        connman->MarkAddressGood(pfrom->addr);
+    }
+
+    std::string remoteAddr;
+    if (fLogIPs)
+        remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
+
+    LogPrint(BCLog::NET, "receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
+             cleanSubVer, pfrom->nVersion,
+             pfrom->nStartingHeight, addrMe.ToString(), pfrom->GetId(),
+             remoteAddr);
+
+    int64_t nTimeOffset = nTime - GetTime();
+    pfrom->nTimeOffset = nTimeOffset;
+    AddTimeData(pfrom->addr, nTimeOffset);
+
+    // If the peer is old enough to have the old alert system, send it the final alert.
+    if (pfrom->nVersion <= 70012) {
+        CDataStream finalAlert(ParseHex("60010000000000000000000000ffffff7f00000000ffffff7ffeffff7f01ffffff7f00000000ffffff7f00ffffff7f002f555247454e543a20416c657274206b657920636f6d70726f6d697365642c2075706772616465207265717569726564004630440220653febd6410f470f6bae11cad19c48413becb1ac2c17f908fd0fd53bdc3abd5202206d0e9c96fe88d4a0f01ed9dedae2b6f9e00da94cad0fecaae66ecf689bf71b50"), SER_NETWORK, PROTOCOL_VERSION);
+        connman->PushMessage(pfrom, CNetMsgMaker(nSendVersion).Make("alert", finalAlert));
+    }
+
+    // Feeler connections exist only to verify if address is online.
+    if (pfrom->fFeeler) {
+        assert(pfrom->fInbound == false);
+        pfrom->fDisconnect = true;
+    }
+    return true;
+}
+
 bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61)
 {
     LogPrint(BCLog::NET, "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->GetId());
@@ -545,208 +712,12 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
 
     if (strCommand == NetMsgType::REJECT)
     {
-        if (LogAcceptCategory(BCLog::NET)) {
-            try {
-                std::string strMsg; unsigned char ccode; std::string strReason;
-                vRecv >> LIMITED_STRING(strMsg, CMessageHeader::COMMAND_SIZE) >> ccode >> LIMITED_STRING(strReason, MAX_REJECT_MESSAGE_LENGTH);
-
-                std::ostringstream ss;
-                ss << strMsg << " code " << itostr(ccode) << ": " << strReason;
-
-                if (strMsg == NetMsgType::BLOCK || strMsg == NetMsgType::TX)
-                {
-                    uint256 hash;
-                    vRecv >> hash;
-                    ss << ": hash " << hash.ToString();
-                }
-                LogPrint(BCLog::NET, "Reject %s\n", SanitizeString(ss.str()));
-            } catch (const std::ios_base::failure&) {
-                // Avoid feedback loops by preventing reject messages from triggering a new reject message.
-                LogPrint(BCLog::NET, "Unparseable reject message received\n");
-            }
-        }
-        return true;
+        return handleReject(vRecv);
     }
-
     else if (strCommand == NetMsgType::VERSION)
     {
-        // Each connection can only send one version message
-        if (pfrom->nVersion != 0)
-        {
-            if (enable_bip61) {
-                connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_DUPLICATE, std::string("Duplicate version message")));
-            }
-            LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 1);
-            return false;
-        }
-
-        int64_t nTime;
-        CAddress addrMe;
-        CAddress addrFrom;
-        uint64_t nNonce = 1;
-        uint64_t nServiceInt;
-        ServiceFlags nServices;
-        int nVersion;
-        int nSendVersion;
-        std::string strSubVer;
-        std::string cleanSubVer;
-        int nStartingHeight = -1;
-        bool fRelay = true;
-
-        vRecv >> nVersion >> nServiceInt >> nTime >> addrMe;
-        nSendVersion = std::min(nVersion, PROTOCOL_VERSION);
-        nServices = ServiceFlags(nServiceInt);
-        if (!pfrom->fInbound)
-        {
-            connman->SetServices(pfrom->addr, nServices);
-        }
-        if (!pfrom->fInbound && !pfrom->fFeeler && !pfrom->m_manual_connection && !HasAllDesirableServiceFlags(nServices))
-        {
-            LogPrint(BCLog::NET, "peer=%d does not offer the expected services (%08x offered, %08x expected); disconnecting\n", pfrom->GetId(), nServices, GetDesirableServiceFlags(nServices));
-            if (enable_bip61) {
-                connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_NONSTANDARD,
-                                   strprintf("Expected to offer services %08x", GetDesirableServiceFlags(nServices))));
-            }
-            pfrom->fDisconnect = true;
-            return false;
-        }
-
-        if (nVersion < MIN_PEER_PROTO_VERSION)
-        {
-            // disconnect from peers older than this proto version
-            LogPrint(BCLog::NET, "peer=%d using obsolete version %i; disconnecting\n", pfrom->GetId(), nVersion);
-            if (enable_bip61) {
-                connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                                   strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION)));
-            }
-            pfrom->fDisconnect = true;
-            return false;
-        }
-
-        if (nVersion == 10300)
-            nVersion = 300;
-        if (!vRecv.empty())
-            vRecv >> addrFrom >> nNonce;
-        if (!vRecv.empty()) {
-            vRecv >> LIMITED_STRING(strSubVer, MAX_SUBVERSION_LENGTH);
-            cleanSubVer = SanitizeString(strSubVer);
-        }
-        if (!vRecv.empty()) {
-            vRecv >> nStartingHeight;
-        }
-        if (!vRecv.empty())
-            vRecv >> fRelay;
-        // Disconnect if we connected to ourself
-        if (pfrom->fInbound && !connman->CheckIncomingNonce(nNonce))
-        {
-            LogPrintf("connected to self at %s, disconnecting\n", pfrom->addr.ToString());
-            pfrom->fDisconnect = true;
-            return true;
-        }
-
-        if (pfrom->fInbound && addrMe.IsRoutable())
-        {
-            SeenLocal(addrMe);
-        }
-
-        // Be shy and don't send version until we hear
-        if (pfrom->fInbound)
-            PushNodeVersion(pfrom, connman, GetAdjustedTime());
-
-        connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERACK));
-
-        pfrom->nServices = nServices;
-        pfrom->SetAddrLocal(addrMe);
-        {
-            LOCK(pfrom->cs_SubVer);
-            pfrom->strSubVer = strSubVer;
-            pfrom->cleanSubVer = cleanSubVer;
-        }
-        pfrom->nStartingHeight = nStartingHeight;
-
-        // set nodes not relaying blocks and tx and not serving (parts) of the historical blockchain as "clients"
-        pfrom->fClient = (!(nServices & NODE_NETWORK) && !(nServices & NODE_NETWORK_LIMITED));
-
-        // set nodes not capable of serving the complete blockchain history as "limited nodes"
-        pfrom->m_limited_node = (!(nServices & NODE_NETWORK) && (nServices & NODE_NETWORK_LIMITED));
-
-        {
-            LOCK(pfrom->cs_filter);
-            pfrom->fRelayTxes = fRelay; // set to true after we get the first filter* message
-        }
-
-        // Change version
-        pfrom->SetSendVersion(nSendVersion);
-        pfrom->nVersion = nVersion;
-
-        if((nServices & NODE_WITNESS))
-        {
-            LOCK(cs_main);
-            State(pfrom->GetId())->fHaveWitness = true;
-        }
-
-        // Potentially mark this peer as a preferred download peer.
-        {
-        LOCK(cs_main);
-        UpdatePreferredDownload(pfrom, State(pfrom->GetId()));
-        }
-
-        if (!pfrom->fInbound)
-        {
-            // Advertise our address
-            if (fListen && !IsInitialBlockDownload())
-            {
-                CAddress addr = GetLocalAddress(&pfrom->addr, pfrom->GetLocalServices());
-                FastRandomContext insecure_rand;
-                if (addr.IsRoutable())
-                {
-                    LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
-                    pfrom->PushAddress(addr, insecure_rand);
-                } else if (IsPeerAddrLocalGood(pfrom)) {
-                    addr.SetIP(addrMe);
-                    LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
-                    pfrom->PushAddress(addr, insecure_rand);
-                }
-            }
-
-            // Get recent addresses
-            if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION || connman->GetAddressCount() < 1000)
-            {
-                connman->PushMessage(pfrom, CNetMsgMaker(nSendVersion).Make(NetMsgType::GETADDR));
-                pfrom->fGetAddr = true;
-            }
-            connman->MarkAddressGood(pfrom->addr);
-        }
-
-        std::string remoteAddr;
-        if (fLogIPs)
-            remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
-
-        LogPrint(BCLog::NET, "receive version message: %s: version %d, blocks=%d, us=%s, peer=%d%s\n",
-                  cleanSubVer, pfrom->nVersion,
-                  pfrom->nStartingHeight, addrMe.ToString(), pfrom->GetId(),
-                  remoteAddr);
-
-        int64_t nTimeOffset = nTime - GetTime();
-        pfrom->nTimeOffset = nTimeOffset;
-        AddTimeData(pfrom->addr, nTimeOffset);
-
-        // If the peer is old enough to have the old alert system, send it the final alert.
-        if (pfrom->nVersion <= 70012) {
-            CDataStream finalAlert(ParseHex("60010000000000000000000000ffffff7f00000000ffffff7ffeffff7f01ffffff7f00000000ffffff7f00ffffff7f002f555247454e543a20416c657274206b657920636f6d70726f6d697365642c2075706772616465207265717569726564004630440220653febd6410f470f6bae11cad19c48413becb1ac2c17f908fd0fd53bdc3abd5202206d0e9c96fe88d4a0f01ed9dedae2b6f9e00da94cad0fecaae66ecf689bf71b50"), SER_NETWORK, PROTOCOL_VERSION);
-            connman->PushMessage(pfrom, CNetMsgMaker(nSendVersion).Make("alert", finalAlert));
-        }
-
-        // Feeler connections exist only to verify if address is online.
-        if (pfrom->fFeeler) {
-            assert(pfrom->fInbound == false);
-            pfrom->fDisconnect = true;
-        }
-        return true;
+        return handleVersion(pfrom, strCommand, vRecv, connman, enable_bip61);
     }
-
-
     else if (pfrom->nVersion == 0)
     {
         // Must have a version message before anything else
@@ -2926,7 +2897,6 @@ void PeerLogicValidation::InitializeNode(CNode *pnode) {
     if(!pnode->fInbound)
         PushNodeVersion(pnode, connman, GetTime());
 }
-
 
 void PeerLogicValidation::FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime) {
     fUpdateConnectionTime = false;

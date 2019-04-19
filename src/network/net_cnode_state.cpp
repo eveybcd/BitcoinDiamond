@@ -20,17 +20,6 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     return true;
 }
 
-
-// This function is used for testing the stale tip eviction logic, see
-// denialofservice_tests.cpp
-void UpdateLastBlockAnnounceTime(NodeId node, int64_t time_in_seconds)
-{
-    LOCK(cs_main);
-    CNodeState *state = State(node);
-    if (state) state->m_last_block_announcement = time_in_seconds;
-}
-
-
 /**
  * Mark a misbehaving peer to be banned depending upon the value of `-banscore`.
  */
