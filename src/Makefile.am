@@ -441,6 +441,12 @@ libbitcoin_common_a_SOURCES = \
   validate/validate_block.cpp \
   validate/coin_man.h \
   validate/coin_man.cpp \
+  network/net_blocktx.h \
+  network/net_blocktx.cpp \
+  network/net_cnode_state.h \
+  network/net_cnode_state.h \
+  network/net_operator.h \
+  network/net_operator.h \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.
