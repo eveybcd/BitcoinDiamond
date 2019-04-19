@@ -3786,14 +3786,3 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
     }
     return true;
 }
-
-class CNetProcessingCleanup
-{
-public:
-    CNetProcessingCleanup() {}
-    ~CNetProcessingCleanup() {
-        // orphan transactions
-        mapOrphanTransactions.clear();
-        mapOrphanTransactionsByPrev.clear();
-    }
-} instance_of_cnetprocessingcleanup;

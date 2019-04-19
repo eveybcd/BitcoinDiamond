@@ -5,7 +5,7 @@
 #define BITCOINDIAMOND_CONNECT_TRACE_H
 
 #include <validate/validation_common.h>
-
+#include <validate/block_storage.h>
 
 struct PerBlockConnectTrace {
     CBlockIndex* pindex = nullptr;
@@ -75,9 +75,6 @@ public:
 };
 
 
-
-
-
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
@@ -98,8 +95,9 @@ public:
     {
         return ((pindex->nVersion & VERSIONBITS_TOP_MASK) == VERSIONBITS_TOP_BITS) &&
                ((pindex->nVersion >> bit) & 1) != 0 &&
-               ((ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
+               ((gBlockStorage.ComputeBlockVersion(pindex->pprev, params) >> bit) & 1) == 0;
     }
+
 };
 
 /**

@@ -40,21 +40,11 @@ extern CFeeRate minRelayTxFee;
  * This is also true for mempool checks.
  */
 int GetSpendHeight(const CCoinsViewCache& inputs);
-
-void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool fAddToMempool);
 /** (try to) add transaction to memory pool
  * plTxnReplaced will be appended to with all transactions replaced from mempool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
                         bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced,
                         bool bypass_limits, const CAmount nAbsurdFee, bool test_accept=false);
-
-void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age);
-
-bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
-                                       bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
-                                       bool bypass_limits, const CAmount nAbsurdFee, bool test_accept);
-
-
 
 /** Transaction validation functions */
 
@@ -66,8 +56,6 @@ bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& poo
  * See consensus/consensus.h for flag definitions.
  */
 bool CheckFinalTx(const CTransaction &tx, int flags = -1);
-
-
 /**
  * Check if transaction will be BIP 68 final in the next block to be created.
  *
@@ -80,6 +68,25 @@ bool CheckFinalTx(const CTransaction &tx, int flags = -1);
  * See consensus/consensus.h for flag definitions.
  */
 bool CheckSequenceLocks(const CTransaction &tx, int flags, LockPoints* lp = nullptr, bool useExistingLockPoints = false);
+
+
+
+
+
+
+
+
+
+void UpdateMempoolForReorg(DisconnectedBlockTransactions &disconnectpool, bool fAddToMempool);
+
+
+void LimitMempoolSize(CTxMemPool& pool, size_t limit, unsigned long age);
+
+bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPool& pool, CValidationState &state, const CTransactionRef &tx,
+                                       bool* pfMissingInputs, int64_t nAcceptTime, std::list<CTransactionRef>* plTxnReplaced,
+                                       bool bypass_limits, const CAmount nAbsurdFee, bool test_accept);
+
+
 
 
 #endif //BITCOINDIAMOND_CHAINCACHE_H
