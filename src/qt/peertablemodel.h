@@ -5,8 +5,8 @@
 #ifndef BITCOIN_QT_PEERTABLEMODEL_H
 #define BITCOIN_QT_PEERTABLEMODEL_H
 
-#include <net_processing.h> // For CNodeStateStats
-#include <net.h>
+#include <network/net_processing.h> // For CNodeStateStats
+#include <network/net.h>
 
 #include <memory>
 

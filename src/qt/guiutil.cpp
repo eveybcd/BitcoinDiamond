@@ -15,7 +15,7 @@
 #include <key_io.h>
 #include <interfaces/node.h>
 #include <policy/policy.h>
-#include <protocol.h>
+#include <network/protocol.h>
 #include <script/script.h>
 #include <script/standard.h>
 #include <util.h>

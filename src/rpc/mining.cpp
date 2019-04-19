@@ -13,7 +13,7 @@
 #include <validate/validation.h>
 #include <key_io.h>
 #include <miner.h>
-#include <net.h>
+#include <network/net.h>
 #include <policy/fees.h>
 #include <pow.h>
 #include <rpc/blockchain.h>

@@ -8,7 +8,7 @@
 #include <chain.h>
 #include <consensus/validation.h>
 #include <interfaces/handler.h>
-#include <net.h>
+#include <network/net.h>
 #include <policy/feerate.h>
 #include <policy/fees.h>
 #include <policy/policy.h>

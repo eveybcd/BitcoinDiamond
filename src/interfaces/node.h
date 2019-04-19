@@ -7,8 +7,8 @@
 
 #include <addrdb.h>     // For banmap_t
 #include <amount.h>     // For CAmount
-#include <net.h>        // For CConnman::NumConnections
-#include <netaddress.h> // For Network
+#include <network/net.h>        // For CConnman::NumConnections
+#include <network/netaddress.h> // For Network
 
 #include <functional>
 #include <memory>

@@ -10,7 +10,7 @@
 #endif
 
 #include <compat.h>
-#include <netaddress.h>
+#include <network/netaddress.h>
 #include <serialize.h>
 
 #include <stdint.h>

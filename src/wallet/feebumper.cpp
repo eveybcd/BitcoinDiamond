@@ -14,7 +14,7 @@
 #include <txmempool.h>
 #include <utilmoneystr.h>
 #include <util.h>
-#include <net.h>
+#include <network/net.h>
 
 //! Check whether transaction has descendant in wallet or mempool, or has been
 //! mined, or conflicts with a mined transaction. Return a feebumper::Result.

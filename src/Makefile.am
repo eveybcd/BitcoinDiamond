@@ -115,8 +115,8 @@ BITCOIN_CORE_H = \
   core_memusage.h \
   cuckoocache.h \
   fs.h \
-  httprpc.h \
-  httpserver.h \
+  network/httprpc.h \
+  network/httpserver.h \
   index/base.h \
   index/txindex.h \
   indirectmap.h \
@@ -133,11 +133,11 @@ BITCOIN_CORE_H = \
   memusage.h \
   merkleblock.h \
   miner.h \
-  net.h \
-  net_processing.h \
-  netaddress.h \
-  netbase.h \
-  netmessagemaker.h \
+  network/net.h \
+  network/net_processing.h \
+  network/netaddress.h \
+  network/netbase.h \
+  network/netmessagemaker.h \
   noui.h \
   outputtype.h \
   policy/feerate.h \
@@ -145,7 +145,7 @@ BITCOIN_CORE_H = \
   policy/policy.h \
   policy/rbf.h \
   pow.h \
-  protocol.h \
+  network/protocol.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -222,16 +222,16 @@ libbitcoin_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   consensus/tx_verify.cpp \
-  httprpc.cpp \
-  httpserver.cpp \
+  network/httprpc.cpp \
+  network/httpserver.cpp \
   index/base.cpp \
   index/txindex.cpp \
   init.cpp \
   dbwrapper.cpp \
   merkleblock.cpp \
   miner.cpp \
-  net.cpp \
-  net_processing.cpp \
+  network/net.cpp \
+  network/net_processing.cpp \
   noui.cpp \
   outputtype.cpp \
   policy/fees.cpp \
@@ -414,10 +414,10 @@ libbitcoin_common_a_SOURCES = \
   key.cpp \
   key_io.cpp \
   keystore.cpp \
-  netaddress.cpp \
-  netbase.cpp \
+  network/netaddress.cpp \
+  network/netbase.cpp \
   policy/feerate.cpp \
-  protocol.cpp \
+  network/protocol.cpp \
   scheduler.cpp \
   script/descriptor.cpp \
   script/ismine.cpp \

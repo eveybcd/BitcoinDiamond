@@ -11,10 +11,10 @@
 #include <init.h>
 #include <interfaces/handler.h>
 #include <interfaces/wallet.h>
-#include <net.h>
-#include <net_processing.h>
-#include <netaddress.h>
-#include <netbase.h>
+#include <network/net.h>
+#include <network/net_processing.h>
+#include <network/netaddress.h>
+#include <network/netbase.h>
 #include <policy/feerate.h>
 #include <policy/fees.h>
 #include <policy/policy.h>

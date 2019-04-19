@@ -7,10 +7,10 @@
 #include <chain.h>
 #include <consensus/validation.h>
 #include <core_io.h>
-#include <httpserver.h>
+#include <network/httpserver.h>
 #include <validate/validation.h>
 #include <key_io.h>
-#include <net.h>
+#include <network/net.h>
 #include <outputtype.h>
 #include <policy/feerate.h>
 #include <policy/fees.h>

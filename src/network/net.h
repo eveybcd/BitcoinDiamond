@@ -13,9 +13,9 @@
 #include <compat.h>
 #include <hash.h>
 #include <limitedmap.h>
-#include <netaddress.h>
+#include <network/netaddress.h>
 #include <policy/feerate.h>
-#include <protocol.h>
+#include <network/protocol.h>
 #include <random.h>
 #include <streams.h>
 #include <sync.h>

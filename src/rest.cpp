@@ -10,7 +10,7 @@
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <validate/validation.h>
-#include <httpserver.h>
+#include <network/httpserver.h>
 #include <rpc/blockchain.h>
 #include <rpc/server.h>
 #include <streams.h>

@@ -8,9 +8,9 @@
 #include <clientversion.h>
 #include <core_io.h>
 #include <validate/validation.h>
-#include <net.h>
-#include <net_processing.h>
-#include <netbase.h>
+#include <network/net.h>
+#include <network/net_processing.h>
+#include <network/netbase.h>
 #include <policy/policy.h>
 #include <rpc/protocol.h>
 #include <sync.h>

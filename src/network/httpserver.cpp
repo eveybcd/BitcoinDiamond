@@ -2,13 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <httpserver.h>
+#include <network/httpserver.h>
 
 #include <chainparamsbase.h>
 #include <compat.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <netbase.h>
+#include <network/netbase.h>
 #include <rpc/protocol.h> // For HTTP status codes
 #include <sync.h>
 #include <ui_interface.h>

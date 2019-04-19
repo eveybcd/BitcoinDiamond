@@ -7,7 +7,7 @@
 #include <config/bitcoin-config.h>
 #endif
 
-#include <net.h>
+#include <network/net.h>
 
 #include <chainparams.h>
 #include <clientversion.h>
@@ -15,7 +15,7 @@
 #include <crypto/common.h>
 #include <crypto/sha256.h>
 #include <primitives/transaction.h>
-#include <netbase.h>
+#include <network/netbase.h>
 #include <scheduler.h>
 #include <ui_interface.h>
 #include <utilstrencodings.h>

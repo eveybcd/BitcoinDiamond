@@ -9,7 +9,7 @@
 #include <consensus/validation.h>
 #include <fs.h>
 #include <key_io.h>
-#include <protocol.h>
+#include <network/protocol.h>
 #include <serialize.h>
 #include <sync.h>
 #include <util.h>

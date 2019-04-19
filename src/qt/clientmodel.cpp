@@ -16,8 +16,8 @@
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 #include <validate/validation.h>
-#include <net.h>
-#include <netbase.h>
+#include <network/net.h>
+#include <network/netbase.h>
 #include <txmempool.h>
 #include <ui_interface.h>
 #include <util.h>

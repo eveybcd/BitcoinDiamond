@@ -8,8 +8,8 @@
 #include <hash.h>
 #include <serialize.h>
 #include <streams.h>
-#include <net.h>
-#include <netbase.h>
+#include <network/net.h>
+#include <network/netbase.h>
 #include <chainparams.h>
 #include <util.h>
 

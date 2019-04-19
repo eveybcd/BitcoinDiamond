@@ -7,7 +7,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <hash.h>
-#include <netbase.h>
+#include <network/netbase.h>
 #include <random.h>
 
 class CAddrManTest : public CAddrMan

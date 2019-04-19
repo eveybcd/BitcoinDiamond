@@ -7,7 +7,7 @@
 
 #include <core_io.h>
 #include <key_io.h>
-#include <netbase.h>
+#include <network/netbase.h>
 
 #include <test/test_bitcoin.h>
 

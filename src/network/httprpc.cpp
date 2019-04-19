@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <httprpc.h>
+#include <network/httprpc.h>
 
 #include <chainparams.h>
-#include <httpserver.h>
+#include <network/httpserver.h>
 #include <key_io.h>
 #include <rpc/protocol.h>
 #include <rpc/server.h>

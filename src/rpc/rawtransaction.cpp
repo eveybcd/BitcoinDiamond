@@ -14,7 +14,7 @@
 #include <validate/validationinterface.h>
 #include <key_io.h>
 #include <merkleblock.h>
-#include <net.h>
+#include <network/net.h>
 #include <policy/policy.h>
 #include <policy/rbf.h>
 #include <primitives/transaction.h>

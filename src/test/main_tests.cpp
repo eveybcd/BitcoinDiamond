@@ -4,7 +4,7 @@
 
 #include <chainparams.h>
 #include <validate/validation.h>
-#include <net.h>
+#include <network/net.h>
 
 #include <test/test_bitcoin.h>
 

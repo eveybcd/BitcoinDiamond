@@ -13,8 +13,8 @@
 
 #include <interfaces/node.h>
 #include <validate/validation.h> // For DEFAULT_SCRIPTCHECK_THREADS
-#include <net.h>
-#include <netbase.h>
+#include <network/net.h>
+#include <network/netbase.h>
 #include <txdb.h> // for -dbcache defaults
 #include <qt/intro.h>
 

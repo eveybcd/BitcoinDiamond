@@ -3,7 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <net_processing.h>
+#include <network/net_processing.h>
 
 #include <addrman.h>
 #include <arith_uint256.h>
@@ -13,8 +13,8 @@
 #include <hash.h>
 #include <validate/validation.h>
 #include <merkleblock.h>
-#include <netmessagemaker.h>
-#include <netbase.h>
+#include <network/netmessagemaker.h>
+#include <network/netbase.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
 #include <primitives/block.h>

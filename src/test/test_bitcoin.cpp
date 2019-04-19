@@ -10,7 +10,7 @@
 #include <crypto/sha256.h>
 #include <validate/validation.h>
 #include <miner.h>
-#include <net_processing.h>
+#include <network/net_processing.h>
 #include <pow.h>
 #include <ui_interface.h>
 #include <streams.h>
