@@ -26,7 +26,7 @@
 #include <txmempool.h>
 #include <ui_interface.h>
 #include <util.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <warnings.h>
 
 #if defined(HAVE_CONFIG_H)

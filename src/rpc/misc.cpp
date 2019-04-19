@@ -8,7 +8,7 @@
 #include <core_io.h>
 #include <crypto/ripemd160.h>
 #include <key_io.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <httpserver.h>
 #include <net.h>
 #include <netbase.h>

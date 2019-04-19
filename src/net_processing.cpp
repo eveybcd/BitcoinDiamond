@@ -11,7 +11,7 @@
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <hash.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <merkleblock.h>
 #include <netmessagemaker.h>
 #include <netbase.h>

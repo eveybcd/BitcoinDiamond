@@ -21,7 +21,7 @@
 #include <httprpc.h>
 #include <index/txindex.h>
 #include <key.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <miner.h>
 #include <netbase.h>
 #include <net.h>
@@ -43,7 +43,7 @@
 #include <ui_interface.h>
 #include <util.h>
 #include <utilmoneystr.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 #include <warnings.h>
 #include <walletinitinterface.h>
 #include <stdint.h>

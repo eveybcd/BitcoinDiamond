@@ -8,7 +8,7 @@
 #include <consensus/consensus.h>
 #include <consensus/validation.h>
 #include <crypto/sha256.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <miner.h>
 #include <net_processing.h>
 #include <pow.h>

@@ -8,7 +8,7 @@
 #include <consensus/validation.h>
 #include <core_io.h>
 #include <httpserver.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <key_io.h>
 #include <net.h>
 #include <outputtype.h>

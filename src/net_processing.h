@@ -7,7 +7,7 @@
 #define BITCOIN_NET_PROCESSING_H
 
 #include <net.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 #include <consensus/params.h>
 
 /** Default for -maxorphantx, maximum number of orphan transactions kept in memory */

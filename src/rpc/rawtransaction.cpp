@@ -10,8 +10,8 @@
 #include <core_io.h>
 #include <index/txindex.h>
 #include <keystore.h>
-#include <validation.h>
-#include <validationinterface.h>
+#include <validate/validation.h>
+#include <validate/validationinterface.h>
 #include <key_io.h>
 #include <merkleblock.h>
 #include <net.h>

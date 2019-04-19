@@ -8,7 +8,7 @@
 
 #include <primitives/block.h>
 #include <txmempool.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <stdint.h>
 #include <memory>

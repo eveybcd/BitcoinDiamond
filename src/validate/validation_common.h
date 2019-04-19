@@ -35,7 +35,7 @@
 #include <util.h>
 #include <utilmoneystr.h>
 #include <utilstrencodings.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 #include <warnings.h>
 
 #include <future>

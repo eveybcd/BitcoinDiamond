@@ -23,7 +23,7 @@
 #include <timedata.h>
 #include <util.h>
 #include <utilmoneystr.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 
 #include <algorithm>
 #include <queue>

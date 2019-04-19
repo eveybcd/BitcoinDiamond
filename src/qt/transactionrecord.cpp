@@ -8,7 +8,7 @@
 #include <interfaces/wallet.h>
 #include <key_io.h>
 #include <timedata.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <stdint.h>
 

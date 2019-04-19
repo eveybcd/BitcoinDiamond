@@ -10,7 +10,7 @@
 #include <outputtype.h>
 #include <util.h>
 #include <utilmoneystr.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <walletinitinterface.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h>

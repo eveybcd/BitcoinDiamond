@@ -12,7 +12,7 @@
 #include <checkpoints.h>
 #include <coins.h>
 #include <consensus/validation.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <core_io.h>
 #include <index/txindex.h>
 #include <key_io.h>
@@ -28,7 +28,7 @@
 #include <util.h>
 #include <utilstrencodings.h>
 #include <hash.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 #include <warnings.h>
 
 #include <assert.h>

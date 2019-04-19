@@ -10,7 +10,7 @@
 #include <consensus/params.h>
 #include <consensus/validation.h>
 #include <core_io.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <key_io.h>
 #include <miner.h>
 #include <net.h>
@@ -23,7 +23,7 @@
 #include <txmempool.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 #include <warnings.h>
 
 #include <memory>

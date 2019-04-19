@@ -15,7 +15,7 @@
 #include <clientversion.h>
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <net.h>
 #include <netbase.h>
 #include <txmempool.h>

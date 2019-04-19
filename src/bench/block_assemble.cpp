@@ -14,8 +14,8 @@
 #include <txdb.h>
 #include <txmempool.h>
 #include <utiltime.h>
-#include <validation.h>
-#include <validationinterface.h>
+#include <validate/validation.h>
+#include <validate/validationinterface.h>
 
 #include <boost/thread.hpp>
 

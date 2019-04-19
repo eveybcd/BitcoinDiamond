@@ -8,7 +8,7 @@
 #include <consensus/validation.h>
 #include <fs.h>
 #include <interfaces/node.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <rpc/register.h>
 #include <rpc/server.h>
 #include <qt/rpcconsole.h>

@@ -10,7 +10,7 @@
 #include <policy/fees.h>
 #include <policy/policy.h>
 #include <policy/rbf.h>
-#include <validation.h> //for mempool access
+#include <validate/validation.h> //for mempool access
 #include <txmempool.h>
 #include <utilmoneystr.h>
 #include <util.h>

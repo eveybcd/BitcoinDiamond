@@ -4,7 +4,7 @@
 
 #include <util.h>
 #include <utiltime.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <test/test_bitcoin.h>
 #include <checkqueue.h>

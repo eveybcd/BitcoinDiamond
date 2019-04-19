@@ -9,7 +9,7 @@
 #include <random.h>
 #include <util.h>
 #include <utilstrencodings.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <memory>
 

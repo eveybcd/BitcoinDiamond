@@ -7,7 +7,7 @@
 #include <test/test_bitcoin.h>
 #include <util.h>
 #include <utiltime.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <boost/test/unit_test.hpp>
 

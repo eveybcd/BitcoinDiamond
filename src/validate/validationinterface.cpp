@@ -3,14 +3,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <validationinterface.h>
+#include <validate/validationinterface.h>
 
 #include <primitives/block.h>
 #include <scheduler.h>
 #include <sync.h>
 #include <txmempool.h>
 #include <util.h>
-#include <validation.h>
+#include <validate/validation.h>
 
 #include <list>
 #include <atomic>

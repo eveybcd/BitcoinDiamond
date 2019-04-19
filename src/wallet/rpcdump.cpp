@@ -5,7 +5,7 @@
 #include <chain.h>
 #include <key_io.h>
 #include <rpc/server.h>
-#include <validation.h>
+#include <validate/validation.h>
 #include <script/script.h>
 #include <script/standard.h>
 #include <sync.h>

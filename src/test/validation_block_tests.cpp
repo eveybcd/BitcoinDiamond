@@ -11,8 +11,8 @@
 #include <pow.h>
 #include <random.h>
 #include <test/test_bitcoin.h>
-#include <validation.h>
-#include <validationinterface.h>
+#include <validate/validation.h>
+#include <validate/validationinterface.h>
 
 struct RegtestingSetup : public TestingSetup {
     RegtestingSetup() : TestingSetup(CBaseChainParams::REGTEST) {}
