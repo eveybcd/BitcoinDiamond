@@ -78,6 +78,9 @@ private:
     bool handleReject(CDataStream& vRecv);
     bool handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams, bool &isNeedReturn);
     bool handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams, bool &isNeedReturn);
+    bool handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, bool &isNeedReturn);
+    bool handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
+    bool handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker, bool &isNeedReturn);
 
 private:
     int64_t m_stale_tip_check_time; //! Next time to check for stale tip
