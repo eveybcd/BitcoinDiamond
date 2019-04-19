@@ -21,14 +21,6 @@ enum DisconnectResult
     DISCONNECT_FAILED   // Something else went wrong.
 };
 
-
-//internal================
-
-
-
-
-
-
 /**
  * CChainState stores and provides an API to update our local knowledge of the
  * current best chain and header tree.
@@ -158,10 +150,6 @@ namespace {
      * Pruned nodes may have entries where B is missing data.
      */
     std::multimap<CBlockIndex*, CBlockIndex*>& mapBlocksUnlinked = g_chainstate.mapBlocksUnlinked;
-
-
-
-
 } // anon namespace
 
 BlockMap& mapBlockIndex = g_chainstate.mapBlockIndex;

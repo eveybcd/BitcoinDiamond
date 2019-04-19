@@ -42,17 +42,12 @@ bool fHavePruned = false;
 
 
 
-
-
-
-
 /** Private helper function that concatenates warning messages. */
 void AppendWarning(std::string& res, const std::string& warn)
 {
     if (!res.empty()) res += ", ";
     res += warn;
 }
-
 
 void DoWarning(const std::string& strWarning)
 {
@@ -95,7 +90,7 @@ void UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainParams) {
         // Check the version of the last 100 blocks to see if we need to upgrade:
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
-            int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
+            int32_t nExpectedVersion = gBlockStorage.ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
             if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
                 ++nUpgraded;
             pindex = pindex->pprev;
@@ -119,8 +114,6 @@ void UpdateTip(const CBlockIndex *pindexNew, const CChainParams& chainParams) {
     LogPrintf("\n");
 
 }
-
-
 
 /**
  * Restore the UTXO in a Coin at a given COutPoint
@@ -155,7 +148,6 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
 
     return fClean ? DISCONNECT_OK : DISCONNECT_UNCLEAN;
 }
-
 
 void CheckForkWarningConditions()
 {
@@ -198,7 +190,6 @@ void CheckForkWarningConditions()
     }
 }
 
-
 void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
 {
     AssertLockHeld(cs_main);
@@ -232,7 +223,6 @@ void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
     CheckForkWarningConditions();
 }
 
-
 void InvalidChainFound(CBlockIndex* pindexNew)
 {
     if (!pindexBestInvalid || pindexNew->nChainWork > pindexBestInvalid->nChainWork)
@@ -258,7 +248,6 @@ void CChainState::InvalidBlockFound(CBlockIndex *pindex, const CValidationState 
         InvalidChainFound(pindex);
     }
 }
-
 
 /** Undo the effects of this block (with given index) on the UTXO set represented by coins.
  *  When FAILED is returned, view is left in an indeterminate state. */
@@ -1828,23 +1817,6 @@ void CChainState::CheckBlockIndex(const Consensus::Params& consensusParams)
     assert(nNodes == forward.size());
 }
 
-
-int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params)
-{
-    LOCK(cs_main);
-    int32_t nVersion = VERSIONBITS_TOP_BITS;
-    if (pindexPrev && pindexPrev->nHeight + 1 >= params.BCDHeight)
-        nVersion |= VERSIONBITS_FORK_BCD;
-
-    for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
-        ThresholdState state = VersionBitsState(pindexPrev, params, static_cast<Consensus::DeploymentPos>(i), versionbitscache);
-        if (state == ThresholdState::LOCKED_IN || state == ThresholdState::STARTED) {
-            nVersion |= VersionBitsMask(params, static_cast<Consensus::DeploymentPos>(i));
-        }
-    }
-
-    return nVersion;
-}
 
 
 

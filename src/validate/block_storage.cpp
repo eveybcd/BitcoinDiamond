@@ -926,3 +926,21 @@ bool BlockStorage::WriteUndoDataForBlock(const CBlockUndo& blockundo, CValidatio
 
     return true;
 }
+
+
+int32_t BlockStorage::ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    LOCK(cs_main);
+    int32_t nVersion = VERSIONBITS_TOP_BITS;
+    if (pindexPrev && pindexPrev->nHeight + 1 >= params.BCDHeight)
+        nVersion |= VERSIONBITS_FORK_BCD;
+
+    for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
+        ThresholdState state = VersionBitsState(pindexPrev, params, static_cast<Consensus::DeploymentPos>(i), versionbitscache);
+        if (state == ThresholdState::LOCKED_IN || state == ThresholdState::STARTED) {
+            nVersion |= VersionBitsMask(params, static_cast<Consensus::DeploymentPos>(i));
+        }
+    }
+
+    return nVersion;
+}

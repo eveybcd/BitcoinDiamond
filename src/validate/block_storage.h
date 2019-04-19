@@ -71,6 +71,10 @@ public:
 
 /** Check whether enough disk space is available for an incoming block */
     bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
+    /**
+     * Determine what nVersion a new block should use.
+     */
+    int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params);
 
 
 public:
