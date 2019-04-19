@@ -4,53 +4,6 @@
 #include <network/net_processing.h>
 
 
-void PeerLogicValidation::InitializeNode(CNode *pnode) {
-    CAddress addr = pnode->addr;
-    std::string addrName = pnode->GetAddrName();
-    NodeId nodeid = pnode->GetId();
-    {
-        LOCK(cs_main);
-        mapNodeState.emplace_hint(mapNodeState.end(), std::piecewise_construct, std::forward_as_tuple(nodeid), std::forward_as_tuple(addr, std::move(addrName)));
-    }
-    if(!pnode->fInbound)
-        PushNodeVersion(pnode, connman, GetTime());
-}
-
-
-void PeerLogicValidation::FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime) {
-    fUpdateConnectionTime = false;
-    LOCK(cs_main);
-    CNodeState *state = State(nodeid);
-    assert(state != nullptr);
-
-    if (state->fSyncStarted)
-        nSyncStarted--;
-
-    if (state->nMisbehavior == 0 && state->fCurrentlyConnected) {
-        fUpdateConnectionTime = true;
-    }
-
-    for (const QueuedBlock& entry : state->vBlocksInFlight) {
-        mapBlocksInFlight.erase(entry.hash);
-    }
-    EraseOrphansFor(nodeid);
-    nPreferredDownload -= state->fPreferredDownload;
-    nPeersWithValidatedDownloads -= (state->nBlocksInFlightValidHeaders != 0);
-    assert(nPeersWithValidatedDownloads >= 0);
-    g_outbound_peers_with_protect_from_disconnect -= state->m_chain_sync.m_protect;
-    assert(g_outbound_peers_with_protect_from_disconnect >= 0);
-
-    mapNodeState.erase(nodeid);
-
-    if (mapNodeState.empty()) {
-        // Do a consistency check after the last peer is removed.
-        assert(mapBlocksInFlight.empty());
-        assert(nPreferredDownload == 0);
-        assert(nPeersWithValidatedDownloads == 0);
-        assert(g_outbound_peers_with_protect_from_disconnect == 0);
-    }
-    LogPrint(BCLog::NET, "Cleared nodestate for peer=%d\n", nodeid);
-}
 
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     LOCK(cs_main);

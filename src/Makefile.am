@@ -444,9 +444,9 @@ libbitcoin_common_a_SOURCES = \
   network/net_blocktx.h \
   network/net_blocktx.cpp \
   network/net_cnode_state.h \
-  network/net_cnode_state.h \
+  network/net_cnode_state.cpp \
   network/net_operator.h \
-  network/net_operator.h \
+  network/net_operator.cpp \
   $(BITCOIN_CORE_H)
 
 # util: shared between all executables.

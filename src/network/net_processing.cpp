@@ -2753,3 +2753,212 @@ PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn, CScheduler &schedu
     static_assert(EXTRA_PEER_CHECK_INTERVAL < STALE_CHECK_INTERVAL, "peer eviction timer should be less than stale tip check timer");
     scheduler.scheduleEvery(std::bind(&PeerLogicValidation::CheckForStaleTipAndEvictPeers, this, consensusParams), EXTRA_PEER_CHECK_INTERVAL * 1000);
 }
+
+
+/**
+ * Evict orphan txn pool entries (EraseOrphanTx) based on a newly connected
+ * block. Also save the time of the last tip update.
+ */
+void PeerLogicValidation::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindex, const std::vector<CTransactionRef>& vtxConflicted) {
+    LOCK(g_cs_orphans);
+
+    std::vector<uint256> vOrphanErase;
+
+    for (const CTransactionRef& ptx : pblock->vtx) {
+        const CTransaction& tx = *ptx;
+
+        // Which orphan pool entries must we evict?
+        for (const auto& txin : tx.vin) {
+            auto itByPrev = mapOrphanTransactionsByPrev.find(txin.prevout);
+            if (itByPrev == mapOrphanTransactionsByPrev.end()) continue;
+            for (auto mi = itByPrev->second.begin(); mi != itByPrev->second.end(); ++mi) {
+                const CTransaction& orphanTx = *(*mi)->second.tx;
+                const uint256& orphanHash = orphanTx.GetHash();
+                vOrphanErase.push_back(orphanHash);
+            }
+        }
+    }
+
+    // Erase orphan transactions included or precluded by this block
+    if (vOrphanErase.size()) {
+        int nErased = 0;
+        for (uint256 &orphanHash : vOrphanErase) {
+            nErased += netBlockTxPtr->EraseOrphanTx(orphanHash);
+        }
+        LogPrint(BCLog::MEMPOOL, "Erased %d orphan tx included or conflicted by block\n", nErased);
+    }
+
+    g_last_tip_update = GetTime();
+}
+
+
+
+/**
+ * Maintain state about the best-seen block and fast-announce a compact block
+ * to compatible peers.
+ */
+void PeerLogicValidation::NewPoWValidBlock(const CBlockIndex *pindex, const std::shared_ptr<const CBlock>& pblock) {
+    std::shared_ptr<const CBlockHeaderAndShortTxIDs> pcmpctblock = std::make_shared<const CBlockHeaderAndShortTxIDs> (*pblock, true);
+    const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
+
+    LOCK(cs_main);
+
+    static int nHighestFastAnnounce = 0;
+    if (pindex->nHeight <= nHighestFastAnnounce)
+        return;
+    nHighestFastAnnounce = pindex->nHeight;
+
+    bool fWitnessEnabled = IsWitnessEnabled(pindex->pprev, Params().GetConsensus());
+    uint256 hashBlock(pblock->GetHash());
+
+    {
+        LOCK(cs_most_recent_block);
+        most_recent_block_hash = hashBlock;
+        most_recent_block = pblock;
+        most_recent_compact_block = pcmpctblock;
+        fWitnessesPresentInMostRecentCompactBlock = fWitnessEnabled;
+    }
+
+    connman->ForEachNode([this, &pcmpctblock, pindex, &msgMaker, fWitnessEnabled, &hashBlock](CNode* pnode) {
+        AssertLockHeld(cs_main);
+
+        // TODO: Avoid the repeated-serialization here
+        if (pnode->nVersion < INVALID_CB_NO_BAN_VERSION || pnode->fDisconnect)
+            return;
+        netBlockTxPtr->ProcessBlockAvailability(pnode->GetId());
+        CNodeState &state = *State(pnode->GetId());
+        // If the peer has, or we announced to them the previous block already,
+        // but we don't think they have this one, go ahead and announce it
+        if (state.fPreferHeaderAndIDs && (!fWitnessEnabled || state.fWantsCmpctWitness) &&
+            !netBlockTxPtr->PeerHasHeader(&state, pindex) && netBlockTxPtr->PeerHasHeader(&state, pindex->pprev)) {
+
+            LogPrint(BCLog::NET, "%s sending header-and-ids %s to peer=%d\n", "PeerLogicValidation::NewPoWValidBlock",
+                     hashBlock.ToString(), pnode->GetId());
+            connman->PushMessage(pnode, msgMaker.Make(NetMsgType::CMPCTBLOCK, *pcmpctblock));
+            state.pindexBestHeaderSent = pindex;
+        }
+    });
+}
+
+
+/**
+ * Update our best height and announce any block hashes which weren't previously
+ * in chainActive to our peers.
+ */
+void PeerLogicValidation::UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {
+    const int nNewHeight = pindexNew->nHeight;
+    connman->SetBestHeight(nNewHeight);
+
+    SetServiceFlagsIBDCache(!fInitialDownload);
+    if (!fInitialDownload) {
+        // Find the hashes of all blocks that weren't previously in the best chain.
+        std::vector<uint256> vHashes;
+        const CBlockIndex *pindexToAnnounce = pindexNew;
+        while (pindexToAnnounce != pindexFork) {
+            vHashes.push_back(pindexToAnnounce->GetBlockHash());
+            pindexToAnnounce = pindexToAnnounce->pprev;
+            if (vHashes.size() == MAX_BLOCKS_TO_ANNOUNCE) {
+                // Limit announcements in case of a huge reorganization.
+                // Rely on the peer's synchronization mechanism in that case.
+                break;
+            }
+        }
+        // Relay inventory, but don't relay old inventory during initial block download.
+        connman->ForEachNode([nNewHeight, &vHashes](CNode* pnode) {
+            if (nNewHeight > (pnode->nStartingHeight != -1 ? pnode->nStartingHeight - 2000 : 0)) {
+                for (const uint256& hash : reverse_iterate(vHashes)) {
+                    pnode->PushBlockHash(hash);
+                }
+            }
+        });
+        connman->WakeMessageHandler();
+    }
+
+    nTimeBestReceived = GetTime();
+}
+
+/**
+ * Handle invalid block rejection and consequent peer banning, maintain which
+ * peers announce compact blocks.
+ */
+void PeerLogicValidation::BlockChecked(const CBlock& block, const CValidationState& state) {
+    LOCK(cs_main);
+
+    const uint256 hash(block.GetHash());
+    std::map<uint256, std::pair<NodeId, bool>>::iterator it = mapBlockSource.find(hash);
+
+    int nDoS = 0;
+    if (state.IsInvalid(nDoS)) {
+        // Don't send reject message with code 0 or an internal reject code.
+        if (it != mapBlockSource.end() && State(it->second.first) && state.GetRejectCode() > 0 && state.GetRejectCode() < REJECT_INTERNAL) {
+            CBlockReject reject = {(unsigned char)state.GetRejectCode(), state.GetRejectReason().substr(0, MAX_REJECT_MESSAGE_LENGTH), hash};
+            State(it->second.first)->rejects.push_back(reject);
+            if (nDoS > 0 && it->second.second)
+                Misbehaving(it->second.first, nDoS);
+        }
+    }
+        // Check that:
+        // 1. The block is valid
+        // 2. We're not in initial block download
+        // 3. This is currently the best block we're aware of. We haven't updated
+        //    the tip yet so we have no way to check this directly here. Instead we
+        //    just check that there are currently no other blocks in flight.
+    else if (state.IsValid() &&
+             !IsInitialBlockDownload() &&
+             mapBlocksInFlight.count(hash) == mapBlocksInFlight.size()) {
+        if (it != mapBlockSource.end()) {
+            netBlockTxPtr->MaybeSetPeerAsAnnouncingHeaderAndIDs(it->second.first, connman);
+        }
+    }
+    if (it != mapBlockSource.end())
+        mapBlockSource.erase(it);
+}
+
+
+void PeerLogicValidation::InitializeNode(CNode *pnode) {
+    CAddress addr = pnode->addr;
+    std::string addrName = pnode->GetAddrName();
+    NodeId nodeid = pnode->GetId();
+    {
+        LOCK(cs_main);
+        mapNodeState.emplace_hint(mapNodeState.end(), std::piecewise_construct, std::forward_as_tuple(nodeid), std::forward_as_tuple(addr, std::move(addrName)));
+    }
+    if(!pnode->fInbound)
+        PushNodeVersion(pnode, connman, GetTime());
+}
+
+
+void PeerLogicValidation::FinalizeNode(NodeId nodeid, bool& fUpdateConnectionTime) {
+    fUpdateConnectionTime = false;
+    LOCK(cs_main);
+    CNodeState *state = State(nodeid);
+    assert(state != nullptr);
+
+    if (state->fSyncStarted)
+        nSyncStarted--;
+
+    if (state->nMisbehavior == 0 && state->fCurrentlyConnected) {
+        fUpdateConnectionTime = true;
+    }
+
+    for (const QueuedBlock& entry : state->vBlocksInFlight) {
+        mapBlocksInFlight.erase(entry.hash);
+    }
+    netBlockTxPtr->EraseOrphansFor(nodeid);
+    nPreferredDownload -= state->fPreferredDownload;
+    nPeersWithValidatedDownloads -= (state->nBlocksInFlightValidHeaders != 0);
+    assert(nPeersWithValidatedDownloads >= 0);
+    g_outbound_peers_with_protect_from_disconnect -= state->m_chain_sync.m_protect;
+    assert(g_outbound_peers_with_protect_from_disconnect >= 0);
+
+    mapNodeState.erase(nodeid);
+
+    if (mapNodeState.empty()) {
+        // Do a consistency check after the last peer is removed.
+        assert(mapBlocksInFlight.empty());
+        assert(nPreferredDownload == 0);
+        assert(nPeersWithValidatedDownloads == 0);
+        assert(g_outbound_peers_with_protect_from_disconnect == 0);
+    }
+    LogPrint(BCLog::NET, "Cleared nodestate for peer=%d\n", nodeid);
+}

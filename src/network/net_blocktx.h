@@ -89,7 +89,7 @@ std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> > mapBlock
 /** Stack of nodes which we have set to announce using compact blocks */
 std::list<NodeId> lNodesAnnouncingHeaderAndIDs GUARDED_BY(cs_main);
 
-class NetBlockTx {
+class NetBlockTx : public CValidationInterface{
 
 private:
     CConnman* const connman;
@@ -108,14 +108,6 @@ public:
 
     bool BlockRequestAllowed(const CBlockIndex *pindex, const Consensus::Params &consensusParams);
 
-    void BlockConnected(const std::shared_ptr<const CBlock> &pblock, const CBlockIndex *pindex,
-                        const std::vector<CTransactionRef> &vtxConflicted);
-
-    void NewPoWValidBlock(const CBlockIndex *pindex, const std::shared_ptr<const CBlock> &pblock);
-
-    void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload);
-
-    void BlockChecked(const CBlock &block, const CValidationState &state);
 
     void ProcessGetBlockData(CNode *pfrom, const CChainParams &chainparams, const CInv &inv, CConnman *connman);
 
@@ -130,6 +122,7 @@ public:
     void MaybeSetPeerAsAnnouncingHeaderAndIDs(NodeId nodeid, CConnman* connman);
     bool PeerHasHeader(CNodeState *state, const CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vector<const CBlockIndex*>& vBlocks, NodeId& nodeStaller, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H
