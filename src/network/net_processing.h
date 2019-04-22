@@ -9,15 +9,17 @@
 #include <network/net_cnode_state.h>
 #include <network/net_blocktx.h>
 #include "netmessagemaker.h"
-
+#include <network/net_msg_handle.h>
 
 /** Default for BIP61 (sending reject messages) */
 static constexpr bool DEFAULT_ENABLE_BIP61 = true;
 
+
 class PeerLogicValidation final : public CValidationInterface, public NetEventsInterface {
 private:
     CConnman* const connman;
-    std::unique_ptr<NetBlockTx> netBlockTxPtr;
+    std::shared_ptr<NetBlockTx> netBlockTxPtr;
+    std::unique_ptr<NetMsgHandle> netMsghandlePtr;
 
 public:
     explicit PeerLogicValidation(CConnman* connman, CScheduler &scheduler, bool enable_bip61);
@@ -66,31 +68,7 @@ public:
     void EvictExtraOutboundPeers(int64_t time_in_seconds);
 
 private:
-    bool ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::vector<CBlockHeader>& headers, const CChainParams& chainparams, bool punish_duplicate_invalid);
     bool ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61);
-
-private:
-    bool handleInv(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker);
-    void handleSendcmpct(CNode* pfrom, CDataStream& vRecv);
-    bool handleAddr(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const std::atomic<bool>& interruptMsgProc);
-    void handleVerack(CNode* pfrom, CConnman* connman, const CNetMsgMaker &msgMaker);
-    bool handleVersion(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman, bool enable_bip61);
-    bool handleReject(CDataStream& vRecv);
-    bool handleGetdata(CNode* pfrom, CDataStream& vRecv, CConnman* connman,const std::atomic<bool>& interruptMsgProc, const CChainParams& chainparams);
-    bool handleGetblocks(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams);
-    bool handleGetblocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams);
-    bool handleGetheaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker);
-    bool handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker);
-    bool handleCmpctblock(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, int64_t nTimeReceived, const CChainParams& chainparams, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker);
-    bool handleBlocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker);
-    bool handleHeaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams);
-    bool handleBlock(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams);
-    bool handleGetaddr(CNode* pfrom, CConnman* connman);
-    bool handleMempool(CNode* pfrom, CConnman* connman);
-    bool handlePing(CNode* pfrom, CDataStream& vRecv, const CNetMsgMaker msgMaker);
-    bool handlePong(CNode* pfrom, CDataStream& vRecv, int64_t nTimeReceived);
-    bool handleFilterload(CNode* pfrom, CDataStream& vRecv);
-    bool handleFilteradd(CNode* pfrom, CDataStream& vRecv);
 
 private:
     int64_t m_stale_tip_check_time; //! Next time to check for stale tip
