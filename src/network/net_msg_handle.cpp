@@ -10,7 +10,6 @@ NetMsgHandle::NetMsgHandle(std::shared_ptr<NetBlockTx> netBlockTx) {
     netBlockTxPtr = netBlockTx;
 }
 
-
 bool NetMsgHandle::AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     switch (inv.type)
