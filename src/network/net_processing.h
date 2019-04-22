@@ -83,6 +83,9 @@ private:
     bool handleTx(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, const std::string& strCommand, const CNetMsgMaker &msgMaker);
     bool handleCmpctblock(CNode* pfrom, CDataStream& vRecv, CConnman* connman, bool enable_bip61, int64_t nTimeReceived, const CChainParams& chainparams, const std::atomic<bool>& interruptMsgProc, const CNetMsgMaker &msgMaker);
     bool handleBlocktxn(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams, const CNetMsgMaker &msgMaker);
+    bool handleHeaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams);
+    bool handleBlock(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams);
+    bool handleGetaddr(CNode* pfrom, CConnman* connman);
 
 
 

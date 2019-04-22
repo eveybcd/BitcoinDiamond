@@ -1550,6 +1550,87 @@ bool PeerLogicValidation::handleBlocktxn(CNode* pfrom, CDataStream& vRecv, CConn
     return true;
 }
 
+bool PeerLogicValidation::handleHeaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams)
+{
+    std::vector<CBlockHeader> headers;
+
+    // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
+    unsigned int nCount = ReadCompactSize(vRecv);
+    if (nCount > MAX_HEADERS_RESULTS) {
+        LOCK(cs_main);
+        Misbehaving(pfrom->GetId(), 20, strprintf("headers message size = %u", nCount));
+        return false;
+    }
+    headers.resize(nCount);
+    for (unsigned int n = 0; n < nCount; n++) {
+        vRecv >> headers[n];
+        ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
+    }
+
+    // Headers received via a HEADERS message should be valid, and reflect
+    // the chain the peer is on. If we receive a known-invalid header,
+    // disconnect the peer if it is using one of our outbound connection
+    // slots.
+    bool should_punish = !pfrom->fInbound && !pfrom->m_manual_connection;
+    return ProcessHeadersMessage(pfrom, connman, headers, chainparams, should_punish);
+}
+
+bool PeerLogicValidation::handleBlock(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams)
+{
+    std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
+    vRecv >> *pblock;
+
+    LogPrint(BCLog::NET, "received block %s peer=%d\n", pblock->GetHash().ToString(), pfrom->GetId());
+
+    bool forceProcessing = false;
+    const uint256 hash(pblock->GetHash());
+    {
+        LOCK(cs_main);
+        // Also always process if we requested the block explicitly, as we may
+        // need it even though it is not a candidate for a new best tip.
+        forceProcessing |= netBlockTxPtr->MarkBlockAsReceived(hash);
+        // mapBlockSource is only used for sending reject messages and DoS scores,
+        // so the race between here and cs_main in ProcessNewBlock is fine.
+        mapBlockSource.emplace(hash, std::make_pair(pfrom->GetId(), true));
+    }
+    bool fNewBlock = false;
+    ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock);
+    if (fNewBlock) {
+        pfrom->nLastBlockTime = GetTime();
+    } else {
+        LOCK(cs_main);
+        mapBlockSource.erase(pblock->GetHash());
+    }
+}
+
+bool PeerLogicValidation::handleGetaddr(CNode* pfrom, CConnman* connman)
+{
+    // This asymmetric behavior for inbound and outbound connections was introduced
+    // to prevent a fingerprinting attack: an attacker can send specific fake addresses
+    // to users' AddrMan and later request them by sending getaddr messages.
+    // Making nodes which are behind NAT and can only make outgoing connections ignore
+    // the getaddr message mitigates the attack.
+    if (!pfrom->fInbound) {
+        LogPrint(BCLog::NET, "Ignoring \"getaddr\" from outbound connection. peer=%d\n", pfrom->GetId());
+        return true;
+    }
+
+    // Only send one GetAddr response per connection to reduce resource waste
+    //  and discourage addr stamping of INV announcements.
+    if (pfrom->fSentAddr) {
+        LogPrint(BCLog::NET, "Ignoring repeated \"getaddr\". peer=%d\n", pfrom->GetId());
+        return true;
+    }
+    pfrom->fSentAddr = true;
+
+    pfrom->vAddrToSend.clear();
+    std::vector<CAddress> vAddr = connman->GetAddresses();
+    FastRandomContext insecure_rand;
+    for (const CAddress &addr : vAddr)
+        pfrom->PushAddress(addr, insecure_rand);
+    return true;
+}
+
 bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61)
 {
     LogPrint(BCLog::NET, "received: %s (%u bytes) peer=%d\n", SanitizeString(strCommand), vRecv.size(), pfrom->GetId());
@@ -1665,83 +1746,18 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
 
     else if (strCommand == NetMsgType::HEADERS && !fImporting && !fReindex) // Ignore headers received while importing
     {
-        std::vector<CBlockHeader> headers;
-
-        // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
-        unsigned int nCount = ReadCompactSize(vRecv);
-        if (nCount > MAX_HEADERS_RESULTS) {
-            LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 20, strprintf("headers message size = %u", nCount));
-            return false;
-        }
-        headers.resize(nCount);
-        for (unsigned int n = 0; n < nCount; n++) {
-            vRecv >> headers[n];
-            ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
-        }
-
-        // Headers received via a HEADERS message should be valid, and reflect
-        // the chain the peer is on. If we receive a known-invalid header,
-        // disconnect the peer if it is using one of our outbound connection
-        // slots.
-        bool should_punish = !pfrom->fInbound && !pfrom->m_manual_connection;
-        return ProcessHeadersMessage(pfrom, connman, headers, chainparams, should_punish);
+        return handleHeaders(pfrom, vRecv, connman, chainparams);
     }
 
     else if (strCommand == NetMsgType::BLOCK && !fImporting && !fReindex) // Ignore blocks received while importing
     {
-        std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
-        vRecv >> *pblock;
-
-        LogPrint(BCLog::NET, "received block %s peer=%d\n", pblock->GetHash().ToString(), pfrom->GetId());
-
-        bool forceProcessing = false;
-        const uint256 hash(pblock->GetHash());
-        {
-            LOCK(cs_main);
-            // Also always process if we requested the block explicitly, as we may
-            // need it even though it is not a candidate for a new best tip.
-            forceProcessing |= netBlockTxPtr->MarkBlockAsReceived(hash);
-            // mapBlockSource is only used for sending reject messages and DoS scores,
-            // so the race between here and cs_main in ProcessNewBlock is fine.
-            mapBlockSource.emplace(hash, std::make_pair(pfrom->GetId(), true));
-        }
-        bool fNewBlock = false;
-        ProcessNewBlock(chainparams, pblock, forceProcessing, &fNewBlock);
-        if (fNewBlock) {
-            pfrom->nLastBlockTime = GetTime();
-        } else {
-            LOCK(cs_main);
-            mapBlockSource.erase(pblock->GetHash());
-        }
+        return handleBlock(pfrom, vRecv, chainparams);
     }
 
 
     else if (strCommand == NetMsgType::GETADDR)
     {
-        // This asymmetric behavior for inbound and outbound connections was introduced
-        // to prevent a fingerprinting attack: an attacker can send specific fake addresses
-        // to users' AddrMan and later request them by sending getaddr messages.
-        // Making nodes which are behind NAT and can only make outgoing connections ignore
-        // the getaddr message mitigates the attack.
-        if (!pfrom->fInbound) {
-            LogPrint(BCLog::NET, "Ignoring \"getaddr\" from outbound connection. peer=%d\n", pfrom->GetId());
-            return true;
-        }
-
-        // Only send one GetAddr response per connection to reduce resource waste
-        //  and discourage addr stamping of INV announcements.
-        if (pfrom->fSentAddr) {
-            LogPrint(BCLog::NET, "Ignoring repeated \"getaddr\". peer=%d\n", pfrom->GetId());
-            return true;
-        }
-        pfrom->fSentAddr = true;
-
-        pfrom->vAddrToSend.clear();
-        std::vector<CAddress> vAddr = connman->GetAddresses();
-        FastRandomContext insecure_rand;
-        for (const CAddress &addr : vAddr)
-            pfrom->PushAddress(addr, insecure_rand);
+        return handleGetaddr(pfrom, connman);
     }
 
 
