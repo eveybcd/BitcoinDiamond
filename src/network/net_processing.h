@@ -86,8 +86,11 @@ private:
     bool handleHeaders(CNode* pfrom, CDataStream& vRecv, CConnman* connman, const CChainParams& chainparams);
     bool handleBlock(CNode* pfrom, CDataStream& vRecv, const CChainParams& chainparams);
     bool handleGetaddr(CNode* pfrom, CConnman* connman);
-
-
+    bool handleMempool(CNode* pfrom, CConnman* connman);
+    bool handlePing(CNode* pfrom, CDataStream& vRecv, const CNetMsgMaker msgMaker);
+    bool handlePong(CNode* pfrom, CDataStream& vRecv, int64_t nTimeReceived);
+    bool handleFilterload(CNode* pfrom, CDataStream& vRecv);
+    bool handleFilteradd(CNode* pfrom, CDataStream& vRecv);
 
 private:
     int64_t m_stale_tip_check_time; //! Next time to check for stale tip
