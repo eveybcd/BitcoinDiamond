@@ -69,23 +69,17 @@ std::atomic<int64_t> nTimeBestReceived(0); // Used only to inform the wallet of 
 int nPeersWithValidatedDownloads GUARDED_BY(cs_main) = 0;
 
 // All of the following cache a recent block, and are protected by cs_most_recent_block
-static CCriticalSection cs_most_recent_block;
-static std::shared_ptr<const CBlock> most_recent_block GUARDED_BY(cs_most_recent_block);
-static std::shared_ptr<const CBlockHeaderAndShortTxIDs> most_recent_compact_block GUARDED_BY(cs_most_recent_block);
-static uint256 most_recent_block_hash GUARDED_BY(cs_most_recent_block);
-static bool fWitnessesPresentInMostRecentCompactBlock GUARDED_BY(cs_most_recent_block);
-
-
+CCriticalSection cs_most_recent_block;
+std::shared_ptr<const CBlock> most_recent_block GUARDED_BY(cs_most_recent_block);
+std::shared_ptr<const CBlockHeaderAndShortTxIDs> most_recent_compact_block GUARDED_BY(cs_most_recent_block);
+uint256 most_recent_block_hash GUARDED_BY(cs_most_recent_block);
+bool fWitnessesPresentInMostRecentCompactBlock GUARDED_BY(cs_most_recent_block);
 CCriticalSection g_cs_orphans;
 std::map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(g_cs_orphans);
-
 std::map<COutPoint, std::set<std::map<uint256, COrphanTx>::iterator, IteratorComparator>> mapOrphanTransactionsByPrev GUARDED_BY(g_cs_orphans);
-
-static size_t vExtraTxnForCompactIt GUARDED_BY(g_cs_orphans) = 0;
-static std::vector<std::pair<uint256, CTransactionRef>> vExtraTxnForCompact GUARDED_BY(g_cs_orphans);
-
+size_t vExtraTxnForCompactIt GUARDED_BY(g_cs_orphans) = 0;
+std::vector<std::pair<uint256, CTransactionRef>> vExtraTxnForCompact GUARDED_BY(g_cs_orphans);
 std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> > mapBlocksInFlight GUARDED_BY(cs_main);
-
 /** Stack of nodes which we have set to announce using compact blocks */
 std::list<NodeId> lNodesAnnouncingHeaderAndIDs GUARDED_BY(cs_main);
 
@@ -97,32 +91,23 @@ private:
 public:
     explicit NetBlockTx(CConnman* connmanIn);
     void EraseOrphansFor(NodeId peer);
-
     void AddToCompactExtraTransactions(const CTransactionRef &tx) EXCLUSIVE_LOCKS_REQUIRED(g_cs_orphans);
-
     bool AddOrphanTx(const CTransactionRef &tx, NodeId peer) EXCLUSIVE_LOCKS_REQUIRED(g_cs_orphans);
-
     int EraseOrphanTx(uint256 hash) EXCLUSIVE_LOCKS_REQUIRED(g_cs_orphans);
-
     unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans);
-
     bool BlockRequestAllowed(const CBlockIndex *pindex, const Consensus::Params &consensusParams);
-
-
     void ProcessGetBlockData(CNode *pfrom, const CChainParams &chainparams, const CInv &inv, CConnman *connman);
-
-    void ProcessGetData(CNode *pfrom, const CChainParams &chainparams, CConnman *connman,
-                        const std::atomic<bool> &interruptMsgProc);
-
+    void ProcessGetData(CNode *pfrom, const CChainParams &chainparams, CConnman *connman, const std::atomic<bool> &interruptMsgProc);
     bool TipMayBeStale(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void UpdateBlockAvailability(NodeId nodeid, const uint256 &hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void ProcessBlockAvailability(NodeId nodeid) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    bool MarkBlockAsInFlight(NodeId nodeid, const uint256& hash, const CBlockIndex* pindex = nullptr, std::list<QueuedBlock>::iterator** pit = nullptr) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool MarkBlockAsInFlight(NodeId nodeid, const uint256& hash, const CBlockIndex* pindex = nullptr,
+                                std::list<QueuedBlock>::iterator** pit = nullptr) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     bool MarkBlockAsReceived(const uint256& hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void MaybeSetPeerAsAnnouncingHeaderAndIDs(NodeId nodeid, CConnman* connman);
     bool PeerHasHeader(CNodeState *state, const CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vector<const CBlockIndex*>& vBlocks, NodeId& nodeStaller, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-
+    void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vector<const CBlockIndex*>& vBlocks, NodeId& nodeStaller,
+                                  const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

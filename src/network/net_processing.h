@@ -19,6 +19,9 @@ private:
     CConnman* const connman;
     std::shared_ptr<NetBlockTx> netBlockTxPtr;
     std::unique_ptr<NetMsgHandle> netMsghandlePtr;
+    int64_t m_stale_tip_check_time; //! Next time to check for stale tip
+    /** Enable BIP61 (sending reject messages) */
+    const bool m_enable_bip61;
     /** Number of nodes with fSyncStarted. */
     int nSyncStarted GUARDED_BY(cs_main) = 0;
 
@@ -61,21 +64,14 @@ public:
     */
     bool SendMessages(CNode* pto) override EXCLUSIVE_LOCKS_REQUIRED(pto->cs_sendProcessing);
 
-    /** Consider evicting an outbound peer based on the amount of time they've been behind our tip */
-    void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
-    /** Evict extra outbound peers. If we think our tip may be stale, connect to an extra outbound */
-    void CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams);
-    /** If we have extra outbound peers, try to disconnect the one with the oldest block announcement */
-    void EvictExtraOutboundPeers(int64_t time_in_seconds);
-
 private:
     bool ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, const std::atomic<bool>& interruptMsgProc, bool enable_bip61);
-
-private:
-    int64_t m_stale_tip_check_time; //! Next time to check for stale tip
-
-    /** Enable BIP61 (sending reject messages) */
-    const bool m_enable_bip61;
+    /** If we have extra outbound peers, try to disconnect the one with the oldest block announcement */
+    void EvictExtraOutboundPeers(int64_t time_in_seconds);
+    /** Evict extra outbound peers. If we think our tip may be stale, connect to an extra outbound */
+    void CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams);
+    /** Consider evicting an outbound peer based on the amount of time they've been behind our tip */
+    void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H

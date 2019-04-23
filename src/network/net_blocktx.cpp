@@ -108,7 +108,6 @@ void NetBlockTx::EraseOrphansFor(NodeId peer)
     if (nErased > 0) LogPrint(BCLog::MEMPOOL, "Erased %d orphan tx from peer=%d\n", nErased, peer);
 }
 
-
 unsigned int NetBlockTx::LimitOrphanTxSize(unsigned int nMaxOrphans)
 {
     LOCK(g_cs_orphans);
@@ -146,8 +145,6 @@ unsigned int NetBlockTx::LimitOrphanTxSize(unsigned int nMaxOrphans)
     }
     return nEvicted;
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -386,7 +383,6 @@ void NetBlockTx::ProcessGetData(CNode* pfrom, const CChainParams& chainparams, C
     }
 }
 
-
 // Returns a bool indicating whether we requested this block.
 // Also used if a block was /not/ received and timed out or started with another peer
 bool NetBlockTx::MarkBlockAsReceived(const uint256& hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
@@ -482,7 +478,6 @@ void NetBlockTx::UpdateBlockAvailability(NodeId nodeid, const uint256 &hash) EXC
     }
 }
 
-
 /**
  * When a peer sends us a valid block, instruct it to announce blocks to us
  * using CMPCTBLOCK if possible by adding its nodeid to the end of
@@ -533,7 +528,6 @@ bool NetBlockTx::PeerHasHeader(CNodeState *state, const CBlockIndex *pindex) EXC
         return true;
     return false;
 }
-
 
 /** Update pindexLastCommonBlock and add not-in-flight missing successors to vBlocks, until it has
  *  at most count entries. */

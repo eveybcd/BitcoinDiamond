@@ -24,7 +24,6 @@
 class CAddrInfo : public CAddress
 {
 
-
 public:
     //! last try whatsoever by us (memory only)
     int64_t nLastTry;
