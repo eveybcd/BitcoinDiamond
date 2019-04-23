@@ -24,7 +24,6 @@ struct QueuedBlock {
     std::unique_ptr<PartiallyDownloadedBlock> partialBlock;  //!< Optional, used for CMPCTBLOCK downloads
 };
 
-
 /**
  * Maintain validation-specific state about nodes, protected by cs_main, instead
  * by CNode's own locks. This simplifies asynchronous operation, where
@@ -144,7 +143,6 @@ struct CNodeState {
     }
 };
 
-
 /** Map maintaining per-node state. */
 std::map<NodeId, CNodeState> mapNodeState GUARDED_BY(cs_main);
 
@@ -158,7 +156,6 @@ CNodeState *State(NodeId pnode) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
 /** Increase a node's misbehavior score. */
 void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-
 
 struct CNodeStateStats {
     int nMisbehavior = 0;

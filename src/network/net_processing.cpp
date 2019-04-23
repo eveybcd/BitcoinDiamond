@@ -40,17 +40,12 @@
  *  Timeout = base + per_header * (expected number of headers) */
 static constexpr int64_t HEADERS_DOWNLOAD_TIMEOUT_BASE = 15 * 60 * 1000000; // 15 minutes
 static constexpr int64_t HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER = 1000; // 1ms/header
-
 /** Timeout for (unprotected) outbound peers to sync to our chainwork, in seconds */
 static constexpr int64_t CHAIN_SYNC_TIMEOUT = 20 * 60; // 20 minutes
 /** How frequently to check for stale tips, in seconds */
 static constexpr int64_t STALE_CHECK_INTERVAL = 10 * 60; // 10 minutes
-
 /** Minimum time an outbound-peer-eviction candidate must be connected for, in order to evict, in seconds */
 static constexpr int64_t MINIMUM_CONNECT_TIME = 30;
-
-
-
 /** Average delay between local address broadcasts in seconds. */
 static constexpr unsigned int AVG_LOCAL_ADDRESS_BROADCAST_INTERVAL = 24 * 60 * 60;
 /** Average delay between peer address broadcasts in seconds. */
@@ -65,13 +60,6 @@ static constexpr unsigned int INVENTORY_BROADCAST_MAX = 7 * INVENTORY_BROADCAST_
 static constexpr unsigned int AVG_FEEFILTER_BROADCAST_INTERVAL = 10 * 60;
 /** Maximum feefilter broadcast delay after significant change. */
 static constexpr unsigned int MAX_FEEFILTER_CHANGE_DELAY = 5 * 60;
-
-// Internal stuff
-namespace {
-    /** Number of nodes with fSyncStarted. */
-    int nSyncStarted GUARDED_BY(cs_main) = 0;
-
-} // namespace
 
 
 
