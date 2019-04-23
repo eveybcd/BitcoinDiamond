@@ -14,16 +14,13 @@
 /** Default for BIP61 (sending reject messages) */
 static constexpr bool DEFAULT_ENABLE_BIP61 = true;
 
-
 class PeerLogicValidation final : public CValidationInterface, public NetEventsInterface {
 private:
     CConnman* const connman;
     std::shared_ptr<NetBlockTx> netBlockTxPtr;
     std::unique_ptr<NetMsgHandle> netMsghandlePtr;
-
     /** Number of nodes with fSyncStarted. */
     int nSyncStarted GUARDED_BY(cs_main) = 0;
-
 
 public:
     explicit PeerLogicValidation(CConnman* connman, CScheduler &scheduler, bool enable_bip61);
