@@ -110,6 +110,7 @@ public:
                                   const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     std::atomic<int64_t>& getLastTipUpdate() {return g_last_tip_update;}
+    void setLastTipUpdate(int64_t tip_update) {g_last_tip_update = tip_update;}
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

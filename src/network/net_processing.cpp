@@ -1144,7 +1144,7 @@ void PeerLogicValidation::BlockConnected(const std::shared_ptr<const CBlock>& pb
         LogPrint(BCLog::MEMPOOL, "Erased %d orphan tx included or conflicted by block\n", nErased);
     }
 
-    netBlockTxPtr->getLastTipUpdate() = GetTime();
+    netBlockTxPtr->setLastTipUpdate(GetTime());
 }
 
 
