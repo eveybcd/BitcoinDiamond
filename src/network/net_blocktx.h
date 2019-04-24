@@ -27,8 +27,6 @@ struct IteratorComparator
         return &(*a) < &(*b);
     }
 };
-/** When our tip was last updated. */
-std::atomic<int64_t> g_last_tip_update(0);
 
 /**
   * Sources of received blocks, saved to be able to send them reject
@@ -87,6 +85,8 @@ class NetBlockTx : public CValidationInterface{
 
 private:
     CConnman* const connman;
+    /** When our tip was last updated. */
+    std::atomic<int64_t> g_last_tip_update;
 
 public:
     explicit NetBlockTx(CConnman* connmanIn);
@@ -108,6 +108,8 @@ public:
     bool PeerHasHeader(CNodeState *state, const CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vector<const CBlockIndex*>& vBlocks, NodeId& nodeStaller,
                                   const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
+    std::atomic<int64_t>& getLastTipUpdate() {return g_last_tip_update;}
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

@@ -15,7 +15,7 @@
 
 
 
-NetBlockTx::NetBlockTx(CConnman* connmanIn) : connman(connmanIn) {}
+NetBlockTx::NetBlockTx(CConnman* connmanIn) : connman(connmanIn), g_last_tip_update(0) {}
 
 bool NetBlockTx::TipMayBeStale(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
