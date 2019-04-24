@@ -28,15 +28,6 @@ struct IteratorComparator
     }
 };
 
-/**
-  * Sources of received blocks, saved to be able to send them reject
-  * messages or ban them when processing happens afterwards.
-  * Set mapBlockSource[hash].second to false if the node should not be
-  * punished if the block is invalid.
-  */
-std::map<uint256, std::pair<NodeId, bool>> mapBlockSource GUARDED_BY(cs_main);
-
-
 /** How frequently to check for extra outbound peers and disconnect, in seconds */
 static constexpr int64_t EXTRA_PEER_CHECK_INTERVAL = 45;
 /// Age after which a stale block will no longer be served if requested as
@@ -111,6 +102,7 @@ public:
 
     std::atomic<int64_t>& getLastTipUpdate() {return g_last_tip_update;}
     void setLastTipUpdate(int64_t tip_update) {g_last_tip_update = tip_update;}
+
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

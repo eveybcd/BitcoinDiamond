@@ -47,6 +47,14 @@ private:
     int g_outbound_peers_with_protect_from_disconnect GUARDED_BY(cs_main) = 0;
 
     std::shared_ptr<NetBlockTx> netBlockTxPtr;
+    /**
+     * Sources of received blocks, saved to be able to send them reject
+     * messages or ban them when processing happens afterwards.
+     * Set mapBlockSource[hash].second to false if the node should not be
+     * punished if the block is invalid.
+     */
+    std::map<uint256, std::pair<NodeId, bool>> mapBlockSource GUARDED_BY(cs_main);
+
 
 public:
     NetMsgHandle(std::shared_ptr<NetBlockTx> netBlockTx);
@@ -78,6 +86,8 @@ public:
     int getNPreferredDownload() {return nPreferredDownload;}
     bool IsOutboundDisconnectionCandidate(const CNode *node);
     bool AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
+    std::map<uint256, std::pair<NodeId, bool>>& getMapBlockSource() {return mapBlockSource;}
 
 private:
     bool ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::vector<CBlockHeader>& headers, const CChainParams& chainparams, bool punish_duplicate_invalid);

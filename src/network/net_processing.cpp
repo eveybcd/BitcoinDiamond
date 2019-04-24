@@ -1147,8 +1147,6 @@ void PeerLogicValidation::BlockConnected(const std::shared_ptr<const CBlock>& pb
     netBlockTxPtr->setLastTipUpdate(GetTime());
 }
 
-
-
 /**
  * Maintain state about the best-seen block and fast-announce a compact block
  * to compatible peers.
@@ -1241,6 +1239,7 @@ void PeerLogicValidation::BlockChecked(const CBlock& block, const CValidationSta
     LOCK(cs_main);
 
     const uint256 hash(block.GetHash());
+    std::map<uint256, std::pair<NodeId, bool>>& mapBlockSource = netMsghandlePtr->getMapBlockSource();
     std::map<uint256, std::pair<NodeId, bool>>::iterator it = mapBlockSource.find(hash);
 
     int nDoS = 0;
