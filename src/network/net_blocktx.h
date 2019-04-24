@@ -49,7 +49,7 @@ static const unsigned int DEFAULT_BLOCK_RECONSTRUCTION_EXTRA_TXN = 100;
 
 /** Relay map */
 typedef std::map<uint256, CTransactionRef> MapRelay;
-MapRelay mapRelay GUARDED_BY(cs_main);
+
 /** Expiration-time ordered list of (expire time, relay map entry) pairs. */
 std::deque<std::pair<int64_t, MapRelay::iterator>> vRelayExpiration GUARDED_BY(cs_main);
 
@@ -78,6 +78,7 @@ private:
     CConnman* const connman;
     /** When our tip was last updated. */
     std::atomic<int64_t> g_last_tip_update;
+    MapRelay mapRelay GUARDED_BY(cs_main);
 
 public:
     explicit NetBlockTx(CConnman* connmanIn);
@@ -103,6 +104,7 @@ public:
     std::atomic<int64_t>& getLastTipUpdate() {return g_last_tip_update;}
     void setLastTipUpdate(int64_t tip_update) {g_last_tip_update = tip_update;}
 
+    MapRelay& getMapRelay() {return mapRelay;}
 };
 
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

@@ -934,11 +934,11 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
                         // Expire old relay messages
                         while (!vRelayExpiration.empty() && vRelayExpiration.front().first < nNow)
                         {
-                            mapRelay.erase(vRelayExpiration.front().second);
+                            netBlockTxPtr->getMapRelay().erase(vRelayExpiration.front().second);
                             vRelayExpiration.pop_front();
                         }
 
-                        auto ret = mapRelay.insert(std::make_pair(hash, std::move(txinfo.tx)));
+                        auto ret = netBlockTxPtr->getMapRelay().insert(std::make_pair(hash, std::move(txinfo.tx)));
                         if (ret.second) {
                             vRelayExpiration.push_back(std::make_pair(nNow + 15 * 60 * 1000000, ret.first));
                         }
