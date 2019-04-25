@@ -1093,7 +1093,6 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
     return true;
 }
 
-
 PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn, CScheduler &scheduler, bool enable_bip61)
         : connman(connmanIn), m_stale_tip_check_time(0), m_enable_bip61(enable_bip61), nTimeBestReceived(0) {
 

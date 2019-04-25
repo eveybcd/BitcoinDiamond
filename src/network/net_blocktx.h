@@ -63,7 +63,7 @@ bool fWitnessesPresentInMostRecentCompactBlock GUARDED_BY(cs_most_recent_block);
 CCriticalSection g_cs_orphans;
 std::map<uint256, COrphanTx> mapOrphanTransactions GUARDED_BY(g_cs_orphans);
 std::map<COutPoint, std::set<std::map<uint256, COrphanTx>::iterator, IteratorComparator>> mapOrphanTransactionsByPrev GUARDED_BY(g_cs_orphans);
-size_t vExtraTxnForCompactIt GUARDED_BY(g_cs_orphans) = 0;
+
 std::vector<std::pair<uint256, CTransactionRef>> vExtraTxnForCompact GUARDED_BY(g_cs_orphans);
 std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> > mapBlocksInFlight GUARDED_BY(cs_main);
 /** Stack of nodes which we have set to announce using compact blocks */
@@ -76,6 +76,7 @@ private:
     /** When our tip was last updated. */
     std::atomic<int64_t> g_last_tip_update;
     MapRelay mapRelay GUARDED_BY(cs_main);
+    size_t vExtraTxnForCompactIt GUARDED_BY(g_cs_orphans) = 0;
 
 public:
     explicit NetBlockTx(CConnman* connmanIn);
