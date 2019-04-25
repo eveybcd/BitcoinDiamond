@@ -25,6 +25,9 @@ private:
     /** Number of nodes with fSyncStarted. */
     int nSyncStarted GUARDED_BY(cs_main) = 0;
 
+    /** Expiration-time ordered list of (expire time, relay map entry) pairs. */
+    std::deque<std::pair<int64_t, MapRelay::iterator>> vRelayExpiration GUARDED_BY(cs_main);
+
 public:
     explicit PeerLogicValidation(CConnman* connman, CScheduler &scheduler, bool enable_bip61);
 

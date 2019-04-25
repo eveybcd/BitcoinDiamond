@@ -50,9 +50,6 @@ static const unsigned int DEFAULT_BLOCK_RECONSTRUCTION_EXTRA_TXN = 100;
 /** Relay map */
 typedef std::map<uint256, CTransactionRef> MapRelay;
 
-/** Expiration-time ordered list of (expire time, relay map entry) pairs. */
-std::deque<std::pair<int64_t, MapRelay::iterator>> vRelayExpiration GUARDED_BY(cs_main);
-
 std::atomic<int64_t> nTimeBestReceived(0); // Used only to inform the wallet of when we last received a block
 /** Number of peers from which we're downloading blocks. */
 int nPeersWithValidatedDownloads GUARDED_BY(cs_main) = 0;
