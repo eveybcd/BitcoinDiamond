@@ -24,6 +24,13 @@ struct QueuedBlock {
     std::unique_ptr<PartiallyDownloadedBlock> partialBlock;  //!< Optional, used for CMPCTBLOCK downloads
 };
 
+struct CNodeStateStats {
+    int nMisbehavior = 0;
+    int nSyncHeight = -1;
+    int nCommonHeight = -1;
+    std::vector<int> vHeightInFlight;
+};
+
 /**
  * Maintain validation-specific state about nodes, protected by cs_main, instead
  * by CNode's own locks. This simplifies asynchronous operation, where
@@ -143,6 +150,10 @@ struct CNodeState {
     }
 };
 
+class CNoteStatePorcess
+{
+
+};
 /** Map maintaining per-node state. */
 std::map<NodeId, CNodeState> mapNodeState GUARDED_BY(cs_main);
 
@@ -157,12 +168,7 @@ CNodeState *State(NodeId pnode) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
 void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
-struct CNodeStateStats {
-    int nMisbehavior = 0;
-    int nSyncHeight = -1;
-    int nCommonHeight = -1;
-    std::vector<int> vHeightInFlight;
-};
+
 
 /** Get statistics from node state */
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);

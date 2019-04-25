@@ -500,7 +500,7 @@ void NetBlockTx::MaybeSetPeerAsAnnouncingHeaderAndIDs(NodeId nodeid, CConnman* c
                 return;
             }
         }
-        connman->ForNode(nodeid, [connman](CNode* pfrom){
+        connman->ForNode(nodeid, [this, connman](CNode* pfrom){
             AssertLockHeld(cs_main);
             uint64_t nCMPCTBLOCKVersion = (pfrom->GetLocalServices() & NODE_WITNESS) ? 2 : 1;
             if (lNodesAnnouncingHeaderAndIDs.size() >= 3) {
