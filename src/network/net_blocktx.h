@@ -66,8 +66,7 @@ std::map<COutPoint, std::set<std::map<uint256, COrphanTx>::iterator, IteratorCom
 
 std::vector<std::pair<uint256, CTransactionRef>> vExtraTxnForCompact GUARDED_BY(g_cs_orphans);
 std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> > mapBlocksInFlight GUARDED_BY(cs_main);
-/** Stack of nodes which we have set to announce using compact blocks */
-std::list<NodeId> lNodesAnnouncingHeaderAndIDs GUARDED_BY(cs_main);
+
 
 class NetBlockTx : public CValidationInterface{
 
@@ -77,6 +76,8 @@ private:
     std::atomic<int64_t> g_last_tip_update;
     MapRelay mapRelay GUARDED_BY(cs_main);
     size_t vExtraTxnForCompactIt GUARDED_BY(g_cs_orphans) = 0;
+    /** Stack of nodes which we have set to announce using compact blocks */
+    std::list<NodeId> lNodesAnnouncingHeaderAndIDs GUARDED_BY(cs_main);
 
 public:
     explicit NetBlockTx(CConnman* connmanIn);
