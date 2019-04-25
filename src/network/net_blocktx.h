@@ -50,7 +50,7 @@ static const unsigned int DEFAULT_BLOCK_RECONSTRUCTION_EXTRA_TXN = 100;
 /** Relay map */
 typedef std::map<uint256, CTransactionRef> MapRelay;
 
-std::atomic<int64_t> nTimeBestReceived(0); // Used only to inform the wallet of when we last received a block
+
 /** Number of peers from which we're downloading blocks. */
 int nPeersWithValidatedDownloads GUARDED_BY(cs_main) = 0;
 

@@ -1095,7 +1095,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
 
 
 PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn, CScheduler &scheduler, bool enable_bip61)
-        : connman(connmanIn), m_stale_tip_check_time(0), m_enable_bip61(enable_bip61) {
+        : connman(connmanIn), m_stale_tip_check_time(0), m_enable_bip61(enable_bip61), nTimeBestReceived(0) {
 
     // Initialize global variables that cannot be constructed at startup.
     netBlockTxPtr.reset(new NetBlockTx(connmanIn));

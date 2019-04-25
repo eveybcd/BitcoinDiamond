@@ -27,6 +27,7 @@ private:
 
     /** Expiration-time ordered list of (expire time, relay map entry) pairs. */
     std::deque<std::pair<int64_t, MapRelay::iterator>> vRelayExpiration GUARDED_BY(cs_main);
+    std::atomic<int64_t> nTimeBestReceived; // Used only to inform the wallet of when we last received a block
 
 public:
     explicit PeerLogicValidation(CConnman* connman, CScheduler &scheduler, bool enable_bip61);
