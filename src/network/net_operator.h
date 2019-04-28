@@ -1,6 +1,0 @@
-// Copyright (c) 2019 The BCD Core developers
-
-#ifndef BITCOINDIAMOND_NET_OPERATOR_H
-#define BITCOINDIAMOND_NET_OPERATOR_H
-
-#endif //BITCOINDIAMOND_NET_OPERATOR_H
