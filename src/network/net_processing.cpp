@@ -589,6 +589,35 @@ void PeerLogicValidation::sendPingMsg(CNode* pto, const CNetMsgMaker &msgMaker)
     }
 }
 
+void PeerLogicValidation::sendAddrMsg(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker)
+{
+    if (pto->nNextAddrSend < nNow) {
+        pto->nNextAddrSend = PoissonNextSend(nNow, AVG_ADDRESS_BROADCAST_INTERVAL);
+        std::vector<CAddress> vAddr;
+        vAddr.reserve(pto->vAddrToSend.size());
+        for (const CAddress& addr : pto->vAddrToSend)
+        {
+            if (!pto->addrKnown.contains(addr.GetKey()))
+            {
+                pto->addrKnown.insert(addr.GetKey());
+                vAddr.push_back(addr);
+                // receiver rejects addr messages larger than 1000
+                if (vAddr.size() >= 1000)
+                {
+                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::ADDR, vAddr));
+                    vAddr.clear();
+                }
+            }
+        }
+        pto->vAddrToSend.clear();
+        if (!vAddr.empty())
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::ADDR, vAddr));
+        // we only send the big addr message once
+        if (pto->vAddrToSend.capacity() > 40)
+            pto->vAddrToSend.shrink_to_fit();
+    }
+}
+
 bool PeerLogicValidation::SendMessages(CNode* pto)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -623,31 +652,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         //
         // Message: addr
         //
-        if (pto->nNextAddrSend < nNow) {
-            pto->nNextAddrSend = PoissonNextSend(nNow, AVG_ADDRESS_BROADCAST_INTERVAL);
-            std::vector<CAddress> vAddr;
-            vAddr.reserve(pto->vAddrToSend.size());
-            for (const CAddress& addr : pto->vAddrToSend)
-            {
-                if (!pto->addrKnown.contains(addr.GetKey()))
-                {
-                    pto->addrKnown.insert(addr.GetKey());
-                    vAddr.push_back(addr);
-                    // receiver rejects addr messages larger than 1000
-                    if (vAddr.size() >= 1000)
-                    {
-                        connman->PushMessage(pto, msgMaker.Make(NetMsgType::ADDR, vAddr));
-                        vAddr.clear();
-                    }
-                }
-            }
-            pto->vAddrToSend.clear();
-            if (!vAddr.empty())
-                connman->PushMessage(pto, msgMaker.Make(NetMsgType::ADDR, vAddr));
-            // we only send the big addr message once
-            if (pto->vAddrToSend.capacity() > 40)
-                pto->vAddrToSend.shrink_to_fit();
-        }
+        sendAddrMsg(pto, nNow, msgMaker);
 
         // Start block sync
         if (pindexBestHeader == nullptr)

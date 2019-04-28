@@ -78,6 +78,7 @@ private:
     void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
 
     void sendPingMsg(CNode* pto, const CNetMsgMaker &msgMaker);
+    void sendAddrMsg(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H
