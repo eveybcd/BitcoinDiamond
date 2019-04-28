@@ -784,9 +784,9 @@ void PeerLogicValidation::sendBlockAnnouncements(CNode* pto, CNodeState &state, 
     pto->vBlockHashesToAnnounce.clear();
 }
 
-void PeerLogicValidation::sendInventory(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker, std::vector<CInv> &vInv)
+void PeerLogicValidation::sendInventory(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker)
 {
-
+    std::vector<CInv> vInv;
      LOCK(pto->cs_inventory);
      vInv.reserve(std::max<size_t>(pto->vInventoryBlockToSend.size(), INVENTORY_BROADCAST_MAX));
 
@@ -916,7 +916,8 @@ void PeerLogicValidation::sendInventory(CNode* pto, int64_t &nNow, const CNetMsg
              pto->filterInventoryKnown.insert(hash);
          }
      }
-
+    if (!vInv.empty())
+        connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
 }
 
 bool PeerLogicValidation::SendMessages(CNode* pto)
@@ -930,9 +931,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         // If we get here, the outgoing message serialization version is set and can't change.
         const CNetMsgMaker msgMaker(pto->GetSendVersion());
 
-        //
         // Message: ping
-        //
         sendPingMsg(pto, msgMaker);
 
         TRY_LOCK(cs_main, lockMain); // Acquire cs_main for IsInitialBlockDownload() and CNodeState()
@@ -950,9 +949,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
             pto->nNextLocalAddrSend = PoissonNextSend(nNow, AVG_LOCAL_ADDRESS_BROADCAST_INTERVAL);
         }
 
-        //
         // Message: addr
-        //
         sendAddrMsg(pto, nNow, msgMaker);
 
         // Start block sync
@@ -967,19 +964,11 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
             GetMainSignals().Broadcast(nTimeBestReceived, connman);
         }
 
-        //
         // Try sending block announcements via headers
-        //
         sendBlockAnnouncements(pto, state, msgMaker);
 
-        //
         // Message: inventory
-        //
-        std::vector<CInv> vInv;
-        sendInventory(pto, nNow, msgMaker, vInv);
-
-        if (!vInv.empty())
-            connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
+        sendInventory(pto, nNow, msgMaker);
 
         // Detect whether we're stalling
         nNow = GetTimeMicros();
