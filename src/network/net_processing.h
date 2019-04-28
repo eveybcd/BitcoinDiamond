@@ -79,6 +79,7 @@ private:
 
     void sendPingMsg(CNode* pto, const CNetMsgMaker &msgMaker);
     void sendAddrMsg(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker);
+    void startBlockSync(CNode* pto, CNodeState &state, const CNetMsgMaker &msgMaker, bool fFetch);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H

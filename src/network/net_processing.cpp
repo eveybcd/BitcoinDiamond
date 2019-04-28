@@ -618,6 +618,34 @@ void PeerLogicValidation::sendAddrMsg(CNode* pto, int64_t &nNow, const CNetMsgMa
     }
 }
 
+void PeerLogicValidation::startBlockSync(CNode* pto, CNodeState &state, const CNetMsgMaker &msgMaker, bool fFetch)
+{
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    if (pindexBestHeader == nullptr)
+        pindexBestHeader = chainActive.Tip();
+
+    if (!state.fSyncStarted && !pto->fClient && !fImporting && !fReindex) {
+        // Only actively request headers from a single peer, unless we're close to today.
+        if ((nSyncStarted == 0 && fFetch) || pindexBestHeader->GetBlockTime() > GetAdjustedTime() - 24 * 60 * 60) {
+            state.fSyncStarted = true;
+            state.nHeadersSyncTimeout = GetTimeMicros() + HEADERS_DOWNLOAD_TIMEOUT_BASE + HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER * (GetAdjustedTime() - pindexBestHeader->GetBlockTime())/(consensusParams.nPowTargetSpacing);
+            nSyncStarted++;
+            const CBlockIndex *pindexStart = pindexBestHeader;
+            /* If possible, start at the block preceding the currently
+               best known header.  This ensures that we always get a
+               non-empty list of headers back as long as the peer
+               is up-to-date.  With a non-empty response, we can initialise
+               the peer's known best block.  This wouldn't be possible
+               if we requested starting at pindexBestHeader and
+               got back an empty response.  */
+            if (pindexStart->pprev)
+                pindexStart = pindexStart->pprev;
+            LogPrint(BCLog::NET, "initial getheaders (%d) to peer=%d (startheight:%d)\n", pindexStart->nHeight, pto->GetId(), pto->nStartingHeight);
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexStart), uint256()));
+        }
+    }
+}
+
 bool PeerLogicValidation::SendMessages(CNode* pto)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -655,29 +683,8 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         sendAddrMsg(pto, nNow, msgMaker);
 
         // Start block sync
-        if (pindexBestHeader == nullptr)
-            pindexBestHeader = chainActive.Tip();
         bool fFetch = state.fPreferredDownload || (netMsghandlePtr->getNPreferredDownload() == 0 && !pto->fClient && !pto->fOneShot); // Download if this is a nice peer, or we have no nice peers and this one might do.
-        if (!state.fSyncStarted && !pto->fClient && !fImporting && !fReindex) {
-            // Only actively request headers from a single peer, unless we're close to today.
-            if ((nSyncStarted == 0 && fFetch) || pindexBestHeader->GetBlockTime() > GetAdjustedTime() - 24 * 60 * 60) {
-                state.fSyncStarted = true;
-                state.nHeadersSyncTimeout = GetTimeMicros() + HEADERS_DOWNLOAD_TIMEOUT_BASE + HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER * (GetAdjustedTime() - pindexBestHeader->GetBlockTime())/(consensusParams.nPowTargetSpacing);
-                nSyncStarted++;
-                const CBlockIndex *pindexStart = pindexBestHeader;
-                /* If possible, start at the block preceding the currently
-                   best known header.  This ensures that we always get a
-                   non-empty list of headers back as long as the peer
-                   is up-to-date.  With a non-empty response, we can initialise
-                   the peer's known best block.  This wouldn't be possible
-                   if we requested starting at pindexBestHeader and
-                   got back an empty response.  */
-                if (pindexStart->pprev)
-                    pindexStart = pindexStart->pprev;
-                LogPrint(BCLog::NET, "initial getheaders (%d) to peer=%d (startheight:%d)\n", pindexStart->nHeight, pto->GetId(), pto->nStartingHeight);
-                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexStart), uint256()));
-            }
-        }
+        startBlockSync(pto, state, msgMaker, state);
 
         // Resend wallet transactions that haven't gotten in a block yet
         // Except during reindex, importing and IBD, when old wallet
