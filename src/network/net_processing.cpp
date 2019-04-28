@@ -560,6 +560,35 @@ public:
 };
 }
 
+void PeerLogicValidation::sendPingMsg(CNode* pto, const CNetMsgMaker &msgMaker)
+{
+    bool pingSend = false;
+    if (pto->fPingQueued) {
+        // RPC ping request by user
+        pingSend = true;
+    }
+    if (pto->nPingNonceSent == 0 && pto->nPingUsecStart + PING_INTERVAL * 1000000 < GetTimeMicros()) {
+        // Ping automatically sent as a latency probe & keepalive.
+        pingSend = true;
+    }
+    if (pingSend) {
+        uint64_t nonce = 0;
+        while (nonce == 0) {
+            GetRandBytes((unsigned char*)&nonce, sizeof(nonce));
+        }
+        pto->fPingQueued = false;
+        pto->nPingUsecStart = GetTimeMicros();
+        if (pto->nVersion > BIP0031_VERSION) {
+            pto->nPingNonceSent = nonce;
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING, nonce));
+        } else {
+            // Peer is too old to support ping command with nonce, pong will never arrive.
+            pto->nPingNonceSent = 0;
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING));
+        }
+    }
+}
+
 bool PeerLogicValidation::SendMessages(CNode* pto)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -574,31 +603,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         //
         // Message: ping
         //
-        bool pingSend = false;
-        if (pto->fPingQueued) {
-            // RPC ping request by user
-            pingSend = true;
-        }
-        if (pto->nPingNonceSent == 0 && pto->nPingUsecStart + PING_INTERVAL * 1000000 < GetTimeMicros()) {
-            // Ping automatically sent as a latency probe & keepalive.
-            pingSend = true;
-        }
-        if (pingSend) {
-            uint64_t nonce = 0;
-            while (nonce == 0) {
-                GetRandBytes((unsigned char*)&nonce, sizeof(nonce));
-            }
-            pto->fPingQueued = false;
-            pto->nPingUsecStart = GetTimeMicros();
-            if (pto->nVersion > BIP0031_VERSION) {
-                pto->nPingNonceSent = nonce;
-                connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING, nonce));
-            } else {
-                // Peer is too old to support ping command with nonce, pong will never arrive.
-                pto->nPingNonceSent = 0;
-                connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING));
-            }
-        }
+        sendPingMsg(pto, msgMaker);
 
         TRY_LOCK(cs_main, lockMain); // Acquire cs_main for IsInitialBlockDownload() and CNodeState()
         if (!lockMain)

@@ -76,6 +76,8 @@ private:
     void CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams);
     /** Consider evicting an outbound peer based on the amount of time they've been behind our tip */
     void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
+
+    void sendPingMsg(CNode* pto, const CNetMsgMaker &msgMaker);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H
