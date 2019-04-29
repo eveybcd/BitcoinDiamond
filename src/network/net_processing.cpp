@@ -920,7 +920,7 @@ void PeerLogicValidation::sendInventory(CNode* pto, int64_t &nNow, const CNetMsg
         connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
 }
 
-void PeerLogicValidation::sendGetdataMsg(CNode* pto, CNodeState &state, bool fFetch)
+void PeerLogicValidation::sendGetdataMsg(CNode* pto, CNodeState &state, int64_t &nNow, bool fFetch, const CNetMsgMaker &msgMaker)
 {
     //
     // Message: getdata (blocks)
@@ -970,6 +970,34 @@ void PeerLogicValidation::sendGetdataMsg(CNode* pto, CNodeState &state, bool fFe
     if (!vGetData.empty())
         connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
 
+}
+
+void PeerLogicValidation::feefilter(CNode* pto, const CNetMsgMaker &msgMaker)
+{
+    // We don't want white listed peers to filter txs to us if we have -whitelistforcerelay
+    if (pto->nVersion >= FEEFILTER_VERSION && gArgs.GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
+        !(pto->fWhitelisted && gArgs.GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY))) {
+        CAmount currentFilter = mempool.GetMinFee(gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFeePerK();
+        int64_t timeNow = GetTimeMicros();
+        if (timeNow > pto->nextSendTimeFeeFilter) {
+            static CFeeRate default_feerate(DEFAULT_MIN_RELAY_TX_FEE);
+            static FeeFilterRounder filterRounder(default_feerate);
+            CAmount filterToSend = filterRounder.round(currentFilter);
+            // We always have a fee filter of at least minRelayTxFee
+            filterToSend = std::max(filterToSend, ::minRelayTxFee.GetFeePerK());
+            if (filterToSend != pto->lastSentFeeFilter) {
+                connman->PushMessage(pto, msgMaker.Make(NetMsgType::FEEFILTER, filterToSend));
+                pto->lastSentFeeFilter = filterToSend;
+            }
+            pto->nextSendTimeFeeFilter = PoissonNextSend(timeNow, AVG_FEEFILTER_BROADCAST_INTERVAL);
+        }
+            // If the fee filter has changed substantially and it's still more than MAX_FEEFILTER_CHANGE_DELAY
+            // until scheduled broadcast, then move the broadcast to within MAX_FEEFILTER_CHANGE_DELAY.
+        else if (timeNow + MAX_FEEFILTER_CHANGE_DELAY * 1000000 < pto->nextSendTimeFeeFilter &&
+                 (currentFilter < 3 * pto->lastSentFeeFilter / 4 || currentFilter > 4 * pto->lastSentFeeFilter / 3)) {
+            pto->nextSendTimeFeeFilter = timeNow + GetRandInt(MAX_FEEFILTER_CHANGE_DELAY) * 1000000;
+        }
+    }
 }
 
 bool PeerLogicValidation::SendMessages(CNode* pto)
@@ -1084,35 +1112,12 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         ConsiderEviction(pto, GetTime());
 
         // Message: getdata (blocks)
-        sendGetdataMsg(pto, state, fFetch);
+        sendGetdataMsg(pto, state, nNow, fFetch, msgMaker);
 
         //
         // Message: feefilter
         //
-        // We don't want white listed peers to filter txs to us if we have -whitelistforcerelay
-        if (pto->nVersion >= FEEFILTER_VERSION && gArgs.GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
-            !(pto->fWhitelisted && gArgs.GetBoolArg("-whitelistforcerelay", DEFAULT_WHITELISTFORCERELAY))) {
-            CAmount currentFilter = mempool.GetMinFee(gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFeePerK();
-            int64_t timeNow = GetTimeMicros();
-            if (timeNow > pto->nextSendTimeFeeFilter) {
-                static CFeeRate default_feerate(DEFAULT_MIN_RELAY_TX_FEE);
-                static FeeFilterRounder filterRounder(default_feerate);
-                CAmount filterToSend = filterRounder.round(currentFilter);
-                // We always have a fee filter of at least minRelayTxFee
-                filterToSend = std::max(filterToSend, ::minRelayTxFee.GetFeePerK());
-                if (filterToSend != pto->lastSentFeeFilter) {
-                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::FEEFILTER, filterToSend));
-                    pto->lastSentFeeFilter = filterToSend;
-                }
-                pto->nextSendTimeFeeFilter = PoissonNextSend(timeNow, AVG_FEEFILTER_BROADCAST_INTERVAL);
-            }
-            // If the fee filter has changed substantially and it's still more than MAX_FEEFILTER_CHANGE_DELAY
-            // until scheduled broadcast, then move the broadcast to within MAX_FEEFILTER_CHANGE_DELAY.
-            else if (timeNow + MAX_FEEFILTER_CHANGE_DELAY * 1000000 < pto->nextSendTimeFeeFilter &&
-                     (currentFilter < 3 * pto->lastSentFeeFilter / 4 || currentFilter > 4 * pto->lastSentFeeFilter / 3)) {
-                pto->nextSendTimeFeeFilter = timeNow + GetRandInt(MAX_FEEFILTER_CHANGE_DELAY) * 1000000;
-            }
-        }
+        feefilter(pto, msgMaker);
     }
     return true;
 }
