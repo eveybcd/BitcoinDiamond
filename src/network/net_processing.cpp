@@ -920,6 +920,58 @@ void PeerLogicValidation::sendInventory(CNode* pto, int64_t &nNow, const CNetMsg
         connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
 }
 
+void PeerLogicValidation::sendGetdataMsg(CNode* pto, CNodeState &state, bool fFetch)
+{
+    //
+    // Message: getdata (blocks)
+    //
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+    std::vector<CInv> vGetData;
+    if (!pto->fClient && ((fFetch && !pto->m_limited_node) || !IsInitialBlockDownload()) && state.nBlocksInFlight < MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
+        std::vector<const CBlockIndex*> vToDownload;
+        NodeId staller = -1;
+        netBlockTxPtr->FindNextBlocksToDownload(pto->GetId(), MAX_BLOCKS_IN_TRANSIT_PER_PEER - state.nBlocksInFlight, vToDownload, staller, consensusParams);
+        for (const CBlockIndex *pindex : vToDownload) {
+            uint32_t nFetchFlags = netMsghandlePtr->GetFetchFlags(pto);
+            vGetData.push_back(CInv(MSG_BLOCK | nFetchFlags, pindex->GetBlockHash()));
+            netBlockTxPtr->MarkBlockAsInFlight(pto->GetId(), pindex->GetBlockHash(), pindex);
+            LogPrint(BCLog::NET, "Requesting block %s (%d) peer=%d\n", pindex->GetBlockHash().ToString(),
+                     pindex->nHeight, pto->GetId());
+        }
+        if (state.nBlocksInFlight == 0 && staller != -1) {
+            if (State(staller)->nStallingSince == 0) {
+                State(staller)->nStallingSince = nNow;
+                LogPrint(BCLog::NET, "Stall started peer=%d\n", staller);
+            }
+        }
+    }
+
+    //
+    // Message: getdata (non-blocks)
+    //
+    while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
+    {
+        const CInv& inv = (*pto->mapAskFor.begin()).second;
+        if (!netMsghandlePtr->AlreadyHave(inv))
+        {
+            LogPrint(BCLog::NET, "Requesting %s peer=%d\n", inv.ToString(), pto->GetId());
+            vGetData.push_back(inv);
+            if (vGetData.size() >= 1000)
+            {
+                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
+                vGetData.clear();
+            }
+        } else {
+            //If we're not going to ask, don't expect a response.
+            pto->setAskFor.erase(inv.hash);
+        }
+        pto->mapAskFor.erase(pto->mapAskFor.begin());
+    }
+    if (!vGetData.empty())
+        connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
+
+}
+
 bool PeerLogicValidation::SendMessages(CNode* pto)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
@@ -1031,52 +1083,8 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         // GetTime() is used by this anti-DoS logic so we can test this using mocktime
         ConsiderEviction(pto, GetTime());
 
-        //
         // Message: getdata (blocks)
-        //
-        std::vector<CInv> vGetData;
-        if (!pto->fClient && ((fFetch && !pto->m_limited_node) || !IsInitialBlockDownload()) && state.nBlocksInFlight < MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
-            std::vector<const CBlockIndex*> vToDownload;
-            NodeId staller = -1;
-            netBlockTxPtr->FindNextBlocksToDownload(pto->GetId(), MAX_BLOCKS_IN_TRANSIT_PER_PEER - state.nBlocksInFlight, vToDownload, staller, consensusParams);
-            for (const CBlockIndex *pindex : vToDownload) {
-                uint32_t nFetchFlags = netMsghandlePtr->GetFetchFlags(pto);
-                vGetData.push_back(CInv(MSG_BLOCK | nFetchFlags, pindex->GetBlockHash()));
-                netBlockTxPtr->MarkBlockAsInFlight(pto->GetId(), pindex->GetBlockHash(), pindex);
-                LogPrint(BCLog::NET, "Requesting block %s (%d) peer=%d\n", pindex->GetBlockHash().ToString(),
-                    pindex->nHeight, pto->GetId());
-            }
-            if (state.nBlocksInFlight == 0 && staller != -1) {
-                if (State(staller)->nStallingSince == 0) {
-                    State(staller)->nStallingSince = nNow;
-                    LogPrint(BCLog::NET, "Stall started peer=%d\n", staller);
-                }
-            }
-        }
-
-        //
-        // Message: getdata (non-blocks)
-        //
-        while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
-        {
-            const CInv& inv = (*pto->mapAskFor.begin()).second;
-            if (!netMsghandlePtr->AlreadyHave(inv))
-            {
-                LogPrint(BCLog::NET, "Requesting %s peer=%d\n", inv.ToString(), pto->GetId());
-                vGetData.push_back(inv);
-                if (vGetData.size() >= 1000)
-                {
-                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
-                    vGetData.clear();
-                }
-            } else {
-                //If we're not going to ask, don't expect a response.
-                pto->setAskFor.erase(inv.hash);
-            }
-            pto->mapAskFor.erase(pto->mapAskFor.begin());
-        }
-        if (!vGetData.empty())
-            connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETDATA, vGetData));
+        sendGetdataMsg(pto, state, fFetch);
 
         //
         // Message: feefilter

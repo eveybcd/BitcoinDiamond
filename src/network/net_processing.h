@@ -82,6 +82,7 @@ private:
     void startBlockSync(CNode* pto, CNodeState &state, const CNetMsgMaker &msgMaker, bool fFetch);
     void sendBlockAnnouncements(CNode* pto, CNodeState &state, const CNetMsgMaker &msgMaker);
     void sendInventory(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker);
+    void sendGetdataMsg(CNode* pto, CNodeState &state, bool fFetch);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H
