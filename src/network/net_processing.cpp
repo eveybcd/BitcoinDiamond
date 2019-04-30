@@ -78,7 +78,7 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
     {
         if (pfrom->nVersion >= NO_BLOOM_VERSION) {
             LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 100);
+            netMsghandlePtr->Misbehaving(pfrom->GetId(), 100);
             return false;
         } else {
             pfrom->fDisconnect = true;
@@ -98,7 +98,7 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
     {
         // Must have a version message before anything else
         LOCK(cs_main);
-        Misbehaving(pfrom->GetId(), 1);
+        netMsghandlePtr->Misbehaving(pfrom->GetId(), 1);
         return false;
     }
 
@@ -114,7 +114,7 @@ bool PeerLogicValidation::ProcessMessage(CNode* pfrom, const std::string& strCom
     {
         // Must have a verack message before anything else
         LOCK(cs_main);
-        Misbehaving(pfrom->GetId(), 1);
+        netMsghandlePtr->Misbehaving(pfrom->GetId(), 1);
         return false;
     }
 
@@ -1295,7 +1295,7 @@ void PeerLogicValidation::BlockChecked(const CBlock& block, const CValidationSta
             CBlockReject reject = {(unsigned char)state.GetRejectCode(), state.GetRejectReason().substr(0, MAX_REJECT_MESSAGE_LENGTH), hash};
             State(it->second.first)->rejects.push_back(reject);
             if (nDoS > 0 && it->second.second)
-                Misbehaving(it->second.first, nDoS);
+                netMsghandlePtr->Misbehaving(it->second.first, nDoS);
         }
     }
         // Check that:

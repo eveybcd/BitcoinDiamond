@@ -88,6 +88,8 @@ public:
     bool AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     std::map<uint256, std::pair<NodeId, bool>>& getMapBlockSource() {return mapBlockSource;}
+    /** Increase a node's misbehavior score. */
+    void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 private:
     bool ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::vector<CBlockHeader>& headers, const CChainParams& chainparams, bool punish_duplicate_invalid);

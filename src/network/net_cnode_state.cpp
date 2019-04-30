@@ -20,29 +20,6 @@ bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats) {
     return true;
 }
 
-/**
- * Mark a misbehaving peer to be banned depending upon the value of `-banscore`.
- */
-void Misbehaving(NodeId pnode, int howmuch, const std::string& message) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
-{
-    if (howmuch == 0)
-        return;
-
-    CNodeState *state = State(pnode);
-    if (state == nullptr)
-        return;
-
-    state->nMisbehavior += howmuch;
-    int banscore = gArgs.GetArg("-banscore", DEFAULT_BANSCORE_THRESHOLD);
-    std::string message_prefixed = message.empty() ? "" : (": " + message);
-    if (state->nMisbehavior >= banscore && state->nMisbehavior - howmuch < banscore)
-    {
-        LogPrint(BCLog::NET, "%s: %s peer=%d (%d -> %d) BAN THRESHOLD EXCEEDED%s\n", __func__, state->name, pnode, state->nMisbehavior-howmuch, state->nMisbehavior, message_prefixed);
-        state->fShouldBan = true;
-    } else
-        LogPrint(BCLog::NET, "%s: %s peer=%d (%d -> %d)%s\n", __func__, state->name, pnode, state->nMisbehavior-howmuch, state->nMisbehavior, message_prefixed);
-}
-
 bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     return chainActive.Tip()->GetBlockTime() > GetAdjustedTime() - consensusParams.nPowTargetSpacing * 20;
