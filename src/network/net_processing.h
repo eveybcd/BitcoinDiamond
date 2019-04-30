@@ -84,6 +84,7 @@ private:
     void sendInventory(CNode* pto, int64_t &nNow, const CNetMsgMaker &msgMaker);
     void sendGetdataMsg(CNode* pto, CNodeState &state, int64_t &nNow, bool fFetch, const CNetMsgMaker &msgMaker);
     void feefilter(CNode* pto, const CNetMsgMaker &msgMaker);
+    bool checkHeaderSyncTimeout(CNode* pto, CNodeState &state, int64_t &nNow);
 };
 
 #endif // BITCOIN_NET_PROCESSING_H
