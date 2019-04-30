@@ -106,4 +106,6 @@ public:
     MapRelay& getMapRelay() {return mapRelay;}
 };
 
+bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
 #endif //BITCOINDIAMOND_NET_BLOCKTX_H

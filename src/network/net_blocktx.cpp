@@ -617,3 +617,8 @@ void NetBlockTx::FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std
         }
     }
 }
+
+bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    return chainActive.Tip()->GetBlockTime() > GetAdjustedTime() - consensusParams.nPowTargetSpacing * 20;
+}
