@@ -83,11 +83,11 @@ public:
 		consensus.BCDHeight = 495867;
 
 		//introduce Zawy's LWMA
-		consensus.ZawyLWMAHeight = 888888;//TODO: to be update
+		consensus.ZawyLWMAHeight = 585000;
 		consensus.nZawyLwmaAveragingWindow = 45;
 		consensus.nZawyLwmaAdjustedWeight = 13772;
 		consensus.nZawyLwmaMinDenominator = 10;
-		consensus.difficultyTolerable = 100; //TODO: to be update
+		consensus.difficultyTolerable = 1000;
 		consensus.bZawyLwmaSolvetimeLimitation = true;
 
         consensus.BCDGenesisBlockReward = 1400 * 10000 * COIN;
@@ -216,7 +216,7 @@ public:
         consensus.BCDBeginPowLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
         //introduce Zawy's LWMA
-        consensus.ZawyLWMAHeight = 1090066;
+        consensus.ZawyLWMAHeight = 1096600;
         consensus.nZawyLwmaAveragingWindow = 45;
         consensus.nZawyLwmaAdjustedWeight = 13772;
         consensus.nZawyLwmaMinDenominator = 10;
